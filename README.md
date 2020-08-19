@@ -1,6 +1,6 @@
 # Field Campaign Explorer Frontend Interface
 
-This is repository contains code for GHRC's Field Campaign Explorer (FCX) GUI (frontend).
+This repository contains code for GHRC's Field Campaign Explorer (FCX) GUI (frontend).
 
 ![Image](fcx-screenshot.png)
 
@@ -25,7 +25,7 @@ And navigate browser to http://localhost:3000/
 
 ## Deployment
 
-To deploy, make sure correct values are entered in `config.js` file and then execute following commands
+To deploy, make sure correct values are entered in `config.js` file or set as environmental variables and then execute following commands
 
 ```console
 $ yarn build
@@ -39,8 +39,8 @@ This was done so that FCX can be deployed as `https://ghrc.earthdata.nasa.gov/fc
 To test this, move the contents of build directory to a subdirectory called `/build/fcx` and run following command
 
 ```console
-cd build
-python3 -m http.server
+$ cd build
+$ python3 -m http.server
 ```
 
 And then goto to `http://localhost:8000/fcx/`
