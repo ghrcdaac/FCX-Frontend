@@ -59,4 +59,6 @@ And then goto to `http://localhost:8000/fcx/`
 
   Then copy `Build/Cesium` folder to this repo's `public/lib` folder.
 
+  Brian has also published his changes are a seperate NPM package https://www.npmjs.com/package/temporal-3d-tile. Investigation on how to include this package with existing codebase is pending.
+
 - The layers that are currently shown are encoded in `layers.js` file. In future, we need to dynamically change values in this file or create a way to manage a separate layer file for each field campaign.
