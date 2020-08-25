@@ -1,5 +1,6 @@
 import React from "react"
 import ReactDOM from "react-dom"
+import { Ion } from "cesium"
 import App from "./components/app"
 import { Provider } from "react-redux"
 import store from "./state/store"
@@ -15,8 +16,7 @@ export const history = createBrowserHistory({
   basename: process.env.PUBLIC_URL,
 })
 
-let Cesium = window.Cesium
-Cesium.Ion.defaultAccessToken = cesiumDefaultAccessToken
+Ion.defaultAccessToken = cesiumDefaultAccessToken
 
 ReactDOM.render(
   <Provider store={store}>

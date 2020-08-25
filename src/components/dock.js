@@ -1,10 +1,8 @@
 import React from "react"
 import { DockLayout } from "rc-dock"
-/*
-import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery } from "cesium"
+import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, createWorldTerrain, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
 // eslint-disable-next-line
 import { createDefaultImageryProviderViewModels } from "cesium"
-*/
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
@@ -14,12 +12,11 @@ import emitter from "../helpers/event"
 import DOIList from "./doiList"
 import CampaignInfoLinks from "./campaignInfo"
 import Settings from "./settings"
-import { getGPUInfo } from "../helpers/utils"
+import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
 
-let Cesium = window.Cesium
 let viewer
 let gpuInfo = getGPUInfo()
 
@@ -34,27 +31,27 @@ let gpuInfo = getGPUInfo()
 let providerViewModels = []
 
 providerViewModels.push(
-  new Cesium.ProviderViewModel({
+  new ProviderViewModel({
     name: "Bing Maps Aerial with Labels",
-    iconUrl: Cesium.buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
+    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
     tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
     category: "Cesium ion",
     creationFunction: function () {
-      return Cesium.createWorldImagery({
-        style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS,
+      return createWorldImagery({
+        style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
       })
     },
   })
 )
 
 providerViewModels.push(
-  new Cesium.ProviderViewModel({
+  new ProviderViewModel({
     name: "Mapbox Streets Dark",
-    iconUrl: Cesium.buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
+    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
     category: "Mapbox",
     tooltip: "Mapbox Streets Dark",
     creationFunction: function () {
-      return new Cesium.UrlTemplateImageryProvider({
+      return new UrlTemplateImageryProvider({
         url: mapboxUrl,
       })
     },
@@ -167,29 +164,45 @@ let box = {
   },
 }
 
+let createViewer = () => {
+  Ion.defaultAccessToken = cesiumDefaultAccessToken
+
+  viewer = new Viewer("cesiumContainer", {
+    //Use Cesium World Terrain
+    terrainProvider: createWorldTerrain(),
+    baseLayerPicker: true,
+    skyBox: false,
+    automaticallyTrackDataSourceClocks: false,
+    navigationHelpButton: true,
+    homeButton: false,
+    sceneModePicker: true,
+    shadows: false,
+    infoBox: false,
+    imageryProviderViewModels: providerViewModels,
+    selectedImageryProviderViewModel: providerViewModels[1],
+  })
+}
+
+let checkViewer = () => {
+  setTimeout(() => {
+    let cesiumActive = document.getElementById("cesiumContainer").querySelectorAll("canvas")[0]
+
+    if (!cesiumActive) {
+      createViewer()
+      adjustHeightOfPanels()
+    } else {
+      checkViewer()
+    }
+  }, 500)
+}
+
 /* 
   Useful links related to Dock
   https://codesandbox.io/s/0mjo76mnz0?file=/src/styles.css
 */
 class Dock extends React.Component {
   componentDidMount() {
-    Cesium.Ion.defaultAccessToken = cesiumDefaultAccessToken
-
-    viewer = new Cesium.Viewer("cesiumContainer", {
-      //Use Cesium World Terrain
-      terrainProvider: Cesium.createWorldTerrain(),
-      baseLayerPicker: true,
-      skyBox: false,
-      automaticallyTrackDataSourceClocks: false,
-      navigationHelpButton: true,
-      homeButton: false,
-      sceneModePicker: true,
-      shadows: false,
-      infoBox: false,
-      imageryProviderViewModels: providerViewModels,
-      selectedImageryProviderViewModel: providerViewModels[1],
-    })
-
+    createViewer()
     if (viewer) {
       console.log("%c Viewer initialization successful", "background: green; color: white; display: block;")
     }
@@ -199,6 +212,7 @@ class Dock extends React.Component {
   onLayoutChange = (newLayout, currentTabId) => {
     emitter.emit("tabLayoutChange")
     this.setState({ layout: newLayout })
+    checkViewer()
   }
   render() {
     emitter.emit("dockRender")

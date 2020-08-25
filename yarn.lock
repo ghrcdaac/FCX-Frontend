@@ -2727,6 +2727,11 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
+cesium@^1.72.0:
+  version "1.72.0"
+  resolved "https://registry.yarnpkg.com/cesium/-/cesium-1.72.0.tgz#dee5da9bfe7313226b6f91dfd8de1541bdc59026"
+  integrity sha512-7m3ITPlEx868+KgT9fVtpCW6gKoPJmNNvU/JxgPIGwwP1gY0dRttog6I4Sfq/j+e+cOtLTmCvN11qtYEuFpGmQ==
+
 chain-function@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/chain-function/-/chain-function-1.0.1.tgz#c63045e5b4b663fb86f1c6e186adaf1de402a1cc"
@@ -10312,6 +10317,11 @@ tar@^4:
     mkdirp "^0.5.0"
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
+
+temporal-3d-tile@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/temporal-3d-tile/-/temporal-3d-tile-1.0.1.tgz#4b1ebb62fd041d762853babde4e8b028e3cad5dc"
+  integrity sha512-leiYsmMKPVGrCAyAc2lNEv96dG6mlvB6d10sJBvCTamAneMkzi/WXkTSNFCbkpizX3tF0JAAxXxxMGLS1AQspg==
 
 terser-webpack-plugin@1.2.2:
   version "1.2.2"

@@ -10,6 +10,7 @@
     "@material-ui/lab": "^4.0.0-alpha.56",
     "animate.css": "^4.1.0",
     "animate.css-react": "^1.0.0",
+    "cesium": "^1.72.0",
     "eventemitter3": "^4.0.4",
     "history": "^5.0.0",
     "interactjs": "1.6.2",
@@ -27,7 +28,8 @@
     "react-scripts": "2.1.8",
     "react-transition-group": "^2.6.1",
     "react-virtualized": "^9.21.2",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "temporal-3d-tile": "^1.0.1"
   },
   "devDependencies": {
     "@craco/craco": "^3.6.0",

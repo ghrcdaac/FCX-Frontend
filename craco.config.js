@@ -1,6 +1,7 @@
 module.exports = {
   eslint: {
-    enable: false,
+    enable: true,
+    //https://github.com/gsoft-inc/craco/issues/85
     loaderOptions: (eslintOptions) => {
       return { ...eslintOptions, ignore: true }
     },

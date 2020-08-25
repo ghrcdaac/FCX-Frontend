@@ -7,6 +7,28 @@ import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 import { Animated } from "react-animated-css"
 import moment from "moment"
+import {
+  Cesium3DTileset,
+  Cesium3DTile,
+  Cesium3DTileOptimizations,
+  Cesium3DTileRefine,
+  CullingVolume,
+  RuntimeError,
+  TimeInterval,
+  defined,
+  ClockRange,
+  JulianDate,
+  CzmlDataSource,
+  CallbackProperty,
+  HeadingPitchRoll,
+  Transforms,
+  Cartesian3,
+  Cesium3DTileStyle,
+  TimeIntervalCollection,
+  WebMapTileServiceImageryProvider,
+  ImageryLayer,
+} from "cesium"
+import { extendCesium3DTileset } from "temporal-3d-tile"
 import emitter from "../helpers/event"
 import campaign from "../layers"
 import { Dock, viewer } from "./dock"
@@ -15,7 +37,6 @@ import allActions from "../state/actions"
 import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { supportEmail } from "../config"
 
-let Cesium = window.Cesium
 let epoch
 let viewerTime = 0
 let lead = 0
@@ -32,6 +53,8 @@ let lastSelectedLayers = []
 let savedSamera
 let trackEntity = false
 let trackedEntity
+
+const Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
 
 let getColorExpression = () => {
   let revScale = ""
@@ -83,7 +106,7 @@ function renderLayers(selectedLayers) {
     const layer = getLayer(selectedLayerId)
 
     const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
-    const cesiumDate = Cesium.JulianDate.toDate(viewer.clock.currentTime)
+    const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
     const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
     const viewerStart = `${layerDate}T00:00:00Z`
     const viewerEnd = `${layerDate}T23:59:59Z`
@@ -94,15 +117,15 @@ function renderLayers(selectedLayers) {
         store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
       }, 1000)
 
-      viewer.clock.currentTime = Cesium.JulianDate.fromIso8601(viewerStart)
+      viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
 
       if (campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
         restoreCamera(campaign.defaultCamera[layerDate])
       }
     }
-    viewer.clock.startTime = Cesium.JulianDate.fromIso8601(viewerStart)
-    viewer.clock.stopTime = Cesium.JulianDate.fromIso8601(viewerEnd)
-    viewer.timeline.zoomTo(Cesium.JulianDate.fromIso8601(viewerStart), Cesium.JulianDate.fromIso8601(viewerEnd))
+    viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
+    viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
+    viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
 
     let found = false
     for (const [, activeLayerItem] of activeLayers.entries()) {
@@ -117,7 +140,7 @@ function renderLayers(selectedLayers) {
     store.dispatch(allActions.listActions.markLoading(selectedLayerId))
 
     if (layer.displayMechanism === "czml") {
-      const dataSource = new Cesium.CzmlDataSource()
+      const dataSource = new CzmlDataSource()
 
       // eslint-disable-next-line no-loop-func
       dataSource.load(layer.czmlLocation).then((ds) => {
@@ -125,17 +148,17 @@ function renderLayers(selectedLayers) {
         if (layer.type === "track") {
           let modelReference = ds.entities.getById("Flight Track")
 
-          modelReference.orientation = new Cesium.CallbackProperty((time, result) => {
+          modelReference.orientation = new CallbackProperty((time, result) => {
             const position = modelReference.position.getValue(time)
             const roll = modelReference.properties.roll.getValue(time)
             const pitch = modelReference.properties.pitch.getValue(time)
             const heading = modelReference.properties.heading.getValue(time)
-            const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll)
-            return Cesium.Transforms.headingPitchRollQuaternion(position, hpr)
+            const hpr = new HeadingPitchRoll(heading, pitch, roll)
+            return Transforms.headingPitchRollQuaternion(position, hpr)
           }, false)
 
           trackedEntity = ds.entities.getById("Flight Track")
-          trackedEntity.viewFrom = new Cesium.Cartesian3(-30000, -70000, 50000)
+          trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
           if (trackEntity) {
             viewer.trackedEntity = trackedEntity
             viewer.clock.shouldAnimate = true
@@ -147,8 +170,8 @@ function renderLayers(selectedLayers) {
         viewer.dataSources.add(ds)
       })
     } else if (layer.displayMechanism === "3dtile") {
-      const newTileset = new Cesium.Cesium3DTileset({
-        //TimeDynamicPointCloud
+      //use TimeDynamicPointCloud from Brian's npm package temporal-3d-tile
+      const newTileset = new Temporal3DTileset({
         url: layer.tileLocation,
         layerId: layer.layerId, // currently not used
       })
@@ -156,17 +179,17 @@ function renderLayers(selectedLayers) {
 
       viewer.scene.primitives.add(newTileset)
 
-      let previousTime = Cesium.JulianDate.clone(viewer.clock.currentTime)
+      let previousTime = JulianDate.clone(viewer.clock.currentTime)
 
       newTileset.readyPromise
         // eslint-disable-next-line no-loop-func
         .then((tileset) => {
           store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-          epoch = Cesium.JulianDate.fromIso8601(tileset.properties.epoch)
-          tileset.style = new Cesium.Cesium3DTileStyle()
+          epoch = JulianDate.fromIso8601(tileset.properties.epoch)
+          tileset.style = new Cesium3DTileStyle()
           tileset.style.pointSize = 2.0
           tileset.style.color = getColorExpression()
-          viewerTime = Cesium.JulianDate.secondsDifference(Cesium.JulianDate.clone(viewer.clock.currentTime), epoch)
+          viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), epoch)
           tileset.style.show = getShowExpression(viewerTime)
           tileset.makeStyleDirty()
 
@@ -178,9 +201,9 @@ function renderLayers(selectedLayers) {
 
           if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
             const eventCallback = viewer.clock.onTick.addEventListener((e) => {
-              if (!Cesium.JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
-                previousTime = Cesium.JulianDate.clone(viewer.clock.currentTime)
-                viewerTime = Cesium.JulianDate.secondsDifference(previousTime, epoch)
+              if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
+                previousTime = JulianDate.clone(viewer.clock.currentTime)
+                viewerTime = JulianDate.secondsDifference(previousTime, epoch)
                 tileset.style.show = getShowExpression()
                 tileset.makeStyleDirty()
               }
@@ -201,11 +224,11 @@ function renderLayers(selectedLayers) {
       const times = layer.times
       const dates = []
       for (const time of times) {
-        const date = new Cesium.JulianDate()
-        Cesium.JulianDate.addSeconds(Cesium.JulianDate.fromIso8601("2000-01-01T12:00:00Z"), Number(time), date)
+        const date = new JulianDate()
+        JulianDate.addSeconds(JulianDate.fromIso8601("2000-01-01T12:00:00Z"), Number(time), date)
         dates.push(date)
       }
-      const timeIntervalCollection = Cesium.TimeIntervalCollection.fromJulianDateArray({
+      const timeIntervalCollection = TimeIntervalCollection.fromJulianDateArray({
         julianDates: dates,
         dataCallback: (interval, index) => {
           return { Time: times[index] }
@@ -217,7 +240,7 @@ function renderLayers(selectedLayers) {
         https://cesium.com/docs/tutorials/imagery-layers/ 
         https://sandcastle.cesium.com/?src=Imagery%20Adjustment.html
       */
-      let imageryProvider = new Cesium.WebMapTileServiceImageryProvider({
+      let imageryProvider = new WebMapTileServiceImageryProvider({
         url: layer.url,
         format: layer.format,
         style: layer.style,
@@ -227,7 +250,7 @@ function renderLayers(selectedLayers) {
         layer: layer.layer,
       })
 
-      let imageLayer = new Cesium.ImageryLayer(imageryProvider)
+      let imageLayer = new ImageryLayer(imageryProvider)
       viewer.imageryLayers.add(imageLayer)
 
       activeLayers.push({ layer: layer, cesiumLayerRef: imageLayer })
@@ -276,7 +299,7 @@ class App extends Component {
       }
     })
 
-    viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP
+    viewer.clock.clockRange = ClockRange.LOOP_STOP
     viewer.clock.multiplier = 10
 
     setInterval(function () {
@@ -288,6 +311,7 @@ class App extends Component {
         right: camera.right,
         currentTime: viewer.clock.currentTime,
       }
+      console.log("saving camera")
     }, 2000)
 
     //check for default selected layers

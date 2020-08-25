@@ -47,18 +47,8 @@ And then goto to `http://localhost:8000/fcx/`
 
 ## Notes
 
-- This repository uses a custom fork of Cesium library maintained by `Brian Ellingson`
-
-  To build his fork, run following commands
-
-  ```console
-  $ git clone https://github.com/brianpojo56/cesium
-  $ cd cesium
-  $ npm run release
-  ```
-
-  Then copy `Build/Cesium` folder to this repo's `public/lib` folder.
-
-  Brian has also published his changes are a seperate NPM package https://www.npmjs.com/package/temporal-3d-tile. Investigation on how to include this package with existing codebase is pending.
+- This repository uses a package maintained by `Brian Ellingson` https://www.npmjs.com/package/temporal-3d-tile
 
 - The layers that are currently shown are encoded in `layers.js` file. In future, we need to dynamically change values in this file or create a way to manage a separate layer file for each field campaign.
+
+- Currently, the compiler is throwing erro 'Critical dependency: require function is used in a way in which dependencies cannot be statically extracted' for './node_modules/cesium/Source/Core/buildModuleUrl.js' file. Pleas see for https://github.com/CesiumGS/cesium/issues/8401 for further reference. How to resolve this error is still pending.

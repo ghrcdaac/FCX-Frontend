@@ -21,8 +21,13 @@
     -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css" />
 
+    <!-- Following is a custom fork of Cesium by Brian
     <link rel="stylesheet" href="lib/Cesium/Widgets/widgets.css" />
     <script src="lib/Cesium/Cesium.js"></script>
+    -->
+    <script>
+      window.CESIUM_BASE_URL = "%PUBLIC_URL%/lib/Cesium/"
+    </script>
 
     <base href="%PUBLIC_URL%/" />
     <title>Field Campaign Explorer</title>

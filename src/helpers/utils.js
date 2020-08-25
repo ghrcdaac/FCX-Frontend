@@ -24,9 +24,11 @@ function adjustHeightOfPanels() {
   let cesiumCanvas = document.getElementById("cesiumContainer").querySelectorAll("canvas")[0]
   let tabCesiumHeight = document.getElementById("tabCesium").offsetHeight
 
-  console.log(`Canvas height is ${cesiumCanvas.height}px`)
-  if (cesiumCanvas.height > 0) {
-    cesiumCanvas.height = tabCesiumHeight - 10
+  if (cesiumCanvas) {
+    console.log(`Canvas height is ${cesiumCanvas.height}px`)
+    if (cesiumCanvas.height > 0) {
+      cesiumCanvas.height = tabCesiumHeight - 10
+    }
   }
 }
 
