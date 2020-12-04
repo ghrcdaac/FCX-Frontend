@@ -1,56 +1,57 @@
 {
-  "name": "fcx",
-  "version": "0.1.0",
-  "homepage": "/fcx/",
-  "start_url": ".",
-  "private": true,
-  "dependencies": {
-    "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.56",
-    "animate.css": "^4.1.0",
-    "animate.css-react": "^1.0.0",
-    "cesium": "^1.72.0",
-    "eventemitter3": "^4.0.4",
-    "history": "^5.0.0",
-    "interactjs": "1.6.2",
-    "lodash": "^4.17.15",
-    "material-ui": "^0.20.2",
-    "moment": "^2.27.0",
-    "rc-dock": "^2.6.0",
-    "react": "^16.8.4",
-    "react-animated-css": "^1.2.1",
-    "react-device-detect": "^1.13.1",
-    "react-dom": "^16.8.4",
-    "react-hot-loader": "^4.8.0",
-    "react-icons": "^3.10.0",
-    "react-redux": "^7.2.0",
-    "react-scripts": "2.1.8",
-    "react-transition-group": "^2.6.1",
-    "react-virtualized": "^9.21.2",
-    "redux": "^4.0.5",
-    "temporal-3d-tile": "^1.0.1"
-  },
-  "devDependencies": {
-    "@craco/craco": "^3.6.0",
-    "craco-plugin-react-hot-reload": "^0.0.3"
-  },
-  "scripts": {
-    "start": "craco start  --no-cache",
-    "build": "craco build  --no-cache",
-    "test": "craco test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
-  "resolutions": {
-    "**/**/node-gyp": "^3.8.0"
-  }
+    "name": "fcx",
+    "version": "0.1.0",
+    "homepage": "/fcx/",
+    "start_url": ".",
+    "private": true,
+    "dependencies": {
+        "@material-ui/core": "^4.11.0",
+        "@material-ui/icons": "^4.9.1",
+        "@material-ui/lab": "^4.0.0-alpha.56",
+        "animate.css": "^4.1.0",
+        "animate.css-react": "^1.0.0",
+        "cesium": "^1.72.0",
+        "eventemitter3": "^4.0.4",
+        "history": "^5.0.0",
+        "interactjs": "^1.6.2",
+        "lodash": "^4.17.15",
+        "material-ui": "^0.20.2",
+        "moment": "^2.27.0",
+        "rc-dock": "^2.6.0",
+        "react": "^16.8.4",
+        "react-animated-css": "^1.2.1",
+        "react-device-detect": "^1.13.1",
+        "react-dom": "^16.8.4",
+        "react-hot-loader": "^4.8.0",
+        "react-icons": "^3.10.0",
+        "react-redux": "^7.2.0",
+        "react-scripts": "^4.0.1",
+        "react-transition-group": "^2.6.1",
+        "react-virtualized": "^9.21.2",
+        "redux": "^4.0.5",
+        "temporal-3d-tile": "^1.0.1"
+    },
+    "devDependencies": {
+        "@craco/craco": "^3.6.0",
+        "craco-plugin-react-hot-reload": "^0.0.3",
+        "snyk": "^1.434.2"
+    },
+    "scripts": {
+        "start": "craco start  --no-cache",
+        "build": "craco build  --no-cache",
+        "test": "snyk test && craco test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": "react-app"
+    },
+    "browserslist": [
+        ">0.2%",
+        "not dead",
+        "not ie <= 11",
+        "not op_mini all"
+    ],
+    "resolutions": {
+        "**/**/node-gyp": "^3.8.0"
+    }
 }
