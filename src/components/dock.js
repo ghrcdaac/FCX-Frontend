@@ -169,7 +169,7 @@ let createViewer = () => {
 
   viewer = new Viewer("cesiumContainer", {
     //Use Cesium World Terrain
-    terrainProvider: createWorldTerrain(),
+    // terrainProvider: createWorldTerrain(),
     baseLayerPicker: true,
     skyBox: false,
     automaticallyTrackDataSourceClocks: false,
@@ -207,7 +207,7 @@ class Dock extends React.Component {
       console.log("%c Viewer initialization successful", "background: green; color: white; display: block;")
     }
   }
-  onDragNewTab = (e) => {}
+  onDragNewTab = (e) => { }
 
   onLayoutChange = (newLayout, currentTabId) => {
     emitter.emit("tabLayoutChange")
