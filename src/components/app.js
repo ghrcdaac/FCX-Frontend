@@ -30,14 +30,6 @@ import {
   PointPrimitiveCollection,
   NearFarScalar,
   Color as ColorCesium,
-  ScreenSpaceEventHandler,
-  HorizontalOrigin,
-  VerticalOrigin,
-  Cartesian2,
-  Cartographic,
-  Math as CesMath,
-  ScreenSpaceEventType
-
 } from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import emitter from "../helpers/event"
@@ -47,18 +39,11 @@ import store from "../state/store"
 import allActions from "../state/actions"
 import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { supportEmail } from "../config"
+import { getColorExpression, getShowExpression, loadData, getTimes, mousePosition } from "./layerFunctions"
 
 let epoch
 let viewerTime = 0
-let lead = 0
 let linger = 300
-let reverse = true
-let ascale = 4.346
-let vmin = -10
-let vmax = 30
-let vrange = vmax - vmin
-let hmin = 0.438
-let hrange = 1
 let activeLayers = []
 let lastSelectedLayers = []
 let savedSamera
@@ -66,90 +51,6 @@ let trackEntity = false
 let trackedEntity
 let pointsCollection;
 const Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
-
-let getColorExpression = () => {
-  let revScale = ""
-  if (reverse) {
-    revScale = " * -1.0 + 1.0"
-  }
-  return `hsla((((clamp(\${value}, ${vmin}, ${vmax}) + ${vmin}) / ${vrange}) ${revScale}) * ${hrange} + ${hmin}, 1.0, 0.5, pow((\${value} - ${vmin})/${vrange}, ${ascale}))`
-}
-
-let getShowExpression = () => {
-  return `\${time} <= ${viewerTime + lead} && \${time} >= ${viewerTime - linger}`
-}
-
-async function loadData(Url) {
-  const resp = await fetch(Url);
-  const data = await resp.json();
-  return data;
-}
-/* Lightning data time array */
-const get_times = (data) => {
-  let times = [];
-  for (let index in data) {
-    times.push(
-      Number(data[index].id)
-    );
-  }
-  return times;
-}
-
-/*--- Mouse over display  GLM/LIS  ---*/
-function mousePosition() {
-
-  let entity = viewer.entities.add({
-    label: {
-      show: false,
-      showBackground: true,
-      font: "11px monospace",
-      fillColor: ColorCesium.BLUE.withAlpha(1.0),
-      backgroundColor: ColorCesium.WHITE,
-      horizontalOrigin: HorizontalOrigin.LEFT,
-      verticalOrigin: VerticalOrigin.TOP,
-      pixelOffset: new Cartesian2(15, 15),
-    },
-  });
-
-  // Mouse over the globe to see the cartographic position
-  let handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-  handler.setInputAction(function (movement) {
-    let picked = viewer.scene.pick(movement.endPosition);
-    let cartesian = viewer.camera.pickEllipsoid(
-      movement.endPosition,
-      viewer.scene.globe.ellipsoid
-    );
-    if (cartesian) {
-      if (defined(picked) && typeof picked.id === 'string') {
-        let cartographic = Cartographic.fromCartesian(cartesian);
-        let longitudeString = CesMath.toDegrees(cartographic.longitude).toFixed(3);
-        let latitudeString = CesMath.toDegrees(cartographic.latitude).toFixed(3);
-        let labelTextString =
-          "Lon: " + ("   " + longitudeString).slice(-8) + "\u00B0" +
-          "\nLat: " + ("   " + latitudeString).slice(-8) + "\u00B0";
-        let LTN = "Intensity: ";
-        let instr = "GLM";
-        let intensity = (Math.pow(picked.primitive._pixelSize, 1 / 0.6) * 15 + 1).toFixed(0);
-        entity.label.fillColor = new ColorCesium(0.6, 0.4, 0.0, 1);
-        if (picked.id[0] === "A") {
-          LTN = "Activity: ";
-          intensity = (Math.pow(picked.primitive._pixelSize, 1 / 0.6) * 4 + 1).toFixed(0);
-        }
-        if (picked.id[0] === "L") {
-          LTN = "Intensity: ";
-          instr = 'LIS';
-          intensity = (Math.pow(picked.primitive._pixelSize * 100, 1 / 0.5) + 1).toFixed(0);
-          entity.label.fillColor = ColorCesium.GREEN.withAlpha(1.0)
-        }
-        labelTextString = instr + " lightning\n" + labelTextString + "\n" + LTN + intensity;     //+picked.id;
-        entity.position = cartesian;
-        entity.label.show = true;
-        entity.label.text = labelTextString;
-      } else { entity.label.show = false; }
-    }
-  }, ScreenSpaceEventType.MOUSE_MOVE);
-}
-
 function renderLayers(selectedLayers) {
   const layersToRemove = []
   for (const [, activeLayerItem] of activeLayers.entries()) {
@@ -191,7 +92,6 @@ function renderLayers(selectedLayers) {
 
   for (const [, selectedLayerId] of selectedLayers.entries()) {
     const layer = getLayer(selectedLayerId)
-    // console.log(layer);
 
     const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
     const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
@@ -283,12 +183,12 @@ function renderLayers(selectedLayers) {
             tileset.style.pointSize = 4.0;
           }
           viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), epoch)
-          tileset.style.show = getShowExpression(viewerTime)
+          tileset.style.show = getShowExpression(viewerTime, linger)
           tileset.makeStyleDirty()
 
           emitter.on("lingerTimeChange", (value) => {
             linger = value
-            tileset.style.show = getShowExpression(viewerTime)
+            tileset.style.show = getShowExpression(viewerTime, linger)
             tileset.makeStyleDirty()
           })
 
@@ -297,7 +197,7 @@ function renderLayers(selectedLayers) {
               if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
                 previousTime = JulianDate.clone(viewer.clock.currentTime)
                 viewerTime = JulianDate.secondsDifference(previousTime, epoch)
-                tileset.style.show = getShowExpression()
+                tileset.style.show = getShowExpression(viewerTime, linger)
                 tileset.makeStyleDirty()
               }
             })
@@ -318,7 +218,7 @@ function renderLayers(selectedLayers) {
       const intvl = 60;
       const promiseG = Promise.resolve(loadData(layer.tileLocation));
       Promise.all([promiseG]).then(([LightningData]) => {
-        const timingsArray = get_times(LightningData);
+        const timingsArray = getTimes(LightningData);
         let lastTime = viewerTime;
         let timesLen = timingsArray.length;
         let initialTime = timingsArray[0];
@@ -399,7 +299,7 @@ function renderLayers(selectedLayers) {
           }
         }
         /*--- mouse functions  ---*/
-        mousePosition();
+        mousePosition(viewer);
 
       })
 
