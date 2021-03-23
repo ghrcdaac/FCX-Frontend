@@ -3,7 +3,7 @@ body {
   height: 100%;
 }
 
-.dock-tabpane > div {
+.dock-tabpane>div {
   margin: 20px;
 }
 
@@ -11,15 +11,17 @@ body {
   overflow: auto !important;
 }
 
-#tabCesium > div {
+#tabCesium>div {
   margin: 0px;
 }
+
 .top-panel {
   position: absolute;
   display: flex;
   align-items: center;
   padding: 0 20px;
 }
+
 .dock-layout {
   position: relative !important;
   left: 10px !important;
@@ -29,15 +31,18 @@ body {
   width: 99%;
   height: 800px;
 }
+
 .MuiListSubheader-sticky {
   text-align: center;
   color: black !important;
   font-size: 1rem !important;
   position: inherit !important;
 }
+
 .MuiExpansionPanel-root.Mui-expanded {
   margin: 20px !important;
 }
+
 .MuiBox-root {
   margin: 0px !important;
   padding: 0px !important;
@@ -46,9 +51,11 @@ body {
 .MuiCard-root {
   margin-bottom: 10px;
 }
+
 ul.MuiList-root {
   margin: auto;
 }
+
 .fcx-logo {
   position: absolute;
   background-color: rgba(0, 0, 0, 0.54);
@@ -70,9 +77,11 @@ ul.MuiList-root {
   color: rgb(255, 240, 239) !important;
   background-color: rgb(189, 34, 15) !important;
 }
+
 .MuiAlert-standardError .MuiAlert-icon {
   color: white !important;
 }
+
 .gpuName {
   z-index: 1000;
   position: absolute;
@@ -81,6 +90,7 @@ ul.MuiList-root {
   color: yellow;
   font-size: 11px;
 }
+
 img.centered {
   display: block;
   margin-left: auto;
@@ -90,10 +100,12 @@ img.centered {
 .fcx-logo img {
   width: 400px;
 }
+
 .legend {
   width: 100%;
   height: 70px;
 }
+
 button {
   display: inline-block;
   margin: 5px;
@@ -118,15 +130,34 @@ button:hover {
   text-decoration: none;
 }
 
-button:focus,
-button.focus {
+button:focus, button.focus {
   outline: 0;
 }
 
-button.disabled,
-button:disabled {
+button.disabled, button:disabled {
   color: #888;
   background-color: #f8f8f8;
   border-color: #e9ecef;
   opacity: 0.65;
+}
+
+.error-page {
+  height: 80vh;
+  /* Magic here */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-flow: column;
+  color: #484848;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.error-message {
+  font-size: 1250%;
+  font-weight: bold;
+}
+
+.error-line1 {
+  font-size: 300%;
+  font-weight: bold;
 }
