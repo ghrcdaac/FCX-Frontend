@@ -143,7 +143,6 @@ button.disabled, button:disabled {
 
 .error-page {
   height: 80vh;
-  /* Magic here */
   display: flex;
   justify-content: center;
   align-items: center;
