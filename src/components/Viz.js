@@ -1,5 +1,6 @@
 import React, { Component } from "react"
 import { hot } from "react-hot-loader"
+
 import Snackbar from "@material-ui/core/Snackbar"
 import Alert from "@material-ui/lab/Alert"
 import { Animated } from "react-animated-css"
@@ -29,8 +30,9 @@ import {
     Color as ColorCesium,
 } from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
+
 import emitter from "../helpers/event"
-import campaign from "../layers"
+import { getCampaignInfo } from "../layers/layers"
 import { Dock, viewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
@@ -49,7 +51,8 @@ let trackEntity = false
 let trackedEntity
 let pointsCollection;
 const Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
-function renderLayers(selectedLayers) {
+
+function renderLayers(selectedLayers, campaign) {
     const layersToRemove = []
     for (const [, activeLayerItem] of activeLayers.entries()) {
         // if layer is not found in current list of selected layers, remove it
@@ -356,11 +359,11 @@ function renderLayers(selectedLayers) {
     }
 }
 
-function readStateAndRender() {
+function readStateAndRender(campaign) {
     const selectedLayers = store.getState().selectedLayers
     if (JSON.stringify(lastSelectedLayers) !== JSON.stringify(selectedLayers)) {
         lastSelectedLayers = selectedLayers
-        renderLayers(selectedLayers)
+        renderLayers(selectedLayers, campaign)
     }
 }
 
@@ -377,12 +380,20 @@ function restoreCamera(cameraObj, updateTime = true) {
     }
 }
 
-class homePage extends Component {
+class Viz extends Component {
+
     componentDidMount() {
+        const { id } = this.props.match.params
+        const campaign = getCampaignInfo(id)
+
         if (!viewer) {
             alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
         }
-
+        
+        if (!campaign) {
+            alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
+        }
+        
         viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (tiles) { })
 
         viewer.imageryLayers.layerAdded.addEventListener((layer) => {
@@ -406,10 +417,10 @@ class homePage extends Component {
         }, 2000)
 
         //check for default selected layers
-        readStateAndRender()
+        readStateAndRender(campaign)
 
         store.subscribe(() => {
-            readStateAndRender()
+            readStateAndRender(campaign)
         })
 
         emitter.on("dockRender", () => {
@@ -420,7 +431,7 @@ class homePage extends Component {
                 if (entitiesLength === 0 && dataSourcesLength === 0 && primitiesLength === 0) {
                     activeLayers = []
                     if (lastSelectedLayers.length !== 0) {
-                        renderLayers(lastSelectedLayers)
+                        renderLayers(lastSelectedLayers, campaign)
                         restoreCamera(savedSamera)
                         //TODO: viewer's current time is not getting restored
                     }
@@ -446,7 +457,7 @@ class homePage extends Component {
 
         emitter.on("listcheck", (selectedLayers) => {
             lastSelectedLayers = selectedLayers
-            renderLayers(selectedLayers)
+            renderLayers(selectedLayers, campaign)
         })
 
         adjustHeightOfPanels()
@@ -480,10 +491,10 @@ class homePage extends Component {
                     </Animated>
                 </div>
 
-                <Dock />
+                <Dock mission={this.props.match.params.id} />
             </div>
         )
     }
 }
 
-export default hot(module)(homePage)
+export default hot(module)(Viz)

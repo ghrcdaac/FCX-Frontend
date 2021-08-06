@@ -7,6 +7,7 @@ import '../../css/cards.css'
 const MissionsCards = () => {
 
   const history = useHistory()
+  const basePath = '/fcx'
   
   return (
     <div className="mission-card-group">
@@ -20,7 +21,7 @@ const MissionsCards = () => {
             reference={landingPageURL}
             dates={dates}
             onClickHandler={history.push}
-            args={[path]}
+            args={[`${basePath}${path}`]}
           />
 
         ))
