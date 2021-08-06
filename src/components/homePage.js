@@ -2,9 +2,6 @@ import React, { Component } from "react"
 import { hot } from "react-hot-loader"
 import Snackbar from "@material-ui/core/Snackbar"
 import Alert from "@material-ui/lab/Alert"
-import AppBar from "@material-ui/core/AppBar"
-import Toolbar from "@material-ui/core/Toolbar"
-import Typography from "@material-ui/core/Typography"
 import { Animated } from "react-animated-css"
 import moment from "moment"
 import {
@@ -482,28 +479,6 @@ class homePage extends Component {
                         <img alt="FCX Logo" className="centered" src={`${process.env.PUBLIC_URL}/fcx_logo.png`} />
                     </Animated>
                 </div>
-
-                <AppBar position="fixed" style={{ top: 30 }}>
-                    <Toolbar>
-                        <a target="_blank" rel="noopener noreferrer" href="https://nasa.gov/">
-                            <img alt="NASA Logo" style={{ marginRight: 20, height: 50 }} src={`${process.env.PUBLIC_URL}/nasa_logo.png`} />
-                        </a>
-                        <a target="_blank" rel="noopener noreferrer" href="https://ghrc.nsstc.nasa.gov/">
-                            <img alt="GHRC Logo" style={{ marginRight: 20, height: 50 }} src={`${process.env.PUBLIC_URL}/ghrc_logo.png`} />
-                        </a>
-                        <img alt="FCX Logo" style={{ marginRight: 10, height: 50 }} src={`${process.env.PUBLIC_URL}/fcx_logo.png`} />
-
-                        <Typography variant="h6" noWrap>
-                            Field Campaign Explorer
-            </Typography>
-
-                        <Typography variant="h6" style={{ marginLeft: 20 }}>
-                            <a target="_blank" rel="noopener noreferrer" style={{ color: "white", textDecoration: "none" }} href=" https://ghrc.nsstc.nasa.gov/home/feedback/contact">
-                                Contact
-              </a>
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
 
                 <Dock />
             </div>

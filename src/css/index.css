@@ -11,3 +11,17 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+a {
+  text-decoration: none;
+  color: #337ab7;
+  background-color: transparent;
+}
+
+.th-wrapper {
+  position: sticky;
+}
+
+.header {
+  position: fixed;
+}
