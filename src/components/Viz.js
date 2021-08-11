@@ -32,13 +32,13 @@ import {
 import { extendCesium3DTileset } from "temporal-3d-tile"
 
 import emitter from "../helpers/event"
-import { getCampaignInfo } from "../layers/layers"
 import { Dock, viewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
 import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { supportEmail } from "../config"
 import { getColorExpression, getShowExpression, loadData, getTimes, mousePosition } from "./layerFunctions"
+import { isEmpty } from "lodash"
 
 let epoch
 let viewerTime = 0
@@ -370,12 +370,12 @@ function readStateAndRender(campaign) {
 function restoreCamera(cameraObj, updateTime = true) {
     if (cameraObj) {
         let camera = viewer.scene.camera
-        camera.position = cameraObj.position
-        camera.direction = cameraObj.direction
-        camera.up = cameraObj.up
-        camera.right = cameraObj.right
+        camera.position = {...cameraObj.position}
+        camera.direction = {...cameraObj.direction}
+        camera.up = {...cameraObj.up}
+        camera.right = {...cameraObj.right}
         if (updateTime && cameraObj.currentTime) {
-            viewer.clock.currentTime = cameraObj.currentTime
+            viewer.clock.currentTime = {...cameraObj.currentTime}
         }
     }
 }
@@ -383,15 +383,15 @@ function restoreCamera(cameraObj, updateTime = true) {
 class Viz extends Component {
 
     componentDidMount() {
-        const { id } = this.props.match.params
-        const campaign = getCampaignInfo(id)
+        const getCampaign = () => this.props.campaign
+        const campaign = getCampaign()
 
         if (!viewer) {
             alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
         }
         
-        if (!campaign) {
-            alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
+        if (isEmpty(campaign)) {
+            alert(`Error: Couldn't fetch the data. Please contact support team at ${supportEmail}`)
         }
         
         viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (tiles) { })
@@ -482,7 +482,7 @@ class Viz extends Component {
         return (
             <div>
                 <Snackbar id="alert-gpu" anchorOrigin={{ vertical: "top", horizontal: "center" }} open={!gpuInfo.discreteGPU} key="alert-gpu">
-                    <Alert severity="error">Note: Your current GPU is {gpuInfo.gpuName}. The performance of Field Campaign Explorer will depend performance of your GPU. A discrete GPU is recommended.</Alert>
+                    <Alert severity="error">Note: Your current GPU is {gpuInfo.gpuName}. The performance of Field campaign Explorer will depend performance of your GPU. A discrete GPU is recommended.</Alert>
                 </Snackbar>
 
                 <div className="fcx-logo animate__rotateIn">
@@ -491,7 +491,7 @@ class Viz extends Component {
                     </Animated>
                 </div>
 
-                <Dock mission={this.props.match.params.id} />
+                <Dock mission={this.props.campaign} />
             </div>
         )
     }
