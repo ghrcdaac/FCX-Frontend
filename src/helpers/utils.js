@@ -1,11 +1,11 @@
-import campaign from "../layers"
+import { cloneDeep } from 'lodash'
 
-function getLayer(layerId) {
+function getLayer(layerId, campaign) {
   for (const [, valueItem] of campaign.layers.entries()) {
     const layerItems = valueItem
     for (const [, valueLayer] of layerItems.items.entries()) {
       if (valueLayer.layerId === layerId) {
-        return valueLayer
+        return cloneDeep(valueLayer)
       }
     }
   }

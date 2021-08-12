@@ -1,7 +1,6 @@
 import React from "react"
 import { useSelector } from "react-redux"
 import moment from "moment"
-import campaign from "../layers"
 import { getLayer } from "../helpers/utils"
 import Timeline from "../customized-components/react-timeline-9000/src/timeline"
 import "../customized-components/react-timeline-9000/src/style.css"
@@ -11,7 +10,7 @@ import "../customized-components/react-timeline-9000/src/style.css"
 
 const { TIMELINE_MODES } = Timeline
 
-function FcxTimeline() {
+function FcxTimeline({ campaign }) {
   const state = useSelector((state) => state)
 
   let layerDate
@@ -29,7 +28,7 @@ function FcxTimeline() {
   groups.push({ id: rowIndex, title: `` })
 
   for (const [selectedLayerIndex, selectedLayerValue] of state.selectedLayers.entries()) {
-    let layer = getLayer(selectedLayerValue)
+    let layer = getLayer(selectedLayerValue, campaign)
 
     if (!layerDate || layerDate !== layer.date) {
       let layerDate = layer.date

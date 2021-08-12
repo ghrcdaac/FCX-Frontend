@@ -6,7 +6,6 @@ import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
-import campaign from "../layers"
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -16,6 +15,7 @@ import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
+import campaigns from "../layers/layers"
 
 let viewer
 let gpuInfo = getGPUInfo()
@@ -58,23 +58,29 @@ providerViewModels.push(
   })
 )
 
-let campaignTab = {
-  title: (
-    <div>
-      <MdFlightTakeoff /> Campaign{" "}
-    </div>
-  ),
-  content: (
-    <div style={{ textAlign: "center" }}>
-      <p>
-        <img alt="Campaign Logo" style={{ height: "80%", width: "80%" }} src={campaign.logo} />
-        <br /> {campaign.description}
-      </p>
-    </div>
-  ),
+let getCampaignTab = (campaign) => {
+  
+  const logo = campaign.logo
+  const description = campaign.description
+
+  return {
+    title: (
+      <div>
+        <MdFlightTakeoff /> Campaign{" "}
+      </div>
+    ),
+    content: (
+      <div style={{ textAlign: "center" }}>
+        <p>
+          <img alt="Campaign Logo" style={{ height: "80%", width: "80%" }} src={logo} />
+          <br /> {description}
+        </p>
+      </div>
+    ),
+  }
 }
 
-let box = {
+let box = (campaign) => ({
   dockbox: {
     mode: "horizontal",
 
@@ -85,7 +91,7 @@ let box = {
         children: [
           {
             tabs: [
-              { ...campaignTab, id: "tabCampaign" },
+              {...getCampaignTab(campaign), id: "tabCampaign" },
               {
                 title: (
                   <div>
@@ -93,7 +99,7 @@ let box = {
                   </div>
                 ),
                 id: "tabCampaignLinks",
-                content: <CampaignInfoLinks />,
+                content: <CampaignInfoLinks campaign={campaign} />,
               },
             ],
           },
@@ -107,7 +113,7 @@ let box = {
                   </div>
                 ),
                 id: "tabDisplay",
-                content: <LayerList />,
+                content: <LayerList campaign={campaign} />,
               },
               {
                 title: (
@@ -116,7 +122,7 @@ let box = {
                   </div>
                 ),
                 id: "tabData",
-                content: <DOIList />,
+                content: <DOIList campaign={campaign}/>,
               },
               {
                 title: (
@@ -162,7 +168,7 @@ let box = {
       },
     ],
   },
-}
+})
 
 let createViewer = () => {
   Ion.defaultAccessToken = cesiumDefaultAccessToken
@@ -201,6 +207,7 @@ let checkViewer = () => {
   https://codesandbox.io/s/0mjo76mnz0?file=/src/styles.css
 */
 class Dock extends React.Component {
+
   componentDidMount() {
     createViewer()
     if (viewer) {
@@ -218,7 +225,9 @@ class Dock extends React.Component {
     emitter.emit("dockRender")
     return (
       <DockLayout
-        defaultLayout={box}
+        defaultLayout={
+          box(this.props.campaign)
+        }
         style={{
           position: "absolute",
           left: 10,

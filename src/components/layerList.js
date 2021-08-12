@@ -21,7 +21,6 @@ import AccordionDetails from "@material-ui/core/AccordionDetails"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import moment from "moment"
 import allActions from "../state/actions"
-import campaign from "../layers"
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -31,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default function LayerList() {
+export default function LayerList({ campaign }) {
   const classes = useStyles()
   const state = useSelector((state) => state)
   const dispatch = useDispatch()

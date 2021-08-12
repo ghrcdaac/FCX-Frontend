@@ -90,7 +90,7 @@ function renderLayers(selectedLayers, campaign) {
     }
 
     for (const [, selectedLayerId] of selectedLayers.entries()) {
-        const layer = getLayer(selectedLayerId)
+        const layer = getLayer(selectedLayerId, campaign)
 
         const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
         const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
@@ -135,7 +135,7 @@ function renderLayers(selectedLayers, campaign) {
                 if (layer.type === "track") {
                     let modelReference = ds.entities.getById("Flight Track")
 
-                    modelReference.orientation = new CallbackProperty((time, result) => {
+                    modelReference.orientation = new CallbackProperty((time, _result) => {
                         const position = modelReference.position.getValue(time)
                         const roll = modelReference.properties.roll.getValue(time)
                         const pitch = modelReference.properties.pitch.getValue(time)
@@ -155,7 +155,7 @@ function renderLayers(selectedLayers, campaign) {
 
                 activeLayers.push({ layer: layer, cesiumLayerRef: ds })
                 viewer.dataSources.add(ds)
-            }).otherwise(function (error) {
+            }).otherwise(function (_error) {
                 window.alert("Error Loading Data")
                 errorLayers.push(selectedLayerId)
             })
@@ -195,7 +195,7 @@ function renderLayers(selectedLayers, campaign) {
                     })
 
                     if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
-                        const eventCallback = viewer.clock.onTick.addEventListener((e) => {
+                        const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
                             if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
                                 previousTime = JulianDate.clone(viewer.clock.currentTime)
                                 viewerTime = JulianDate.secondsDifference(previousTime, epoch)
@@ -212,7 +212,7 @@ function renderLayers(selectedLayers, campaign) {
                         }
                     }
                 })
-                .otherwise(function (error) {
+                .otherwise(function (_error) {
                     window.alert("Error Loading Data")
                     errorLayers.push(selectedLayerId)
                     // activeLayers.push({ layer: layer })
@@ -224,7 +224,7 @@ function renderLayers(selectedLayers, campaign) {
             const promiseG = Promise.resolve(loadData(layer.tileLocation));
             Promise.all([promiseG]).then(([LightningData]) => {
                 const timingsArray = getTimes(LightningData);
-                let lastTime = viewerTime;
+                let lastTime =viewerTime;
                 let timesLen = timingsArray.length;
                 let initialTime = timingsArray[0];
                 let endTime = timingsArray[timesLen - 1];
@@ -237,7 +237,7 @@ function renderLayers(selectedLayers, campaign) {
 
                 if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
 
-                    const eventCallback = viewer.clock.onTick.addEventListener((e) => {
+                    const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
                         let previousTime = JulianDate.clone(viewer.clock.currentTime);
 
                         const startTime = JulianDate.fromIso8601(layer.date + "T00:00:00Z");
@@ -307,7 +307,7 @@ function renderLayers(selectedLayers, campaign) {
                 /*--- mouse functions  ---*/
                 mousePosition(viewer);
 
-            }).catch(error => {
+            }).catch(_error => {
                 window.alert("Error Loading Data")
                 errorLayers.push(selectedLayerId)
             })
@@ -324,7 +324,7 @@ function renderLayers(selectedLayers, campaign) {
             }
             const timeIntervalCollection = TimeIntervalCollection.fromJulianDateArray({
                 julianDates: dates,
-                dataCallback: (interval, index) => {
+                dataCallback: (_interval, index) => {
                     return { Time: times[index] }
                 },
             })
@@ -394,7 +394,7 @@ class Viz extends Component {
             alert(`Error: Couldn't fetch the data. Please contact support team at ${supportEmail}`)
         }
         
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (tiles) { })
+        viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (_tiles) { })
 
         viewer.imageryLayers.layerAdded.addEventListener((layer) => {
             if (layer.imageryProvider) {
@@ -491,7 +491,7 @@ class Viz extends Component {
                     </Animated>
                 </div>
 
-                <Dock mission={this.props.campaign} />
+                <Dock campaign={this.props.campaign} />
             </div>
         )
     }

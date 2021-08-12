@@ -1,16 +1,18 @@
 import React from "react"
 import { FiExternalLink } from "react-icons/fi"
-import campaign from "../layers"
 
-function CampaignInfoLinks() {
+function CampaignInfoLinks({ campaign }) {
   const links = []
 
   for (const [itemIndex, itemValue] of campaign.links.entries()) {
+    const url = itemValue.url
+    const title = itemValue.title
+
     links.push(
       <div key={"campaignInfo-" + itemIndex}>
         <FiExternalLink />{" "}
-        <a target="_blank" rel="noopener noreferrer" href={itemValue.url}>
-          {itemValue.title}
+        <a target="_blank" rel="noopener noreferrer" href={url}>
+          {title}
         </a>
       </div>
     )
