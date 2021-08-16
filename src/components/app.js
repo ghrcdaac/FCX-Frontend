@@ -2,9 +2,12 @@ import React, { Component } from "react"
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 
 import VizContainer from "./VizContainer";
-import pageNotFound from "./pageNotFound";
+import PageNotFound from "./pageNotFound";
 import Header from "./Header";
 import MissionsCards from "./MissionCards/MissionsCards";
+import { missions } from "./MissionCards/missions.json"
+import { missionExists } from "../helpers/apiHelpers"
+import { supportEmail } from "../config"
 
 class App extends Component {
 
@@ -17,10 +20,31 @@ class App extends Component {
           <Switch>
             <Route
               path={`${basePath}/:id`}
-              render={(props) => <VizContainer {...props}/>}
+              render={(props) => {
+                console.log(missionExists(props.match.params.id, missions))
+                return missionExists(props.match.params.id, missions)
+                  ? <VizContainer {...props}/>
+                  : <PageNotFound
+                      title={`Page Not Found`}
+                      message={`404 Error`}
+                      description={`This page doesn't exists! Please check the url and try again. Please contact support team at ${supportEmail}`}
+                    />  
+              }}
             />
-            <Route path={`${basePath}`} exact component={MissionsCards} />
-            <Route path="*" component={pageNotFound} status={404} />
+            <Route
+              exact path={`${basePath}`}
+              render={() => <MissionsCards missions={missions}/>}
+            />
+            <Route
+              path="*"
+              render={() => (
+                <PageNotFound
+                  title={`Page Not Found`}
+                  message={`404 Error`}
+                  description={`This page doesn't exists! Please check the url and try again. Please contact support team at ${supportEmail}`}
+                />
+              )}
+            />
           </Switch>
         </Router>
       </div>

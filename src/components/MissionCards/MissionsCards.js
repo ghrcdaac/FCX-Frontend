@@ -1,14 +1,12 @@
 import { useHistory, withRouter } from "react-router"
 
-import { missions } from './missions.json'
 import Card from "./Card"
 import '../../css/cards.css'
 
-const MissionsCards = () => {
+const MissionsCards = ({ missions }) => {
 
   const history = useHistory()
   const basePath = '/fcx'
-  
   return (
     <div className="mission-card-group">
       {

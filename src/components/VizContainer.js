@@ -6,6 +6,7 @@ import Viz from "./Viz"
 
 import { getCampaignInfo } from "../layers/layers"
 import { deepFreeze } from "../helpers/objectHelpers"
+import PageNotFound from "./pageNotFound"
 
 const VizContainer = () => {
   const { id } = useParams()
@@ -13,14 +14,26 @@ const VizContainer = () => {
   
   useEffect(() => {
     const campaign = getCampaignInfo(id)
-    deepFreeze(campaign)
-    setCampaign(campaign)  
+    if(campaign){
+      deepFreeze(campaign)
+      setCampaign(campaign)
+    }else{
+      setCampaign(null)
+    } 
   }, [id])
 
   return (
-    isEmpty(campaign)
-      ? null
-      : <Viz campaign={campaign}/> 
+    campaign === null
+      ? <PageNotFound
+          title={`UNDER CONSTRUCTION`}
+          message={``}
+          description={`We are working to bring this page to life!`}          
+        />
+      : (isEmpty(campaign)
+        ? null
+        : <Viz campaign={campaign} />)
+      
+
   )
 }
 
