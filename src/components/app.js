@@ -21,7 +21,6 @@ class App extends Component {
             <Route
               path={`${basePath}/:id`}
               render={(props) => {
-                console.log(missionExists(props.match.params.id, missions))
                 return missionExists(props.match.params.id, missions)
                   ? <VizContainer {...props}/>
                   : <PageNotFound

@@ -480,7 +480,9 @@ class Viz extends Component {
         let gpuInfo = getGPUInfo()
 
         return (
-            <div>
+            <div
+                className={"main"}
+            >
                 <Snackbar id="alert-gpu" anchorOrigin={{ vertical: "top", horizontal: "center" }} open={!gpuInfo.discreteGPU} key="alert-gpu">
                     <Alert severity="error">Note: Your current GPU is {gpuInfo.gpuName}. The performance of Field campaign Explorer will depend performance of your GPU. A discrete GPU is recommended.</Alert>
                 </Snackbar>
