@@ -19,7 +19,7 @@ class App extends Component {
         <Router>
           <Switch>
             <Route
-              path={`${basePath}/:id`}
+              exact path={`${basePath}/:id`}
               render={(props) => {
                 return missionExists(props.match.params.id, missions)
                   ? <VizContainer {...props}/>
@@ -36,6 +36,7 @@ class App extends Component {
             />
             <Route
               path="*"
+              status={404}
               render={() => (
                 <PageNotFound
                   title={`Page Not Found`}

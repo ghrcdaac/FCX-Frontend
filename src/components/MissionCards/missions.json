@@ -7,7 +7,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/ACES/DATA101",
       "image": "aces.png",
       "path": "/aces",
-      "id": "aces"
+      "id": "aces",
+      "priority": 100
     },
     {
       "name": "Canadian CloudSat/CALIPSO Validation Project (C3VP)",
@@ -16,7 +17,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GPMGV/C3VP/DATA101",
       "image": "c3vp.png",
       "path": "/c3vp",
-      "id": "c3vp"
+      "id": "c3vp",
+      "priority": 100
     },
     {
       "name": "Convection And Moisture EXperiment 3 (CAMEX3)",
@@ -25,7 +27,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/CAMEX-3/DATA101",
       "image": "camex3.png",
       "path": "/camex3",
-      "id": "camex3"
+      "id": "camex3",
+      "priority": 100
     },
     {
       "name": "Convection And Moisture EXperiment 4 (CAMEX4)",
@@ -34,7 +37,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/CAMEX-4/DATA101",
       "image": "camex4.png",
       "path": "/camex4",
-      "id": "camex4"
+      "id": "camex4",
+      "priority": 100
     },
     {
       "name": "Geostationary Operational Environmental Satellite-R Post Launch Test (GOES-R-PLT)",
@@ -43,7 +47,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GOESRPLT/DATA101",
       "image": "goes-r-plt.png",
       "path": "/goes-r-plt",
-      "id": "goes-r-plt"
+      "id": "goes-r-plt",
+      "priority": 0
     },
     {
       "name": "GPM Cold-season Precipitation Experiment (GCPEx)",
@@ -52,7 +57,8 @@
       "landingPageURL": "https://doi.org/10.5067/GPMGV/GCPEX/DATA101",
       "image": "gcpex.png",
       "path": "/gcpex",
-      "id": "gcpex"
+      "id": "gcpex",
+      "priority": 100
     },
     {
       "name": "Genesis and Rapid Intensification Processes (GRIP)",
@@ -61,7 +67,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GRIP/DATA101",
       "image": "grip.png",
       "path": "/grip",
-      "id": "grip"
+      "id": "grip",
+      "priority": 100
     },
     {
       "name": "Hurricane and Severe Storm Sentinel (HS3)",
@@ -70,7 +77,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/HS3/DATA101",
       "image": "hs3.png",
       "path": "/hs3",
-      "id": "hs3"
+      "id": "hs3",
+      "priority": 100
     },
     {
       "name": "Hydrological Cycle in the Mediterranean Experiment (HyMeX)",
@@ -79,7 +87,8 @@
       "landingPageURL": "",
       "image": "hymex.png",
       "path": "/hymex",
-      "id": "hymex"
+      "id": "hymex",
+      "priority": 100
     },
     {
       "name": "International Collaborative Experiment for PyeongChang Olympic and Paralympics (ICE-POP) (ICE POP)",
@@ -88,7 +97,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GPMGV/ICEPOP/DATA101",
       "image": "ice-pop.png",
       "path": "/ice-pop",
-      "id": "ice-pop"
+      "id": "ice-pop",
+      "priority": 100
     },
     {
       "name": "Iowa Flood Studies (IFloodS)",
@@ -97,7 +107,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GPMGV/IFLOODS/DATA101",
       "image": "ifloods.png",
       "path": "/ifloods",
-      "id": "ifloods"
+      "id": "ifloods",
+      "priority": 100
     },
     {
       "name": "Integrated Precipitation and Hydrology Experiment (IPHEx)",
@@ -106,7 +117,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GPMGV/IPHEX/DATA101",
       "image": "iphex.png",
       "path": "/iphex",
-      "id": "iphex"
+      "id": "iphex",
+      "priority": 100
     },
     {
       "name": "Light Precipitation Evaluation Experiment (LPVEx)",
@@ -115,7 +127,8 @@
       "landingPageURL": "https://doi.org/10.5067/GPMGV/LPVEX/DATA101",
       "image": "lpvex.png",
       "path": "/lpvex",
-      "id": "lpvex"
+      "id": "lpvex",
+      "priority": 100
     },
     {
       "name": "Mid-latitude Continental Convective Clouds Experiment (MC3E)",
@@ -124,7 +137,8 @@
       "landingPageURL": "https://doi.org/10.5067/GPMGV/MC3E/DATA101",
       "image": "mc3e.png",
       "path": "/mc3e",
-      "id": "mc3e"
+      "id": "mc3e",
+      "priority": 100
     },
     {
       "name": "NASA African Monsoon Multidisciplinary Analyses (NAMMA)",
@@ -133,7 +147,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/NAMMA/DATA101",
       "image": "namma.png",
       "path": "/namma",
-      "id": "namma"
+      "id": "namma",
+      "priority": 100
     },
     {
       "name": "Olympic Mountains Ground Validation Experiment (OLYMPEX)",
@@ -142,7 +157,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/GPMGV/OLYMPEX/DATA101",
       "image": "olympex.png",
       "path": "/olympex",
-      "id": "olympex"
+      "id": "olympex",
+      "priority": 100
     },
     {
       "name": "Tropical Composition, Cloud and Climate Coupling (TC4)",
@@ -151,7 +167,8 @@
       "landingPageURL": "",
       "image": "tc4.png",
       "path": "/tc4",
-      "id": "tc4"
+      "id": "tc4",
+      "priority": 100
     },
     {
       "name": "The Tropical Cloud Systems and Processes (TCSP)",
@@ -160,7 +177,8 @@
       "landingPageURL": "http://dx.doi.org/10.5067/TCSP/DATA101",
       "image": "tcsp.png",
       "path": "/tcsp",
-      "id": "tcsp"
+      "id": "tcsp",
+      "priority": 100
     }
   ]
 }
