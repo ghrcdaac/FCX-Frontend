@@ -162,7 +162,7 @@ let box = (campaign) => ({
               </div>
             ),
             id: "tabTimeline",
-            content: <FcxTimeline />,
+            content: <FcxTimeline campaign={campaign} />,
           },
         ],
       },

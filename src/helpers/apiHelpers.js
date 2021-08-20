@@ -1,6 +1,6 @@
 import { cloneDeep } from "lodash"
 
-const missionExists = (missionId, missions) => {
+const missionExists = (missions, missionId) => {
   return missions.some(
     element => element['id'] === missionId)
 }

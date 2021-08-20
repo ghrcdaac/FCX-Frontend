@@ -6,7 +6,6 @@ import PageNotFound from "./pageNotFound";
 import Header from "./Header";
 import MissionsCards from "./MissionCards/MissionsCards";
 import { missions } from "./MissionCards/missions.json"
-import { missionExists } from "../helpers/apiHelpers"
 import { supportEmail } from "../config"
 
 class App extends Component {
@@ -14,40 +13,35 @@ class App extends Component {
   render() {
     const basePath = '/fcx'
     return (
-      <div>
+      <Router>
         <Header />
-        <Router>
-          <Switch>
-            <Route
-              exact path={`${basePath}/:id`}
-              render={(props) => {
-                return missionExists(props.match.params.id, missions)
-                  ? <VizContainer {...props}/>
-                  : <PageNotFound
-                      title={`Page Not Found`}
-                      message={`404 Error`}
-                      description={`This page doesn't exists! Please check the url and try again. Please contact support team at ${supportEmail}`}
-                    />  
-              }}
-            />
-            <Route
-              exact path={`${basePath}`}
-              render={() => <MissionsCards missions={missions}/>}
-            />
-            <Route
-              path="*"
-              status={404}
-              render={() => (
-                <PageNotFound
-                  title={`Page Not Found`}
-                  message={`404 Error`}
-                  description={`This page doesn't exists! Please check the url and try again. Please contact support team at ${supportEmail}`}
-                />
-              )}
-            />
-          </Switch>
-        </Router>
-      </div>
+        <Switch>
+          <Route
+            exact path={`${basePath}/:id`}
+            render={(props) => {
+              return <VizContainer
+                missions={missions}
+                {...props}
+              />
+            }}
+          />
+          <Route
+            exact path={`${basePath}`}
+            render={() => <MissionsCards missions={missions}/>}
+          />
+          <Route
+            path="*"
+            status={404}
+            render={() => (
+              <PageNotFound
+                title={`Page Not Found`}
+                message={`404 Error`}
+                description={`This page doesn't exists! Please check the url and try again. Please contact support team at ${supportEmail}`}
+              />
+            )}
+          />
+        </Switch>
+      </Router>
     )
   }
 }
