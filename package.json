@@ -26,15 +26,17 @@
         "react-icons": "^3.10.0",
         "react-redux": "^7.2.0",
         "react-router-dom": "^5.2.0",
-        "react-scripts": "^4.0.1",
+        "react-scripts": "^4.0.3",
         "react-transition-group": "^2.6.1",
         "react-virtualized": "^9.21.2",
         "redux": "^4.0.5",
-        "temporal-3d-tile": "^1.0.1"
+        "temporal-3d-tile": "^1.0.1",
+        "typescript": "^4.4.2"
     },
     "devDependencies": {
         "@craco/craco": "^3.6.0",
-        "craco-plugin-react-hot-reload": "^0.0.3",
+        "@hot-loader/react-dom": "^16.8.6",
+        "craco-plugin-react-hot-reload": "^0.1.0",
         "snyk": "^1.434.2"
     },
     "scripts": {
@@ -53,6 +55,14 @@
         "not op_mini all"
     ],
     "resolutions": {
-        "**/**/node-gyp": "^3.8.0"
+        "**/**/node-gyp": "^3.8.0",
+        "react-scripts/react-dev-utils/browserslist": "^4.16.5",
+        "react-scripts/react-dev-utils/immer": "^9.0.6",
+        "react-scripts/@svgr/webpack/@svgr/plugin-svgo/svgo/css-select/css-what": "^5.0.1",
+        "react-scripts/workbox-webpack-plugin/workbox-build/@surma/rollup-plugin-off-main-thread/ejs": "^3.1.6",
+        "react-scripts/webpack-dev-server/chokidar/glob-parent": "^5.1.2",
+        "react-scripts/webpack/watchpack/watchpack-chokidar2/chokidar/glob-parent": "^5.1.2",
+        "material-ui/recompose/fbjs/isomorphic-fetch/node-fetch": "^2.6.1",
+        "@craco/craco/lodash.mergewith": "^4.6.2"
     }
 }
