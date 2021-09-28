@@ -1,5 +1,6 @@
 import React from "react"
 import { DockLayout } from "rc-dock"
+import { useLocation } from "react-router"
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, createWorldTerrain, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
 // eslint-disable-next-line
 import { createDefaultImageryProviderViewModels } from "cesium"
@@ -15,7 +16,6 @@ import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
-import campaigns from "../layers/layers"
 
 let viewer
 let gpuInfo = getGPUInfo()
@@ -171,6 +171,8 @@ let box = (campaign) => ({
 })
 
 let createViewer = () => {
+  const path = new URL(window.location.href).pathname
+  if (path !==  "/fcx/goes-r-plt") return
   Ion.defaultAccessToken = cesiumDefaultAccessToken
 
   viewer = new Viewer("cesiumContainer", {
@@ -191,13 +193,18 @@ let createViewer = () => {
 
 let checkViewer = () => {
   setTimeout(() => {
-    let cesiumActive = document.getElementById("cesiumContainer").querySelectorAll("canvas")[0]
+    const path = new URL(window.location.href).pathname
+    if (path !==  "/fcx/goes-r-plt") return
+    let cesiumActive = document.getElementById("cesiumContainer")
+    
+    if(cesiumActive) cesiumActive = cesiumActive.querySelectorAll("canvas")[0]
 
     if (!cesiumActive) {
-      createViewer()
+      createViewer(path)
       adjustHeightOfPanels()
-    } else {
-      checkViewer()
+    }
+    else {
+      checkViewer(path)
     }
   }, 500)
 }
@@ -217,7 +224,7 @@ class Dock extends React.Component {
   onDragNewTab = (e) => { }
 
   onLayoutChange = (newLayout, currentTabId) => {
-    emitter.emit("tabLayoutChange")
+    
     this.setState({ layout: newLayout })
     checkViewer()
   }

@@ -468,9 +468,11 @@ class Viz extends Component {
 
         setTimeout(() => {
             let logoElement = document.querySelector(".fcx-logo")
-            logoElement.parentNode.removeChild(logoElement)
+            if(logoElement?.parentNode){
+                logoElement.parentNode.removeChild(logoElement)
+            }
             let alertElement = document.querySelector("#alert-gpu")
-            if (alertElement) {
+            if (alertElement?.parentNode) {
                 alertElement.parentNode.removeChild(alertElement)
             }
         }, 5000)

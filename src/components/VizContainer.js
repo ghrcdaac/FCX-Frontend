@@ -26,7 +26,6 @@ const VizContainer = (props) => {
         status: status.success,
         details: null
       })
-      console.log(campaign)
       deepFreeze(campaign)
       setCampaign(campaign)
     }else{
