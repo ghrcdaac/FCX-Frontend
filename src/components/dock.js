@@ -1,7 +1,7 @@
 import React from "react"
 import { DockLayout } from "rc-dock"
-import { useLocation } from "react-router"
-import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, createWorldTerrain, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
+
+import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
 // eslint-disable-next-line
 import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
@@ -14,6 +14,8 @@ import CampaignInfoLinks from "./campaignInfo"
 import Settings from "./settings"
 import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
+import { checkPath } from "../helpers/path"
+
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
 
@@ -171,8 +173,7 @@ let box = (campaign) => ({
 })
 
 let createViewer = () => {
-  const path = new URL(window.location.href).pathname
-  if (path !==  "/fcx/goes-r-plt") return
+  if (!checkPath()) return
   Ion.defaultAccessToken = cesiumDefaultAccessToken
 
   viewer = new Viewer("cesiumContainer", {
@@ -193,18 +194,17 @@ let createViewer = () => {
 
 let checkViewer = () => {
   setTimeout(() => {
-    const path = new URL(window.location.href).pathname
-    if (path !==  "/fcx/goes-r-plt") return
+    if(!checkPath()) return
     let cesiumActive = document.getElementById("cesiumContainer")
     
     if(cesiumActive) cesiumActive = cesiumActive.querySelectorAll("canvas")[0]
 
     if (!cesiumActive) {
-      createViewer(path)
+      createViewer()
       adjustHeightOfPanels()
     }
     else {
-      checkViewer(path)
+      checkViewer()
     }
   }, 500)
 }
