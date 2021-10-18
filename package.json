@@ -33,13 +33,21 @@
     },
     "devDependencies": {
         "@craco/craco": "^3.6.0",
-        "craco-plugin-react-hot-reload": "^0.0.3",
+        "@hot-loader/react-dom": "^16.8.6",
+        "chai": "^4.3.4",
+        "craco-plugin-react-hot-reload": "^0.1.0",
+        "enzyme": "^3.11.0",
+        "enzyme-adapter-react-16": "^1.15.6",
+        "enzyme-to-json": "^3.6.2",
+        "jest-canvas-mock": "^2.3.1",
+        "react-scripts": "^4.0.3",
         "snyk": "^1.434.2"
     },
     "scripts": {
         "start": "craco start  --no-cache",
         "build": "craco build  --no-cache",
         "test": "snyk test && craco test",
+        "test-craco": "craco test --no-cache",
         "eject": "react-scripts eject"
     },
     "eslintConfig": {

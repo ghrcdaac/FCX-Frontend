@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cards Components Card Should Match Card Snapshot 1`] = `
+<div
+  className="mission-card"
+>
+  <div
+    className="mission-card-side"
+  >
+    <img
+      className="mission-card-image"
+    />
+  </div>
+  <div
+    className="mission-card-body"
+  >
+    <h4
+      className="mission-card-name"
+      onClick={[Function]}
+    />
+    <div
+      className="mission-card-description"
+    />
+  </div>
+</div>
+`;
+
+exports[`Cards Components Mission Cards Should Match Mission Card Snapshot 1`] = `
+<ContextConsumer>
+  <Component />
+</ContextConsumer>
+`;

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Timeline/> should have text 1`] = `
+<div
+  className="rct9k-timeline-div rct9k-id-r9k1"
+>
+  <AutoSizer
+    className="rct9k-autosizer"
+    disableHeight={false}
+    disableWidth={false}
+    onResize={[Function]}
+    style={Object {}}
+  >
+    <Component />
+  </AutoSizer>
+</div>
+`;

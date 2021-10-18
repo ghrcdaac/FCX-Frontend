@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CampaignInfo Component Should Match CampaignInfo Snapshot 1`] = `
+Array [
+  <div
+    key="campaignInfo-0"
+  >
+    <FiExternalLink />
+     
+    <a
+      href="https://ghrc.nsstc.nasa.gov/uso/ds_details/collections/goesrpltC.html"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Landing Page
+    </a>
+  </div>,
+  <div
+    key="campaignInfo-1"
+  >
+    <FiExternalLink />
+     
+    <a
+      href="https://ghrc.nsstc.nasa.gov/home/micro-articles/goes-r-post-launch-test-plt"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Micro Article
+    </a>
+  </div>,
+  <div
+    key="campaignInfo-2"
+  >
+    <FiExternalLink />
+     
+    <a
+      href="https://ghrc.nsstc.nasa.gov/home/field-campaigns/goes-r_plt"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Description
+    </a>
+  </div>,
+  <div
+    key="campaignInfo-3"
+  >
+    <FiExternalLink />
+     
+    <a
+      href="https://ghrc.nsstc.nasa.gov/home/field-campaigns/goes-r_plt/instruments"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Instruments
+    </a>
+  </div>,
+]
+`;
