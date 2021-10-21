@@ -37,10 +37,6 @@ const VizContainer = (props) => {
   }, [props.missions, id])
 
   if (!missionExists(props.missions, id)){
-    setValidationStatus({
-      status: status.failure,
-      details: failure.doesNotExists
-    })
     return(
       <Redirect
         to={{
