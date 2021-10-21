@@ -20,7 +20,6 @@ import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
 
 let viewer
-let gpuInfo = getGPUInfo()
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -30,35 +29,38 @@ let gpuInfo = getGPUInfo()
   console.log(createDefaultImageryProviderViewModels())
 */
 
-let providerViewModels = []
+const getProviderViewModels = () =>{
+  const providerViewModels = []
 
-providerViewModels.push(
-  new ProviderViewModel({
-    name: "Bing Maps Aerial with Labels",
-    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
-    tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
-    category: "Cesium ion",
-    creationFunction: function () {
-      return createWorldImagery({
-        style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
-      })
-    },
-  })
-)
+  providerViewModels.push(
+    new ProviderViewModel({
+      name: "Bing Maps Aerial with Labels",
+      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
+      tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
+      category: "Cesium ion",
+      creationFunction: function () {
+        return createWorldImagery({
+          style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
+        })
+      },
+    })
+  )
 
-providerViewModels.push(
-  new ProviderViewModel({
-    name: "Mapbox Streets Dark",
-    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
-    category: "Mapbox",
-    tooltip: "Mapbox Streets Dark",
-    creationFunction: function () {
-      return new UrlTemplateImageryProvider({
-        url: mapboxUrl,
-      })
-    },
-  })
-)
+  providerViewModels.push(
+    new ProviderViewModel({
+      name: "Mapbox Streets Dark",
+      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
+      category: "Mapbox",
+      tooltip: "Mapbox Streets Dark",
+      creationFunction: function () {
+        return new UrlTemplateImageryProvider({
+          url: mapboxUrl,
+        })
+      },
+    })
+  )
+  return providerViewModels
+}
 
 let getCampaignTab = (campaign) => {
   
@@ -152,7 +154,7 @@ let box = (campaign) => ({
             id: "tabCesium",
             content: (
               <div>
-                <span className="gpuName">Detected GPU: {gpuInfo.gpuName}</span>
+                <span className="gpuName">Detected GPU: {getGPUInfo().gpuName}</span>
                 <div id="cesiumContainer"></div>
               </div>
             ),
@@ -187,8 +189,8 @@ let createViewer = () => {
     sceneModePicker: true,
     shadows: false,
     infoBox: false,
-    imageryProviderViewModels: providerViewModels,
-    selectedImageryProviderViewModel: providerViewModels[1],
+    imageryProviderViewModels: getProviderViewModels(),
+    selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 }
 
@@ -214,6 +216,7 @@ let checkViewer = () => {
   https://codesandbox.io/s/0mjo76mnz0?file=/src/styles.css
 */
 class Dock extends React.Component {
+  
 
   componentDidMount() {
     createViewer()

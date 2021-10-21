@@ -107,7 +107,7 @@ class Viz extends Component {
 
             if (layerDate !== viewerDate) {
                 // remove layers with other dates
-                setTimeout(function () {
+                setTimeout(() => {
                     if(!checkPath()) return;
                     store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
                 }, 1000)
@@ -163,7 +163,7 @@ class Viz extends Component {
 
                     this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
                     viewer.dataSources.add(ds)
-                }).otherwise(function (_error) {
+                }).otherwise((_error) => {
                     console.error(_error)
                     window.alert("Error Loading Data")
                     this.errorLayers.push(selectedLayerId)
@@ -221,7 +221,7 @@ class Viz extends Component {
                             }
                         }
                     })
-                    .otherwise(function (_error) {
+                    .otherwise((_error) => {
                     console.error(_error)
                         window.alert("Error Loading Data")
                         this.errorLayers.push(selectedLayerId)
@@ -403,7 +403,7 @@ class Viz extends Component {
             alert(`Error: Couldn't fetch the data. Please contact support team at ${supportEmail}`)
         }
         
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(function (_tiles) { })
+        viewer.scene.globe.tileLoadProgressEvent.addEventListener((_tiles) => { })
 
         viewer.imageryLayers.layerAdded.addEventListener((layer) => {
             if (layer.imageryProvider) {
@@ -414,7 +414,7 @@ class Viz extends Component {
         viewer.clock.clockRange = ClockRange.LOOP_STOP
         viewer.clock.multiplier = 10
 
-        setInterval(function () {
+        setInterval(() => {
             let camera = viewer.scene.camera
             this.savedSamera = {
                 position: camera.position,
@@ -433,7 +433,7 @@ class Viz extends Component {
         })
 
         emitter.on("dockRender", () => {
-            setTimeout(function () {
+            setTimeout(() => {
                 if (!checkPath()) return
                 let entitiesLength = viewer.entities.values.length
                 let dataSourcesLength = viewer.dataSources.length
