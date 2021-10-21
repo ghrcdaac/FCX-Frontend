@@ -3,3 +3,6 @@ build
 .DS_Store
 .ionide
 yarn-error.log
+.idea
+.vscode
+.eslintcache

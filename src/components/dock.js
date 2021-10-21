@@ -1,12 +1,12 @@
 import React from "react"
 import { DockLayout } from "rc-dock"
-import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, createWorldTerrain, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
+
+import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
 // eslint-disable-next-line
 import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
-import campaign from "../layers"
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -14,11 +14,12 @@ import CampaignInfoLinks from "./campaignInfo"
 import Settings from "./settings"
 import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
+import { checkPath } from "../helpers/path"
+
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
 
 let viewer
-let gpuInfo = getGPUInfo()
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -28,53 +29,62 @@ let gpuInfo = getGPUInfo()
   console.log(createDefaultImageryProviderViewModels())
 */
 
-let providerViewModels = []
+const getProviderViewModels = () =>{
+  const providerViewModels = []
 
-providerViewModels.push(
-  new ProviderViewModel({
-    name: "Bing Maps Aerial with Labels",
-    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
-    tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
-    category: "Cesium ion",
-    creationFunction: function () {
-      return createWorldImagery({
-        style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
-      })
-    },
-  })
-)
+  providerViewModels.push(
+    new ProviderViewModel({
+      name: "Bing Maps Aerial with Labels",
+      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
+      tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
+      category: "Cesium ion",
+      creationFunction: function () {
+        return createWorldImagery({
+          style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
+        })
+      },
+    })
+  )
 
-providerViewModels.push(
-  new ProviderViewModel({
-    name: "Mapbox Streets Dark",
-    iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
-    category: "Mapbox",
-    tooltip: "Mapbox Streets Dark",
-    creationFunction: function () {
-      return new UrlTemplateImageryProvider({
-        url: mapboxUrl,
-      })
-    },
-  })
-)
-
-let campaignTab = {
-  title: (
-    <div>
-      <MdFlightTakeoff /> Campaign{" "}
-    </div>
-  ),
-  content: (
-    <div style={{ textAlign: "center" }}>
-      <p>
-        <img alt="Campaign Logo" style={{ height: "80%", width: "80%" }} src={campaign.logo} />
-        <br /> {campaign.description}
-      </p>
-    </div>
-  ),
+  providerViewModels.push(
+    new ProviderViewModel({
+      name: "Mapbox Streets Dark",
+      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
+      category: "Mapbox",
+      tooltip: "Mapbox Streets Dark",
+      creationFunction: function () {
+        return new UrlTemplateImageryProvider({
+          url: mapboxUrl,
+        })
+      },
+    })
+  )
+  return providerViewModels
 }
 
-let box = {
+let getCampaignTab = (campaign) => {
+  
+  const logo = campaign.logo
+  const description = campaign.description
+
+  return {
+    title: (
+      <div>
+        <MdFlightTakeoff /> Campaign{" "}
+      </div>
+    ),
+    content: (
+      <div style={{ textAlign: "center" }}>
+        <p>
+          <img alt="Campaign Logo" style={{ height: "80%", width: "80%" }} src={logo} />
+          <br /> {description}
+        </p>
+      </div>
+    ),
+  }
+}
+
+let box = (campaign) => ({
   dockbox: {
     mode: "horizontal",
 
@@ -85,7 +95,7 @@ let box = {
         children: [
           {
             tabs: [
-              { ...campaignTab, id: "tabCampaign" },
+              {...getCampaignTab(campaign), id: "tabCampaign" },
               {
                 title: (
                   <div>
@@ -93,7 +103,7 @@ let box = {
                   </div>
                 ),
                 id: "tabCampaignLinks",
-                content: <CampaignInfoLinks />,
+                content: <CampaignInfoLinks campaign={campaign} />,
               },
             ],
           },
@@ -107,7 +117,7 @@ let box = {
                   </div>
                 ),
                 id: "tabDisplay",
-                content: <LayerList />,
+                content: <LayerList campaign={campaign} />,
               },
               {
                 title: (
@@ -116,7 +126,7 @@ let box = {
                   </div>
                 ),
                 id: "tabData",
-                content: <DOIList />,
+                content: <DOIList campaign={campaign}/>,
               },
               {
                 title: (
@@ -144,7 +154,7 @@ let box = {
             id: "tabCesium",
             content: (
               <div>
-                <span className="gpuName">Detected GPU: {gpuInfo.gpuName}</span>
+                <span className="gpuName">Detected GPU: {getGPUInfo().gpuName}</span>
                 <div id="cesiumContainer"></div>
               </div>
             ),
@@ -156,20 +166,21 @@ let box = {
               </div>
             ),
             id: "tabTimeline",
-            content: <FcxTimeline />,
+            content: <FcxTimeline campaign={campaign} />,
           },
         ],
       },
     ],
   },
-}
+})
 
 let createViewer = () => {
+  if (!checkPath()) return
   Ion.defaultAccessToken = cesiumDefaultAccessToken
 
   viewer = new Viewer("cesiumContainer", {
     //Use Cesium World Terrain
-    terrainProvider: createWorldTerrain(),
+    // terrainProvider: createWorldTerrain(),
     baseLayerPicker: true,
     skyBox: false,
     automaticallyTrackDataSourceClocks: false,
@@ -178,19 +189,23 @@ let createViewer = () => {
     sceneModePicker: true,
     shadows: false,
     infoBox: false,
-    imageryProviderViewModels: providerViewModels,
-    selectedImageryProviderViewModel: providerViewModels[1],
+    imageryProviderViewModels: getProviderViewModels(),
+    selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 }
 
 let checkViewer = () => {
   setTimeout(() => {
-    let cesiumActive = document.getElementById("cesiumContainer").querySelectorAll("canvas")[0]
+    if(!checkPath()) return
+    let cesiumActive = document.getElementById("cesiumContainer")
+    
+    if(cesiumActive) cesiumActive = cesiumActive.querySelectorAll("canvas")[0]
 
     if (!cesiumActive) {
       createViewer()
       adjustHeightOfPanels()
-    } else {
+    }
+    else {
       checkViewer()
     }
   }, 500)
@@ -201,16 +216,18 @@ let checkViewer = () => {
   https://codesandbox.io/s/0mjo76mnz0?file=/src/styles.css
 */
 class Dock extends React.Component {
+  
+
   componentDidMount() {
     createViewer()
     if (viewer) {
       console.log("%c Viewer initialization successful", "background: green; color: white; display: block;")
     }
   }
-  onDragNewTab = (e) => {}
+  onDragNewTab = (e) => { }
 
   onLayoutChange = (newLayout, currentTabId) => {
-    emitter.emit("tabLayoutChange")
+    
     this.setState({ layout: newLayout })
     checkViewer()
   }
@@ -218,7 +235,9 @@ class Dock extends React.Component {
     emitter.emit("dockRender")
     return (
       <DockLayout
-        defaultLayout={box}
+        defaultLayout={
+          box(this.props.campaign)
+        }
         style={{
           position: "absolute",
           left: 10,

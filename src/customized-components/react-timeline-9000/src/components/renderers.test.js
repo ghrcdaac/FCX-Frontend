@@ -1,9 +1,9 @@
 'use strict';
 import React from 'react';
-import {shallow, mount} from 'enzyme';
+import {shallow} from 'enzyme';
 import {expect} from 'chai';
 
-import setup from 'setupTests';
+import '../setupTests';
 import {DefaultItemRenderer, DefaultGroupRenderer} from './renderers';
 
 describe('Item renderer', () => {

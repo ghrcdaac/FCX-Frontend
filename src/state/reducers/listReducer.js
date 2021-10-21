@@ -1,7 +1,7 @@
 const selectedLayers = (state = ["2017-05-17-abi-13", "2017-05-17-track15", "2017-05-17-glm", "2017-05-17-isslis", "2017-05-17-crs", "2017-05-17-fegs", "2017-05-17-lip"], action) => {
   if (action.type === "HANDLE_TOGGLE") {
-    if (state.indexOf(action.layerId) === -1) {
-      return state.concat(action.layerId)
+    if (!state.some(ele => ele === action.layerId)) {
+      return [...state, action.layerId]
     } else {
       return state.filter((id) => {
         return id !== action.layerId
@@ -17,7 +17,7 @@ const selectedLayers = (state = ["2017-05-17-abi-13", "2017-05-17-track15", "201
 
 const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
   if (action.type === "MARK_LOADING") {
-    return { inProgress: state.inProgress.concat(action.layerId), loaded: state.loaded }
+    return { inProgress: [...state.inProgress, action.layerId], loaded: [...state.loaded] }
   }
 
   if (action.type === "MARK_LOADED") {
@@ -25,12 +25,15 @@ const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
       inProgress: state.inProgress.filter((id) => {
         return id !== action.layerId
       }),
-      loaded: state.loaded.concat(action.layerId),
+      loaded: state.loaded.some(ele => ele === action.layerId) ?
+        [...state.loaded] :
+        [...state.loaded, action.layerId],
     }
   }
+  
   if (action.type === "MARK_UNLOADED") {
     return {
-      inProgress: state.inProgress,
+      inProgress: [...state.inProgress],
       loaded: state.loaded.filter((id) => {
         return id !== action.layerId
       }),

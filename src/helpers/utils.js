@@ -1,6 +1,4 @@
-import campaign from "../layers"
-
-function getLayer(layerId) {
+function getLayer(layerId, campaign) {
   for (const [, valueItem] of campaign.layers.entries()) {
     const layerItems = valueItem
     for (const [, valueLayer] of layerItems.items.entries()) {
@@ -19,13 +17,13 @@ function adjustHeightOfPanels() {
   })
 
   let docLayout = document.getElementById("root").querySelectorAll(".dock-layout")[0]
-  docLayout.style.height = `${window.innerHeight - (80 + 30)}px`
+  if(docLayout) docLayout.style.height = `${window.innerHeight - (80 + 30)}px`
 
+  if(!document?.getElementById("cesiumContainer")?.querySelectorAll("canvas")[0]) return
   let cesiumCanvas = document.getElementById("cesiumContainer").querySelectorAll("canvas")[0]
   let tabCesiumHeight = document.getElementById("tabCesium").offsetHeight
 
   if (cesiumCanvas) {
-    console.log(`Canvas height is ${cesiumCanvas.height}px`)
     if (cesiumCanvas.height > 0) {
       cesiumCanvas.height = tabCesiumHeight - 10
     }

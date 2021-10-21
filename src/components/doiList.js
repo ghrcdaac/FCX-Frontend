@@ -1,10 +1,9 @@
 import React from "react"
 import { FiExternalLink } from "react-icons/fi"
-import campaignInfo from "../layers"
 
-function DOIList() {
+function DOIList({ campaign }) {
   const links = []
-  for (const [itemIndex, itemValue] of campaignInfo.dois.entries()) {
+  for (const [itemIndex, {...itemValue}] of campaign.dois.entries()) {
     links.push(
       <div key={"doi-" + itemIndex}>
         <FiExternalLink />{" "}
