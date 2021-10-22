@@ -78,7 +78,7 @@
       "image": "hs3.png",
       "path": "/hs3",
       "id": "hs3",
-      "priority": 100
+      "priority": 2
     },
     {
       "name": "Hydrological Cycle in the Mediterranean Experiment (HyMeX)",
@@ -158,7 +158,7 @@
       "image": "olympex.png",
       "path": "/olympex",
       "id": "olympex",
-      "priority": 100
+      "priority": 3
     },
     {
       "name": "Tropical Composition, Cloud and Climate Coupling (TC4)",
