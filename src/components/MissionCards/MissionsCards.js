@@ -3,11 +3,11 @@ import { useHistory, withRouter } from "react-router"
 import Card from "./Card"
 import '../../css/cards.css'
 import { sortMissionsByKey } from "../../helpers/apiHelpers"
+import { basePath } from '../../constants/enum'
 
 const MissionsCards = ({ missions }) => {
 
   const history = useHistory()
-  const basePath = '/fcx'
   const sortedMissions = sortMissionsByKey(missions, "priority")
 
   return (
