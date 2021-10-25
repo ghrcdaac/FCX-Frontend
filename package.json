@@ -1,7 +1,7 @@
 {
     "name": "fcx",
     "version": "0.1.0",
-    "homepage": "/fcx/",
+    "homepage": "/fcx/index.html",
     "start_url": ".",
     "private": true,
     "dependencies": {

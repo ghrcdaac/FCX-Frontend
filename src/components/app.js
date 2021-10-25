@@ -1,5 +1,6 @@
 import React, { Component } from "react"
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
+import { MemoryRouter } from "react-router";
 
 import VizContainer from "./VizContainer";
 import PageNotFound from "./pageNotFound";
@@ -7,13 +8,13 @@ import Header from "./Header";
 import MissionsCards from "./MissionCards/MissionsCards";
 import { missions } from "./MissionCards/missions.json"
 import { supportEmail } from "../config"
+import { basePath } from '../constants/enum'
 
 class App extends Component {
 
   render() {
-    const basePath = '/fcx'
     return (
-      <Router>
+      <MemoryRouter>
         <Header />
         <Switch>
           <Route
@@ -26,7 +27,8 @@ class App extends Component {
             }}
           />
           <Route
-            exact path={`${basePath}`}
+            // exact path={`${basePath}`}
+            path={`*`}
             render={() => <MissionsCards missions={missions}/>}
           />
           <Route
@@ -41,7 +43,7 @@ class App extends Component {
             )}
           />
         </Switch>
-      </Router>
+      </MemoryRouter>
     )
   }
 }

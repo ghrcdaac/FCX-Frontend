@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Redirect, useParams } from "react-router-dom"
+import { Redirect } from "react-router-dom"
 
 import Viz from "./Viz"
 
@@ -10,7 +10,7 @@ import { status, failure, notFoundPath } from "../constants/enum"
 import { missionExists } from "../helpers/apiHelpers"
 
 const VizContainer = (props) => {
-  const { id } = useParams()
+  const id = props.location.pathname.split('/').pop()
   const [validationStatus, setValidationStatus] = useState({
     status: status.pending,
     details: null
@@ -21,6 +21,7 @@ const VizContainer = (props) => {
     if(!missionExists(props.missions, id)) return
 
     const campaign = getCampaignInfo(id)
+    console.log(campaign)
     if(campaign){
       setValidationStatus({
         status: status.success,
