@@ -1,4 +1,4 @@
-const Card = ({ name, description, dates, imageUrl, reference, onClickHandler, args }) => {
+const Card = ({ name, description, dates, imageUrl, reference, status, onClickHandler, args }) => {
     const className = "mission-card"
 
     return (
@@ -14,6 +14,13 @@ const Card = ({ name, description, dates, imageUrl, reference, onClickHandler, a
                     className={`${className}-reference`}
                 >
                     <a target="_blank" rel="noopener noreferrer" href={reference}>Learn More</a>
+                </div>}
+
+                {<div className={`${className}-status`}>
+                    <div className={`${className}-status-text`}>
+                        Status: {status}
+                    </div>
+                    <i className={`${className}-status-icon ${status}`}></i>
                 </div>}
             </div>
             
