@@ -13,7 +13,7 @@ const MissionsCards = ({ missions }) => {
   return (
     <div className="mission-card-group">
       {
-        sortedMissions.map(({ name, description, image, dates, landingPageURL, path }) => (
+        sortedMissions.map(({ name, description, image, dates, landingPageURL, path, status }) => (
           <Card
             key={name}
             imageUrl={`missions-logos/${image}`}
@@ -21,6 +21,7 @@ const MissionsCards = ({ missions }) => {
             description={description}
             reference={landingPageURL}
             dates={dates}
+            status={status}
             onClickHandler={history.push}
             args={[`${basePath}${path}`]}
           />

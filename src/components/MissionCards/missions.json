@@ -8,7 +8,8 @@
       "image": "aces.png",
       "path": "/aces",
       "id": "aces",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Canadian CloudSat/CALIPSO Validation Project (C3VP)",
@@ -18,7 +19,8 @@
       "image": "c3vp.png",
       "path": "/c3vp",
       "id": "c3vp",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Convection And Moisture EXperiment 3 (CAMEX3)",
@@ -28,7 +30,8 @@
       "image": "camex3.png",
       "path": "/camex3",
       "id": "camex3",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Convection And Moisture EXperiment 4 (CAMEX4)",
@@ -38,7 +41,8 @@
       "image": "camex4.png",
       "path": "/camex4",
       "id": "camex4",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Geostationary Operational Environmental Satellite-R Post Launch Test (GOES-R-PLT)",
@@ -48,7 +52,8 @@
       "image": "goes-r-plt.png",
       "path": "/goes-r-plt",
       "id": "goes-r-plt",
-      "priority": 0
+      "priority": 0,
+      "status": "Active"
     },
     {
       "name": "GPM Cold-season Precipitation Experiment (GCPEx)",
@@ -58,7 +63,8 @@
       "image": "gcpex.png",
       "path": "/gcpex",
       "id": "gcpex",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Genesis and Rapid Intensification Processes (GRIP)",
@@ -68,7 +74,8 @@
       "image": "grip.png",
       "path": "/grip",
       "id": "grip",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Hurricane and Severe Storm Sentinel (HS3)",
@@ -78,7 +85,8 @@
       "image": "hs3.png",
       "path": "/hs3",
       "id": "hs3",
-      "priority": 2
+      "priority": 2,
+      "status": "Inactive"
     },
     {
       "name": "Hydrological Cycle in the Mediterranean Experiment (HyMeX)",
@@ -88,7 +96,8 @@
       "image": "hymex.png",
       "path": "/hymex",
       "id": "hymex",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "International Collaborative Experiment for PyeongChang Olympic and Paralympics (ICE-POP) (ICE POP)",
@@ -98,7 +107,8 @@
       "image": "ice-pop.png",
       "path": "/ice-pop",
       "id": "ice-pop",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Iowa Flood Studies (IFloodS)",
@@ -108,7 +118,8 @@
       "image": "ifloods.png",
       "path": "/ifloods",
       "id": "ifloods",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Integrated Precipitation and Hydrology Experiment (IPHEx)",
@@ -118,7 +129,8 @@
       "image": "iphex.png",
       "path": "/iphex",
       "id": "iphex",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Light Precipitation Evaluation Experiment (LPVEx)",
@@ -128,7 +140,8 @@
       "image": "lpvex.png",
       "path": "/lpvex",
       "id": "lpvex",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Mid-latitude Continental Convective Clouds Experiment (MC3E)",
@@ -138,7 +151,8 @@
       "image": "mc3e.png",
       "path": "/mc3e",
       "id": "mc3e",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "NASA African Monsoon Multidisciplinary Analyses (NAMMA)",
@@ -148,7 +162,8 @@
       "image": "namma.png",
       "path": "/namma",
       "id": "namma",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "Olympic Mountains Ground Validation Experiment (OLYMPEX)",
@@ -158,7 +173,8 @@
       "image": "olympex.png",
       "path": "/olympex",
       "id": "olympex",
-      "priority": 3
+      "priority": 3,
+      "status": "Inactive"
     },
     {
       "name": "Tropical Composition, Cloud and Climate Coupling (TC4)",
@@ -168,7 +184,8 @@
       "image": "tc4.png",
       "path": "/tc4",
       "id": "tc4",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     },
     {
       "name": "The Tropical Cloud Systems and Processes (TCSP)",
@@ -178,7 +195,8 @@
       "image": "tcsp.png",
       "path": "/tcsp",
       "id": "tcsp",
-      "priority": 100
+      "priority": 100,
+      "status": "Inactive"
     }
   ]
 }

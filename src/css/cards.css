@@ -25,6 +25,7 @@
   grid-template-areas:
     "logo"
     "reference"
+    "status"
 }
 
 .mission-card-body{
@@ -59,4 +60,34 @@
   display: grid;
   grid-area: reference;
   place-items: center;
+}
+
+.mission-card-status {
+  display: grid;
+  grid-area: status;
+  gap: 0;
+  place-items: center;
+  grid-template-areas:
+    "text icon"
+}
+
+.mission-card-status-text {
+  grid-area: text;
+
+}
+
+.mission-card-status-icon {
+  grid-area: icon;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  margin-left: -30px;
+}
+
+.Active {
+  background-color:#32CD32;
+}
+
+.Inactive {
+  background-color:#FF0000;
 }
