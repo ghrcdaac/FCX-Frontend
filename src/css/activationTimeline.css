@@ -1,0 +1,176 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: #f5f5f5;
+}
+
+#container {
+	background-color: rgba(0, 0, 0, 0.2);
+	position: absolute;
+	width: 100%;
+	height: 5400px;
+	top: 96px;
+}
+
+#title {
+	margin-left: 8%; 
+	margin-right: 8%;
+	background-color: #f5f5f5;
+	color: #3f51b5;
+	text-align: center;
+	position: relative;
+}
+
+.mission-container {
+	background-color: #f5f5f5;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	padding: 32px;
+	margin-left: 8%;
+	margin-right: 8%;
+}
+
+.mission-container::before {
+	background-color: #3f51b5;
+	content: '';
+	left: calc(50% - 2px);
+	position: absolute;
+	width: 4px;
+	height: 100%;
+	max-height: 99%;
+}
+
+/* @keyframes slide {
+	from {height: 0%;}
+	to {height: calc(3% - 20px);}
+} */
+.mission-container::after {
+	background-color: lightgreen;
+	content: '';
+	left: calc(50% - 2px);
+	position: absolute;
+	width: 4px;
+	max-height: 99%;
+	/* animation-name: slide;
+	animation-timing-function: linear;
+	animation-duration: 2s;
+	animation-fill-mode: both; */
+}
+
+.mission {
+	display: flex;
+	justify-content: flex-end;
+	padding-right: 30px;
+	position: relative;
+	margin: 10px 0;
+	width: 50%;
+}
+
+.mission:nth-child(odd) {
+	align-self: flex-end;
+	justify-content: flex-start;
+	padding-left: 30px;
+	padding-right: 0;
+}
+
+.mission-data-container {
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+	border-radius: 5px;
+	background-color: white;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	padding: 15px;
+	position: relative;
+	width: 600px;
+	max-width: 100%;
+	text-align: right;
+}
+
+.mission-data-container::after {
+	content: ' ';
+	background-color: white;
+	box-shadow: 2px -1px 3px rgba(0, 0, 0, 0.2);
+	position: absolute;
+	right: -7.5px;
+	top: calc(50% - 7.5px);
+	transform: rotate(45deg);
+	width: 15px;
+	height: 15px;
+}
+
+.mission:nth-child(odd) .mission-data-container {
+	text-align: left;
+	align-items: flex-start;
+}
+
+.mission:nth-child(odd) .mission-data-container::after {
+	right: auto;
+	left: -7.5px;
+	box-shadow: -1px 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.mission-name {
+	color: #2980ba;
+	position: relative;
+	text-align: center;
+}
+
+.mission-name:hover {
+	color: #124b70;
+	cursor: pointer;
+}
+
+@keyframes color-active {
+	from {border-color: #3f51b5;}
+	to {border-color: lightgreen;}
+}
+@keyframes color-inactive {
+	from {border-color: #3f51b5;}
+	to {border-color: red;}
+}
+.mission-data-container .mission-node {
+	background-color: white;
+	border: 3px solid #3f51b5;
+	border-radius: 50%;
+	position: absolute;
+	top: calc(50% - 10px);
+	right: -40px;
+	width: 20px;
+	height: 20px;
+	z-index: 100;
+
+	animation-timing-function: linear;
+	animation-duration: 2s;
+	animation-fill-mode: both;
+}
+
+.mission:nth-child(odd) .mission-data-container .mission-node {
+	right: auto;
+	left: -40px;
+}
+
+.mission-logos {
+	width: 150px;
+	padding: 10px;
+}
+
+.mission-data {
+	display: grid;
+	gap: 1rem;
+	grid-template-areas:
+    "side mission-name-container"
+}
+
+.side {
+  grid-area: side;
+  position: relative;
+}
+
+.mission-name-container {
+  grid-area: mission-name-container;
+	text-align: center;
+}
