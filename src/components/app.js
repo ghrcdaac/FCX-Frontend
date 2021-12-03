@@ -1,7 +1,6 @@
 import React, { Component } from "react"
 import { Switch, Route } from 'react-router-dom'
 import { MemoryRouter } from "react-router";
-
 import VizContainer from "./VizContainer";
 import PageNotFound from "./pageNotFound";
 import Header from "./Header";
@@ -9,13 +8,25 @@ import MissionsCards from "./MissionCards/MissionsCards";
 import { missions } from "./MissionCards/missions.json"
 import { supportEmail } from "../config"
 import { basePath } from '../constants/enum'
+import ActivationTimeline from "./ActivationTimeline/timeline";
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      timelinePopup: false
+    };
+  }
+
+  handleMissionTimeline = () => {
+    this.setState({timelinePopup: !this.state.timelinePopup})
+  }
 
   render() {
     return (
       <MemoryRouter>
-        <Header />
+        <Header handleMissionTimeline = {this.handleMissionTimeline}/>
         <Switch>
           <Route
             exact path={`${basePath}/:id`}
@@ -43,6 +54,11 @@ class App extends Component {
             )}
           />
         </Switch>
+        {this.state.timelinePopup === true ? (
+          <ActivationTimeline handleMissionTimeline = {this.handleMissionTimeline}/>
+        ):(
+          ''
+        )}
       </MemoryRouter>
     )
   }

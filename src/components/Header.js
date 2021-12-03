@@ -1,8 +1,9 @@
+import React from "react"
 import AppBar from "@material-ui/core/AppBar"
 import Toolbar from "@material-ui/core/Toolbar"
 import Typography from "@material-ui/core/Typography"
 
-const Header = () => (
+const Header = ({handleMissionTimeline}) => (
 
   <AppBar
     position="sticky"
@@ -33,6 +34,20 @@ const Header = () => (
           Contact
         </a>
       </Typography>
+
+      <button style = {{
+        color: "white",
+        backgroundColor: "#3f51b5",
+        border: "none",
+        position: "absolute",
+        right:"20px",
+        bottom: "7px"
+      }} onClick = {() => handleMissionTimeline()}>
+        <Typography variant="h6" noWrap>
+          Coming Soon
+        </Typography>
+      </button>
+
     </Toolbar>
   </AppBar>
 )
