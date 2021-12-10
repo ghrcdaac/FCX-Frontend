@@ -20,18 +20,28 @@ const sortMissionsByTimeline = (missions) => {
     new Date(a.timeline).getTime() - new Date(b.timeline).getTime()
   ))
 }
-
-const compareMissionsByTimeline = (timeline) => {
+const updateMissionsByTimeline = (missions) => {
+  const sortedMissions = sortMissionsByTimeline(missions)
   const t = new Date()
   //const tDate = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate()
   const tDate = t.toISOString().split('T')[0];
 
-  if (new Date(tDate) >= new Date(timeline)) {
-    return true
+  for (let i = 0; i < sortedMissions.length; i++) {
+    if (new Date(tDate) >= new Date(sortedMissions[i].timeline)) {
+      sortedMissions[i].status = 'Active'
+    }
   }
-  else {
-    return false
-  }
+  return sortedMissions
 }
 
-export { missionExists, sortMissionsByKey, sortMissionsByTimeline, compareMissionsByTimeline }
+const checkLastActiveMission = (updatedMissions) => {
+  let activeMissions = []
+  for (let i = 0; i < updatedMissions.length; i++) {
+    if (updatedMissions[i].status === 'Active') {
+      activeMissions.push(updatedMissions[i])
+    }
+  }
+  return activeMissions.pop()
+}
+
+export { missionExists, sortMissionsByKey, updateMissionsByTimeline, checkLastActiveMission }
