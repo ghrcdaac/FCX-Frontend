@@ -12,61 +12,97 @@ body {
 	width: 100%;
 	height: 5400px;
 	top: 96px;
+	bottom: 0;
 }
 
-#title {
-	margin-left: 8%; 
-	margin-right: 8%;
+.mission-popup {
+	border-radius: 10px;
 	background-color: #f5f5f5;
-	color: #3f51b5;
-	text-align: center;
-	position: relative;
-}
-
-.mission-container {
-	background-color: #f5f5f5;
-	display: flex;
-	flex-direction: column;
-	position: relative;
+	border-style: solid;
+	border-color: blue;
 	padding: 32px;
+	margin-top: 2%;
+	margin-bottom: 2%;
 	margin-left: 8%;
 	margin-right: 8%;
 }
 
-.mission-container::before {
+.mission-set-container {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+.mission-container {
+	display: flex;
+	flex-direction: column;
+	position: relative;
+}
+
+@keyframes title-popup {
+	from {opacity:0; transform: translateX(-70px);}
+	to {opacity:1; transform: translateX(0px);}
+}
+#title {
+	background-color: #f5f5f5;
+	color: #3f51b5;
+	text-align: center;
+	position: relative;
+	margin-bottom: 50px;
+	animation: title-popup 3s;
+	animation-fill-mode: both;
+}
+
+@keyframes bar-popup {
+	from {height: 0%;}
+	to {height: 100%;}
+}
+.mission-set-container::before {
 	background-color: #3f51b5;
 	content: '';
 	left: calc(50% - 2px);
 	position: absolute;
 	width: 4px;
-	height: 100%;
-	max-height: 99%;
+	animation-name: bar-popup;
+	animation-timing-function: linear 2s;
+	animation-duration: 2s;
+	animation-fill-mode: both;
 }
 
-/* @keyframes slide {
-	from {height: 0%;}
-	to {height: calc(3% - 20px);}
-} */
-.mission-container::after {
-	background-color: lightgreen;
+@keyframes bar-slide {
+	from {height: 0%; background-color: blue;}
+	to {height: calc(100%); background-color: lightgreen;}
+}
+@keyframes last-bar-slide {
+	from {height: 0%; background-color: blue;}
+	to {height: calc(50%); background-color: lightgreen;}
+}
+.mission-bar-active {
 	content: '';
-	left: calc(50% - 2px);
+	right: calc(0% - 2px);
 	position: absolute;
 	width: 4px;
-	max-height: 99%;
-	/* animation-name: slide;
 	animation-timing-function: linear;
 	animation-duration: 2s;
-	animation-fill-mode: both; */
+	animation-fill-mode: both;
+	animation-delay: 1s;
+}
+.mission:nth-child(odd) .mission-bar-active {
+	right: auto;
+	left: calc(0% - 2px);
 }
 
+@keyframes mission-popup {
+	from {opacity:0; transform: translateY(-70px);}
+	to {opacity:1; transform: translateY(0px);}
+}
 .mission {
 	display: flex;
 	justify-content: flex-end;
 	padding-right: 30px;
-	position: relative;
-	margin: 10px 0;
 	width: 50%;
+	animation: mission-popup 3s;
+	animation-fill-mode: both;
 }
 
 .mission:nth-child(odd) {
@@ -142,11 +178,10 @@ body {
 	width: 20px;
 	height: 20px;
 	z-index: 100;
-
 	animation-timing-function: linear;
 	animation-duration: 2s;
 	animation-fill-mode: both;
-}
+} 
 
 .mission:nth-child(odd) .mission-data-container .mission-node {
 	right: auto;
@@ -172,5 +207,5 @@ body {
 
 .mission-name-container {
   grid-area: mission-name-container;
-	text-align: center;
+  text-align: center;
 }
