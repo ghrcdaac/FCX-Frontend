@@ -10,6 +10,10 @@ This repository contains code for GHRC's Field Campaign Explorer (FCX) GUI (fron
 - Install Yarn https://classic.yarnpkg.com/en/docs/cli/install/
 - Install AWS CLI https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html
 
+ Setup the env variables based on `src/config.js` 
+ Note: The Access tokens and base URL locations must be specified for the application to work.
+
+ 
 ## Running
 
 To run, execute following commands
