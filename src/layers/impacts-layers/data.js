@@ -34,6 +34,15 @@ const cpl_er2       = [
   "2020-01-15 17:55:40	2020-01-15 21:33:13",
 ]
 
+const hiwrap_er2    = [
+  "2020-02-27 07:43:38	2020-02-27 14:22:38",
+  "2020-02-25 20:29:29	2020-02-26 03:01:12",
+  "2020-02-07 12:22:21	2020-02-07 18:00:45",
+  "2020-02-05 19:23:21	2020-02-06 00:48:35",
+  "2020-02-01 11:33:16	2020-02-01 15:52:57",
+  "2020-01-25 18:19:52	2020-01-26 00:30:40",
+]
+
 const defaultCamera = {
 
 }
@@ -85,4 +94,15 @@ const campaign = "IMPACTS"
 const description = "IMPACTS will fly a complementary suite of remote sensing and in-situ instruments for three 6-week deployments (2020-2022) on NASA’s ER-2 high-altitude aircraft and P-3 cloud-sampling aircraft."
 
 
-export { cpl_er2, crs_er2, lip_er2, defaultCamera, legends, links, dois, campaign, description }
+export {
+  cpl_er2,
+  crs_er2,
+  lip_er2,
+  hiwrap_er2,
+  defaultCamera,
+  legends,
+  links,
+  dois,
+  campaign,
+  description
+}

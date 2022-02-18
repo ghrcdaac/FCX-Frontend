@@ -3,6 +3,7 @@ import {
   cpl_er2,
   crs_er2,
   lip_er2,
+  hiwrap_er2,
   defaultCamera,
   legends,
   links,
@@ -28,6 +29,11 @@ generator.addLayer({
   instrument: 'cpl',
   platform: 'air-er2'
 }, cpl_er2)
+
+generator.addLayer({
+  instrument: 'hiwrap',
+  platform: 'air-er2'
+}, hiwrap_er2)
 
 const layers = generator.generateLayers()
 

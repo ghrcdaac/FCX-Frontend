@@ -7,6 +7,17 @@ class LayerGenerator{
     this.dates = {}
     this.layerMetaData = {}
   }
+
+  getHIWRAP = ({ date }) => {
+    return {
+      displayName: "High Altitude Imaging Wind and Rain Airborne Profiler",
+      variableName: "Radar Reflectivity",
+      unit: "dBZ",
+      type: "instrument",
+      displayMechanism: "3dtile",
+      titleLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/HIWRAP/tilest.json`,
+    }
+  }
   
   getCRS = ({ date }) => {
     return {
@@ -46,7 +57,8 @@ class LayerGenerator{
     const mapping = {
       'crs': this.getCRS,
       'cpl': this.getCPL,
-      'lip': this.getLIP
+      'lip': this.getLIP,
+      'hiwrap': this.getHIWRAP,
     }
 
     return mapping[instrument]
