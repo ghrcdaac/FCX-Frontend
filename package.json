@@ -11,6 +11,7 @@
         "animate.css": "^4.1.0",
         "animate.css-react": "^1.0.0",
         "cesium": "^1.72.0",
+        "dotenv": "^16.0.0",
         "eventemitter3": "^4.0.4",
         "history": "^5.0.0",
         "interactjs": "^1.6.2",
