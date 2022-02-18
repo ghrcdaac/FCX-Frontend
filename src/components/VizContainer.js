@@ -21,7 +21,6 @@ const VizContainer = (props) => {
     if(!missionExists(props.missions, id)) return
 
     const campaign = getCampaignInfo(id)
-    console.log(campaign)
     if(campaign){
       setValidationStatus({
         status: status.success,
