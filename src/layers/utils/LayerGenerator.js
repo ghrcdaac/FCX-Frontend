@@ -1,4 +1,5 @@
 import { dataBaseUrl } from "../../config"
+import { getLayerDate, compareDate, getDateString } from "./layerDates"
 
 class LayerGenerator{
 
@@ -8,14 +9,27 @@ class LayerGenerator{
     this.layerMetaData = {}
   }
 
-  getHIWRAP = ({ date }) => {
+  getFlightTrack = ({ date, flight }) => {
+    const fileName = flight.toLowerCase() === 'er2' ?
+        `FCX_${this.fieldCampaignName}_MetNav_ER2_${getDateString(date)}_R0.czml` :
+        `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
+
     return {
-      displayName: "High Altitude Imaging Wind and Rain Airborne Profiler",
+      displayName: `Flight Track ${flight}`,
+      type: "track",
+      displayMechanism: "czml",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
+    }
+  }
+
+  getHIWRAP = ({ date, HiWRAPVar }) => {
+    return {
+      displayName: `High Altitude Imaging Wind and Rain Airborne Profiler ${HiWRAPVar}`,
       variableName: "Radar Reflectivity",
       unit: "dBZ",
       type: "instrument",
       displayMechanism: "3dtile",
-      titleLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/HIWRAP/tilest.json`,
+      tileLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/hiwrap/${HiWRAPVar}_dBZe/tileset.json`,
     }
   }
   
@@ -26,7 +40,7 @@ class LayerGenerator{
       unit: "dBZ",
       type: "instrument",
       displayMechanism: "3dtile",
-      titleLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/crs/tilest.json`,
+      tileLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/crs/tileset.json`,
     }
   }
   
@@ -38,7 +52,7 @@ class LayerGenerator{
       unit: "dBZ",
       type: "instrument",
       displayMechanism: "3dtile",
-      titleLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/cpl/cpl_atb/tileset.json`,
+      tileLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/cpl/cpl_atb/tileset.json`,
     }
   }
   
@@ -49,7 +63,7 @@ class LayerGenerator{
       unit: "kV/m",
       type: "instrument",
       displayMechanism: "czml",
-      titleLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/LIP/LIP.czml`,
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/lip/FCX_${this.fieldCampaignName}_LIP_ER2_${getLayerDate(date)}.czml`,
     }
   }
 
@@ -59,6 +73,7 @@ class LayerGenerator{
       'cpl': this.getCPL,
       'lip': this.getLIP,
       'hiwrap': this.getHIWRAP,
+      'flightTrack': this.getFlightTrack, 
     }
 
     return mapping[instrument]
@@ -71,7 +86,6 @@ class LayerGenerator{
     const generator = this.mapInstrumentToGenerator(instrument)
 
     return {
-      ...generator({ date, platform }),
       date,
       shortName: instrument,
       layerId: `${date}-${instrument}`,
@@ -79,6 +93,7 @@ class LayerGenerator{
       start: `${date}T${start}Z`,
       end: `${endDate ? endDate : date}T${end}Z`,
       platform,
+      ...generator({ date, ...rest }),
     }
   }
 
@@ -134,11 +149,14 @@ class LayerGenerator{
         layers[date] = layers[date] ? [...layers[date], layer]: [layer]
       })
     })
+    
     return Object.keys(layers).map((date) => {
       return {
         date,
         items: layers[date]
       }
+    }).sort((a, b) => {
+      return compareDate(a.date, b.date)
     })
   }
 }

@@ -1823,6 +1823,7 @@
       currentTime: { dayNumber: 2457855, secondsOfDay: 21126.767623933905 },
     },
   }
+  
   const goes_r_plt_campaign = {
     title: "GOES-R PLT Field Campaign",
     logo: `${dataBaseUrl}/fieldcampaign/goesrplt/logo/GOES-R_logo_small.png`,

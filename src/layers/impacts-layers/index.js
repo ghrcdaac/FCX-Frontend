@@ -4,12 +4,14 @@ import {
   crs_er2,
   lip_er2,
   hiwrap_er2,
+  flight_p3b,
+  flight_er2,
   defaultCamera,
   legends,
   links,
   dois,
   campaign,
-  description
+  description,
 } from "./data"
 import LayerGenerator from '../utils/LayerGenerator'
 
@@ -32,8 +34,27 @@ generator.addLayer({
 
 generator.addLayer({
   instrument: 'hiwrap',
-  platform: 'air-er2'
+  platform: 'air-er2',
+  HiWRAPVar: 'Ku'
 }, hiwrap_er2)
+
+generator.addLayer({
+  instrument: 'hiwrap',
+  platform: 'air-er2',
+  HiWRAPVar: 'Ka'
+}, hiwrap_er2)
+
+generator.addLayer({
+  instrument: 'flightTrack',
+  platform: 'air-er2',
+  flight: 'ER2'
+}, flight_er2)
+
+generator.addLayer({
+  instrument: 'flightTrack',
+  platform: 'air-p3b',
+  flight: 'P3'
+}, flight_p3b)
 
 const layers = generator.generateLayers()
 

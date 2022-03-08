@@ -3,11 +3,14 @@ import { Redirect } from "react-router-dom"
 
 import Viz from "./Viz"
 
-import { getCampaignInfo } from "../layers/layers"
+import { getCampaignInfo, getDefaultLayers } from "../layers/layers"
 import { deepFreeze } from "../helpers/objectHelpers"
 import PageNotFound from "./pageNotFound"
 import { status, failure, notFoundPath } from "../constants/enum"
 import { missionExists } from "../helpers/apiHelpers"
+
+import store from "../state/store"
+import allActions from "../state/actions"
 
 const VizContainer = (props) => {
   const id = props.location.pathname.split('/').pop()
@@ -22,6 +25,10 @@ const VizContainer = (props) => {
 
     const campaign = getCampaignInfo(id)
     if(campaign){
+      store.dispatch(
+        allActions.listActions.addDefaultSelectedLayers(
+            getDefaultLayers(id)
+        ))
       setValidationStatus({
         status: status.success,
         details: null
