@@ -33,25 +33,25 @@ generator.addLayer({
 }, cpl_er2)
 
 generator.addLayer({
-  instrument: 'hiwrap',
+  instrument: 'hiwrap-Ku',
   platform: 'air-er2',
   HiWRAPVar: 'Ku'
 }, hiwrap_er2)
 
 generator.addLayer({
-  instrument: 'hiwrap',
+  instrument: 'hiwrap-Ka',
   platform: 'air-er2',
   HiWRAPVar: 'Ka'
 }, hiwrap_er2)
 
 generator.addLayer({
-  instrument: 'flightTrack',
+  instrument: 'flightTrack-er2',
   platform: 'air-er2',
   flight: 'ER2'
 }, flight_er2)
 
 generator.addLayer({
-  instrument: 'flightTrack',
+  instrument: 'flightTrack-p3',
   platform: 'air-p3b',
   flight: 'P3'
 }, flight_p3b)

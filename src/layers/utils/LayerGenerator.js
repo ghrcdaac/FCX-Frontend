@@ -9,7 +9,7 @@ class LayerGenerator{
     this.layerMetaData = {}
   }
 
-  getFlightTrack = ({ date, flight }) => {
+  getFlightTrack = ({ date, url, flight }) => {
     const fileName = flight.toLowerCase() === 'er2' ?
         `FCX_${this.fieldCampaignName}_MetNav_ER2_${getDateString(date)}_R0.czml` :
         `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
@@ -18,7 +18,7 @@ class LayerGenerator{
       displayName: `Flight Track ${flight}`,
       type: "track",
       displayMechanism: "czml",
-      czmlLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
+      czmlLocation: url ? url : `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
     }
   }
 
@@ -72,16 +72,18 @@ class LayerGenerator{
       'crs': this.getCRS,
       'cpl': this.getCPL,
       'lip': this.getLIP,
-      'hiwrap': this.getHIWRAP,
-      'flightTrack': this.getFlightTrack, 
+      'hiwrap-Ka': this.getHIWRAP,
+      'hiwrap-Ku': this.getHIWRAP,
+      'flightTrack-er2': this.getFlightTrack, 
+      'flightTrack-p3': this.getFlightTrack, 
     }
-
+    
     return mapping[instrument]
   }
 
   getLayer = (
     {instrument, platform, ...rest},
-    date, start, endDate, end
+    date, start, endDate, end, url
   ) => {
     const generator = this.mapInstrumentToGenerator(instrument)
 
@@ -93,7 +95,7 @@ class LayerGenerator{
       start: `${date}T${start}Z`,
       end: `${endDate ? endDate : date}T${end}Z`,
       platform,
-      ...generator({ date, ...rest }),
+      ...generator({ date, url, ...rest }),
     }
   }
 
@@ -150,14 +152,18 @@ class LayerGenerator{
       })
     })
     
-    return Object.keys(layers).map((date) => {
+    const generatedLayer = Object.keys(layers).map((date) => {
       return {
         date,
         items: layers[date]
       }
-    }).sort((a, b) => {
+    }).sort((b, a) => {
       return compareDate(a.date, b.date)
     })
+
+    console.log(generatedLayer)
+
+    return generatedLayer
   }
 }
 

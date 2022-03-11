@@ -19,7 +19,7 @@ export const compareDate = (d1, d2, deliminator='-') => {
   const i_d2 = dtoi(d2)
 
   return  i_d1 ===  i_d2  ? 0 :
-          i_d1 >    i_d2  ? -1 :
-                            1
+          i_d1 >    i_d2  ? 1 :
+                            -1
 
 }
