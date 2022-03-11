@@ -19,40 +19,40 @@ const generator = new LayerGenerator(campaign)
 
 generator.addLayer({
   instrument: 'crs',
-  platform: 'air-er2'
+  platform: 'air'
 }, crs_er2)
 
 generator.addLayer({
   instrument: 'lip',
-  platform: 'air-er2'
+  platform: 'air'
 }, lip_er2)
 
 generator.addLayer({
   instrument: 'cpl',
-  platform: 'air-er2'
+  platform: 'air'
 }, cpl_er2)
 
 generator.addLayer({
   instrument: 'hiwrap-Ku',
-  platform: 'air-er2',
+  platform: 'air',
   HiWRAPVar: 'Ku'
 }, hiwrap_er2)
 
 generator.addLayer({
   instrument: 'hiwrap-Ka',
-  platform: 'air-er2',
+  platform: 'air',
   HiWRAPVar: 'Ka'
 }, hiwrap_er2)
 
 generator.addLayer({
   instrument: 'flightTrack-er2',
-  platform: 'air-er2',
+  platform: 'air',
   flight: 'ER2'
 }, flight_er2)
 
 generator.addLayer({
   instrument: 'flightTrack-p3',
-  platform: 'air-p3b',
+  platform: 'air',
   flight: 'P3'
 }, flight_p3b)
 
@@ -60,7 +60,8 @@ const layers = generator.generateLayers()
 
 const impacts_campaign = {
   title: `${campaign} Field Campaign`,
-  logo: `${dataBaseUrl}/fieldcampaign/${campaign.toLowerCase()}/logo/${campaign.toLowerCase()}_logo_small.png`,
+  // logo: `${dataBaseUrl}/fieldcampaign/${campaign.toLowerCase()}/logo/${campaign.toLowerCase()}_logo_small.png`,
+  logo: `missions-logos/impacts.png`,
   description,
   links,
   dois,

@@ -48,11 +48,11 @@ const flight_er2    = [
   // "2020-02-27 07:21:29	2020-02-27 15:17:57",
   // "2020-02-25 20:06:39	2020-02-26 03:57:48",
   // "2020-02-23 16:31:39	2020-02-23 19:05:32",
-  "2020-02-07 12:04:21	2020-02-07 18:52:35",
-  "2020-02-05 18:59:12	2020-02-06 01:35:42",
-  "2020-02-01 11:09:00	2020-02-01 17:09:20",
-  "2020-01-25 17:49:01	2020-01-26 01:25:55",
-  "2020-01-18 17:14:58	2020-01-18 21:07:18",
+  "2020-02-07 12:04:21	2020-02-07 18:52:35 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-07/er2/FCX_IMPACTS_MetNav_ER2_20200207_R0.czml",
+  "2020-02-05 18:59:12	2020-02-06 01:35:42 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-05/er2/FCX_IMPACTS_MetNav_ER2_20200205_R0.czml",
+  "2020-02-01 11:09:00	2020-02-01 17:09:20 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-01/er2/FCX_IMPACTS_MetNav_ER2_20200201_R0.czml",
+  "2020-01-25 17:49:01	2020-01-26 01:25:55 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-01-25/er2/FCX_IMPACTS_MetNav_ER2_20200125_R0.czml",
+  "2020-01-18 17:14:58	2020-01-18 21:07:18 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-01-18/er2/FCX_IMPACTS_MetNav_ER2_20200118_R0.czml",
   // "2020-01-15 17:29:01	2020-01-15 22:37:00",
 ]
 
@@ -78,8 +78,9 @@ const legends       = {
   crs: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
   cpl: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
   lip: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lip_legend.png`, color: "red" },
-  track:       { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/flighttrack_legend.png`, color: "darkgreen" },
-
+  track: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/flighttrack_legend.png`, color: "darkgreen" },
+  'hiwrap-Ku': {},
+  'hiwrap-Ka': {},
 }
 
 const links         = [
