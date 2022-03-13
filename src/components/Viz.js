@@ -40,7 +40,7 @@ import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { Dock, viewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
-import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
+// import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 class Viz extends Component {
     
@@ -394,7 +394,7 @@ class Viz extends Component {
     componentDidMount() {
         const campaign = (() => this.props.campaign)()
 
-        printCameraAnglesInterval(viewer)
+        // printCameraAnglesInterval(viewer)
         
         if (!viewer) {
             alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)

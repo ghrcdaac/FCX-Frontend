@@ -162,8 +162,6 @@ class LayerGenerator{
       return compareDate(a.date, b.date)
     })
 
-    console.log(generatedLayer)
-
     return generatedLayer
   }
 }
