@@ -74,6 +74,7 @@ class LayerGenerator{
       'lip': this.getLIP,
       'hiwrap-Ka': this.getHIWRAP,
       'hiwrap-Ku': this.getHIWRAP,
+      'hiwrap': this.getHIWRAP,
       'flightTrack-er2': this.getFlightTrack, 
       'flightTrack-p3': this.getFlightTrack, 
     }
