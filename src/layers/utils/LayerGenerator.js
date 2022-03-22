@@ -9,6 +9,17 @@ class LayerGenerator{
     this.layerMetaData = {}
   }
 
+  getEXRAD = ({date}) => {
+    return {
+      displayName: "ER-2 X-Band Doppler Radar",
+      variableName: "Wind",
+      unit: "dBZ",
+      type: "instrument",
+      displayMechanism: "3dtile",
+      tileLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/exrad/X_dBZe/tileset.json`,
+    }
+  }
+
   getFlightTrack = ({ date, url, flight }) => {
     const fileName = flight.toLowerCase() === 'er2' ?
         `FCX_${this.fieldCampaignName}_MetNav_ER2_${getDateString(date)}_R0.czml` :
@@ -71,6 +82,7 @@ class LayerGenerator{
     const mapping = {
       'crs': this.getCRS,
       'cpl': this.getCPL,
+      'exrad': this.getEXRAD,
       'lip': this.getLIP,
       'hiwrap-Ka': this.getHIWRAP,
       'hiwrap-Ku': this.getHIWRAP,

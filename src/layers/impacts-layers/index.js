@@ -2,6 +2,7 @@ import { dataBaseUrl } from "../../config"
 import {
   cpl_er2,
   crs_er2,
+  exrad_er2,
   lip_er2,
   hiwrap_er2,
   flight_p3b,
@@ -21,6 +22,11 @@ generator.addLayer({
   instrument: 'crs',
   platform: 'air'
 }, crs_er2)
+
+generator.addLayer({
+  instrument: 'exrad',
+  platform: 'air'
+}, exrad_er2)
 
 generator.addLayer({
   instrument: 'lip',
