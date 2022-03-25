@@ -23,3 +23,16 @@ export const compareDate = (d1, d2, deliminator='-') => {
                             -1
 
 }
+
+export const compareISO8601Date = (d1, d2) => {
+  const delta = new Date(d1) - new Date(d2)
+  return  delta ===  0  ? 0 :
+          delta >    0  ? 1 :
+                          -1
+}
+
+export const addTimeToISODate = (date, seconds) => {
+  const currentDate = new Date(date)
+  currentDate.setSeconds(currentDate.getSeconds() + seconds)
+  return currentDate.toISOString()
+}

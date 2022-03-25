@@ -40,6 +40,8 @@ import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { Dock, viewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
+import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/cesium/dates' 
+import { addTimeToISODate } from "../layers/utils/layerDates"
 // import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 class Viz extends Component {
@@ -102,8 +104,9 @@ class Viz extends Component {
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
             const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
             const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
-            const viewerStart = `${layerDate}T00:00:00Z`
-            const viewerEnd = `${layerDate}T23:59:59Z`
+            
+            const viewerStart = addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+            const viewerEnd = addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
             if (layerDate !== viewerDate) {
                 // remove layers with other dates
@@ -411,7 +414,7 @@ class Viz extends Component {
                 // we can raise an event here for imagery ${layer.imageryProvider.url} loaded
             }
         })
-
+      
         viewer.clock.clockRange = ClockRange.LOOP_STOP
         viewer.clock.multiplier = 10
 
