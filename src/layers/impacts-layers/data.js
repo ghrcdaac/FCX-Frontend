@@ -361,15 +361,15 @@ const legends = {
   },
   "hiwrap-Ka": {
     url: `legends/impacts/hiwrap_legend.png`,
-    color: "lightblue",
+    color: "magenta",
   },
   "hiwrap-Ku": {
     url: `legends/impacts/hiwrap_legend.png`,
-    color: "lightblue",
+    color: "magenta",
   },
   exrad: {
     url: `legends/impacts/exrad_legend.png`,
-    color: "lightgreen",
+    color: "magenta",
   }
 }
 
