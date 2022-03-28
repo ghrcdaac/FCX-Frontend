@@ -10,6 +10,10 @@ This repository contains code for GHRC's Field Campaign Explorer (FCX) GUI (fron
 - Install Yarn https://classic.yarnpkg.com/en/docs/cli/install/
 - Install AWS CLI https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html
 
+ Setup the env variables based on `src/config.js` 
+ Note: The Access tokens and base URL locations must be specified for the application to work.
+
+
 ## Running
 
 To run, execute following commands
@@ -54,3 +58,5 @@ And then goto to `http://localhost:8000/fcx/`
 - The layers that are currently shown are encoded in `layers.js` file. In future, we need to dynamically change values in this file or create a way to manage a separate layer file for each field campaign.
 
 - Currently, the compiler is throwing erro 'Critical dependency: require function is used in a way in which dependencies cannot be statically extracted' for './node_modules/cesium/Source/Core/buildModuleUrl.js' file. Pleas see for https://github.com/CesiumGS/cesium/issues/8401 for further reference. How to resolve this error is still pending.
+
+- Initial code developed by Ajinkya Kulkarni
