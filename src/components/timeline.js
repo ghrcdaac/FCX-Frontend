@@ -4,6 +4,8 @@ import moment from "moment"
 import { getLayer } from "../helpers/utils"
 import Timeline from "../customized-components/react-timeline-9000/src/timeline"
 import "../customized-components/react-timeline-9000/src/style.css"
+import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/cesium/dates' 
+import { addTimeToISODate } from "../layers/utils/layerDates"
 
 //https://github.com/BHP-DevHub/react-timeline-9000
 //https://codesandbox.io/s/op9tg
@@ -32,8 +34,8 @@ function FcxTimeline({ campaign }) {
 
     if (!layerDate || layerDate !== layer.date) {
       let layerDate = layer.date
-      const viewerStart = `${layerDate}T00:00:00Z`
-      const viewerEnd = `${layerDate}T23:59:59Z`
+      const viewerStart = addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+      const viewerEnd = addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
       startDate = moment.utc(viewerStart)
       endDate = moment.utc(viewerEnd)
     }

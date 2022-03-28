@@ -30,16 +30,19 @@ import {
     Color as ColorCesium,
 } from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
+import { isEmpty } from "lodash"
 
+import { supportEmail } from "../config"
+import { getColorExpression, getShowExpression, loadData, getTimes, mousePosition } from "./layerFunctions"
 import { checkPath } from "../helpers/path"
 import emitter from "../helpers/event"
+import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
 import { Dock, viewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
-import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
-import { supportEmail } from "../config"
-import { getColorExpression, getShowExpression, loadData, getTimes, mousePosition } from "./layerFunctions"
-import { isEmpty } from "lodash"
+import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/cesium/dates' 
+import { addTimeToISODate } from "../layers/utils/layerDates"
+// import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 class Viz extends Component {
     
@@ -98,12 +101,12 @@ class Viz extends Component {
 
         for (const [, selectedLayerId] of selectedLayers.entries()) {
             const layer = getLayer(selectedLayerId, campaign)
-
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
             const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
             const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
-            const viewerStart = `${layerDate}T00:00:00Z`
-            const viewerEnd = `${layerDate}T23:59:59Z`
+            
+            const viewerStart = addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+            const viewerEnd = addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
             if (layerDate !== viewerDate) {
                 // remove layers with other dates
@@ -392,9 +395,10 @@ class Viz extends Component {
     }
     
     componentDidMount() {
-        const getCampaign = () => this.props.campaign
-        const campaign = getCampaign()
+        const campaign = (() => this.props.campaign)()
 
+        // printCameraAnglesInterval(viewer)
+        
         if (!viewer) {
             alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
         }
@@ -410,7 +414,7 @@ class Viz extends Component {
                 // we can raise an event here for imagery ${layer.imageryProvider.url} loaded
             }
         })
-
+      
         viewer.clock.clockRange = ClockRange.LOOP_STOP
         viewer.clock.multiplier = 10
 
