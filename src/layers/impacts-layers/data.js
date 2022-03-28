@@ -344,7 +344,7 @@ const defaultCamera = {
 
 const legends = {
   crs: {
-    url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`,
+    url: `legends/impacts/crs_legend.png`,
     color: "magenta"
   },
   cpl: {
@@ -359,8 +359,18 @@ const legends = {
     url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/flighttrack_legend.png`,
     color: "darkgreen"
   },
-  // 'hiwrap-Ku': {},
-  // 'hiwrap-Ka': {},
+  "hiwrap-Ka": {
+    url: `legends/impacts/hiwrap_legend.png`,
+    color: "lightblue",
+  },
+  "hiwrap-Ku": {
+    url: `legends/impacts/hiwrap_legend.png`,
+    color: "lightblue",
+  },
+  exrad: {
+    url: `legends/impacts/exrad_legend.png`,
+    color: "lightgreen",
+  }
 }
 
 const links = [
