@@ -11,6 +11,7 @@ class LayerGenerator{
 
   getEXRAD = ({date}) => {
     return {
+      addOnTickEventListener: true,
       displayName: "ER-2 X-Band Doppler Radar",
       variableName: "Wind",
       unit: "dBZ",
@@ -22,7 +23,7 @@ class LayerGenerator{
 
   getFlightTrack = ({ date, url, flight }) => {
     const fileName = flight.toLowerCase() === 'er2' ?
-        `FCX_${this.fieldCampaignName}_MetNav_ER2_${getDateString(date)}_R0.czml` :
+        `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` :
         `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
 
     return {
@@ -35,6 +36,7 @@ class LayerGenerator{
 
   getHIWRAP = ({ date, HiWRAPVar }) => {
     return {
+      addOnTickEventListener: true,
       displayName: `High Altitude Imaging Wind and Rain Airborne Profiler ${HiWRAPVar}`,
       variableName: "Radar Reflectivity",
       unit: "dBZ",
@@ -46,6 +48,7 @@ class LayerGenerator{
   
   getCRS = ({ date }) => {
     return {
+      addOnTickEventListener: true,
       displayName: "Cloud Radar System",
       variableName: "Radar Reflectivity",
       unit: "dBZ",
@@ -69,10 +72,12 @@ class LayerGenerator{
   
   getLIP = ({ date }) => {
     return {
+      addOnTickEventListener: true,
       displayName: "Lightning Instrument Package",
       variableName: "Electric Field",
       unit: "kV/m",
       type: "instrument",
+      platform: "air",
       displayMechanism: "czml",
       czmlLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/lip/FCX_${this.fieldCampaignName}_LIP_ER2_${getLayerDate(date)}.czml`,
     }
