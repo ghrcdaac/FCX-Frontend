@@ -197,6 +197,17 @@
       "id": "tcsp",
       "priority": 100,
       "status": "Inactive"
+    },
+    {
+      "name": "Investigation of Microphysics and Precipitation for Atlantic Coast-Threatening Snowstorms (IMPACTS)",
+      "description": "IMPACTS will fly a complementary suite of remote sensing and in-situ instruments for three 6-week deployments (2020-2022) on NASA’s ER-2 high-altitude aircraft and P-3 cloud-sampling aircraft.",
+      "dates": [],
+      "landingPageURL": "http://dx.doi.org/10.5067/IMPACTS/DATA101",
+      "image": "impacts.png",
+      "path": "/impacts",
+      "id": "impacts",
+      "priority": 1,
+      "status": "Active"
     }
   ]
 }
