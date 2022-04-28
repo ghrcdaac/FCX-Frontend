@@ -1,4 +1,3 @@
-import { dataBaseUrl } from "../../config"
 import {
   cpl_er2,
   crs_er2,
@@ -13,6 +12,7 @@ import {
   dois,
   campaign,
   description,
+  defaultDate
 } from "./data"
 import LayerGenerator from '../utils/LayerGenerator'
 
@@ -64,6 +64,15 @@ generator.addLayer({
 
 const layers = generator.generateLayers()
 
+const defaultLayers = [
+  "2020-02-07-exrad",
+  "2020-02-07-hiwrap-Ku",
+  "2020-02-07-hiwrap-Ka",
+  "2020-02-07-lip",
+  "2020-02-07-flightTrack-er2",
+  "2020-02-07-flightTrack-p3",
+]
+
 const impacts_campaign = {
   title: `${campaign} Field Campaign`,
   // logo: `${dataBaseUrl}/fieldcampaign/${campaign.toLowerCase()}/logo/${campaign.toLowerCase()}_logo_small.png`,
@@ -74,6 +83,8 @@ const impacts_campaign = {
   layers,
   legends,
   defaultCamera,
+  defaultLayers,
+  defaultDate,
 }
 
 export default impacts_campaign

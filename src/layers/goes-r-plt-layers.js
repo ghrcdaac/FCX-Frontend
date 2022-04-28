@@ -1823,6 +1823,18 @@
       currentTime: { dayNumber: 2457855, secondsOfDay: 21126.767623933905 },
     },
   }
+
+  const defaultLayers = [
+    "2017-05-17-abi-13",
+    "2017-05-17-track15",
+    "2017-05-17-glp",
+    "2017-05-17-isslis",
+    "2017-05-17-crs",
+    "2017-05-17-fegs",
+    "2017-05-17-lip"
+  ]
+
+  const defaultDate = "2017-05-17"
   
   const goes_r_plt_campaign = {
     title: "GOES-R PLT Field Campaign",
@@ -1962,7 +1974,8 @@
       isslis:         { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/isslis_legend.png`, color: "cyan" },
       goesrpltoklma:   { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_legend.png`, color: "lightred" },
     },
-
+    defaultLayers,
+    defaultDate,
     defaultCamera: defaultCamera,
   }
   

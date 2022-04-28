@@ -406,7 +406,7 @@ const dois = [
 
 const campaign = "IMPACTS"
 const description = "IMPACTS will fly a complementary suite of remote sensing and in-situ instruments for three 6-week deployments (2020-2022) on NASA’s ER-2 high-altitude aircraft and P-3 cloud-sampling aircraft."
-
+const defaultDate = "2020-02-07"
 
 export {
   cpl_er2,
@@ -421,5 +421,6 @@ export {
   links,
   dois,
   campaign,
-  description
+  description,
+  defaultDate
 }

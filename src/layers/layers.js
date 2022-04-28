@@ -26,9 +26,9 @@ const getDatesMap = () => {
   return datesMap
 }
 
-const getDefaultLayers = (campaign) => campaigns[campaign].layers[0].items.map(item => {
-  return item.layerId
-})
+const getDefaultLayers = (campaign) => {
+  return campaigns[campaign].defaultLayers
+}
 
 export default campaigns
 export {

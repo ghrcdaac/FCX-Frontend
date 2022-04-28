@@ -1,4 +1,4 @@
-const selectedLayers = (state = ["a"], action) => {
+const selectedLayers = (state = null, action) => {
   if (action.type === "ADD_DEFAULT_SELECTED_LAYERS"){
     return [...action.defaultSelectedLayers]
   }

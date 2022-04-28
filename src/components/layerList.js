@@ -141,13 +141,8 @@ export default function LayerList({ campaign }) {
       )
     }
 
-    let expanded = false
-    if (itemIndex === 0) {
-      expanded = true
-    }
-
     dates.push(
-      <Accordion key={"panel" + itemIndex} defaultExpanded={expanded}>
+      <Accordion key={"panel" + itemIndex} defaultExpanded={campaign.defaultDate === layerItems.date}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" key={"summary-panel" + itemIndex}>
           <div style={{ width: "100%" }}>
             <Box display="flex" justifyContent="center" m={1} p={1}>
