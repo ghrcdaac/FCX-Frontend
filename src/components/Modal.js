@@ -17,9 +17,8 @@ display: flex;
 justify-content: center;
 align-items: center;
 z-index:999;
-bottom:100vh;
 border-radius: 12px;
-bottom:62.5rem;
+bottom:90vh;
 `
 const Button = styled.button`
 position:absolute;
@@ -115,9 +114,6 @@ const Modal = (props) =>{
                 {geoJson.fieldCampaignImages[index].type === 'video' &&
                 <div style={{justifyContent:'center', alignItems:'center', maxHeight:'100%', maxWidth:'100%'}}>
                     <ReactPlayer url={geoJson.fieldCampaignImages[index].imageURL} controls />
-                    {/* <video width="320" height="240" controls>
-                        <source src={geoJson.fieldCampaignImages[index].imageURL} type="video/mp4" />
-                    </video> */}
                 </div>                    
                 }                
                 <Backward onClick={backwardHandler} title="Previous">&#8249;</Backward>

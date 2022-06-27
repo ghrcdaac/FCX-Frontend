@@ -21,6 +21,7 @@ import AccordionDetails from "@material-ui/core/AccordionDetails"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import moment from "moment"
 import allActions from "../state/actions"
+import {BsCardImage} from 'react-icons/bs'
 
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 import { Dock, viewer } from "./dock"
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+let imageToggle = false;
 export default function LayerList({ campaign }) {
   const classes = useStyles()
   const state = useSelector((state) => state)
@@ -152,7 +154,6 @@ export default function LayerList({ campaign }) {
       expanded = true
     }
 
-    let imageToggle = false;
     const changeHandler = (e) =>{
       imageToggle = !imageToggle;
       if(imageToggle){
@@ -195,10 +196,13 @@ export default function LayerList({ campaign }) {
             </Box>
           </div>
         </AccordionSummary>
-        <div style={{display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', height:'100px', width:'100%'}}>
+        {layerItems.date === '2017-05-17' && <div style={{display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', height:'100px', width:'100%'}}>
           <div style={{height:'100%',display:'flex', width:'90%',justifyContent:'center', alignItems:'center', textAlign:'center', border:'1px solid #dfdede', borderRadius:'5px'}}>
             <div style={{width:'75%'}}>
-              <div style={{fontSize:'20px', marginTop:'10px'}}>Image Viewer</div>
+              <div style={{display:'flex', marginTop:'1rem', marginLeft:'20px'}}>
+                <div style={{marginTop:'1rem', marginRight:'30px'}}><BsCardImage /></div>
+                <div style={{fontSize:'20px', marginTop:'10px'}}>Image Viewer</div>
+              </div>
               <h6>Toggle to enable/disable Markers</h6>
             </div>
             <div style={{width:'25%', marginBottom:'50px'}}>
@@ -208,7 +212,7 @@ export default function LayerList({ campaign }) {
               />
             </div>
           </div>
-        </div>
+        </div>}
         <AccordionDetails key={"details-panel" + itemIndex}>
           <List key={itemIndex} className={classes.root}>
             {layers}
