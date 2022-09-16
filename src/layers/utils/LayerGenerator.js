@@ -22,15 +22,36 @@ class LayerGenerator{
   }
 
   getFlightTrack = ({ date, url, flight }) => {
-    const fileName = flight.toLowerCase() === 'er2' ?
-        `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` :
-        `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
+    let fileName;
+    let modelCorrectionOffsets = {
+      heading: 0,
+      pitch: 0,
+      roll: 0
+    };
+        if (flight.toLowerCase() === 'er2') {
+          fileName = `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0`
+          modelCorrectionOffsets = {
+            heading: -90,
+            pitch: 0,
+            roll: 0
+          }
+        } else {
+          // p3
+          fileName = `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
+          modelCorrectionOffsets = {
+            heading: -90,
+            pitch: 0,
+            roll: 0
+          }
+        }
 
     return {
+      // maybe put the correction mechanism here!!
       displayName: `Flight Track ${flight}`,
       type: "track",
       displayMechanism: "czml",
       czmlLocation: url ? url : `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
+      modelCorrectionOffsets
     }
   }
 
