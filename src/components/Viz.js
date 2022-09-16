@@ -140,15 +140,13 @@ class Viz extends Component {
 
             if (layer.displayMechanism === "czml") {
                 const dataSource = new CzmlDataSource()
-                // console.log("++++++++++")
-                // console.log(layer.czmlLocation)
                 // eslint-disable-next-line no-loop-func
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
                         let modelReference = ds.entities.getById("Flight Track")
                         let { modelCorrectionOffsets } = layer;
-
+                        if (modelCorrectionOffsets == null) modelCorrectionOffsets = {roll: 0, pitch: 0, heading: 0}
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
                             const roll = modelReference.properties.roll.getValue(time) + cMath.toRadians(modelCorrectionOffsets.roll);
