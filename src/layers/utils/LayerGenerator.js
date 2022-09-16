@@ -22,26 +22,39 @@ class LayerGenerator{
   }
 
   getModelCorrectionOffsets(flight, date) {
+    /**
+     * This function takes in flight model type (P3 | ER2 used in layer implementation) and returns correction offsets for the model.
+     * You can change the correction offset for entire flight type (dont use switch)
+     * Even change the correction offset for specific date of a flight type (use switch statement)
+     */
+    // default correction offsets is zero
     let modelCorrectionOffsets = {
       heading: 0,
       pitch: 0,
       roll: 0
     };
     if (flight === "ER2") {
+      // default -90 degree correction heading offset for er-2 model in flight track model of all impact layers.
+      modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: -90 }
+      // control for specific model of specific date
       switch (date) {
-        case "2020-02-27":
-          modelCorrectionOffsets = {
-            heading: -90,
-            pitch: 0,
-            roll: 0
-          }
+        case "2020-02-07":
+          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
           break;
-
+        case "2020-02-01":
+          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
+          break;
+        case "2020-01-18":
+          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
+          break;
         default:
           break;
       }
       return modelCorrectionOffsets;
     } else if (flight === "P3") {
+      // default -90 degree correction heading offset for P3 model in flight track model of all impact layers.
+      modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: -90 }
+      // control for specific model of specific date
       switch (date) {
         default:
           break;
