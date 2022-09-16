@@ -28,6 +28,7 @@ import {
     PointPrimitiveCollection,
     NearFarScalar,
     Color as ColorCesium,
+    Math as cMath
 } from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import { isEmpty } from "lodash"
@@ -139,18 +140,18 @@ class Viz extends Component {
 
             if (layer.displayMechanism === "czml") {
                 const dataSource = new CzmlDataSource()
-
                 // eslint-disable-next-line no-loop-func
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
                         let modelReference = ds.entities.getById("Flight Track")
+                        let { modelCorrectionOffsets } = layer;
 
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            const roll = modelReference.properties.roll.getValue(time)
-                            const pitch = modelReference.properties.pitch.getValue(time)
-                            const heading = modelReference.properties.heading.getValue(time)
+                            const roll = modelReference.properties.roll.getValue(time) + cMath.toRadians(modelCorrectionOffsets.roll);
+                            const pitch = modelReference.properties.pitch.getValue(time) + cMath.toRadians(modelCorrectionOffsets.pitch);
+                            const heading = modelReference.properties.heading.getValue(time) + cMath.toRadians(modelCorrectionOffsets.heading);
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
