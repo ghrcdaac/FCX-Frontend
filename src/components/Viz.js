@@ -140,6 +140,8 @@ class Viz extends Component {
 
             if (layer.displayMechanism === "czml") {
                 const dataSource = new CzmlDataSource()
+                // console.log("++++++++++")
+                // console.log(layer.czmlLocation)
                 // eslint-disable-next-line no-loop-func
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
