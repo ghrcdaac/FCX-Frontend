@@ -33,48 +33,22 @@ class LayerGenerator{
       pitch: 0,
       roll: 0
     };
-    if (flight === "ER2") {
-      // default -90 degree correction heading offset for er-2 model in flight track model of all impact layers.
-      modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: -90 }
-      // control for specific model of specific date
-      switch (date) {
-        case "2020-02-07":
-          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
-          break;
-        case "2020-02-01":
-          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
-          break;
-        case "2020-01-18":
-          modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: 0 }; // no correction needed
-          break;
-        default:
-          break;
-      }
-      return modelCorrectionOffsets;
-    } else if (flight === "P3") {
-      // default -90 degree correction heading offset for P3 model in flight track model of all impact layers.
-      modelCorrectionOffsets = { ...modelCorrectionOffsets, heading: -90 }
-      // control for specific model of specific date
-      switch (date) {
-        default:
-          break;
-      }
-      return modelCorrectionOffsets;
-    } else {
-      return modelCorrectionOffsets;
+    // model orientation correction handled from the backend itself.
+    // kept this function, to quickly visualize how the orientation offsets will look.
+    return modelCorrectionOffsets;
     }
   }
 
   getFlightTrack = ({ date, url, flight }) => {
     let fileName = flight.toLowerCase() === 'er2' ? `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` : `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`;
-    const modelCorrectionOffsets = this.getModelCorrectionOffsets(flight, date);
+    // const modelCorrectionOffsets = this.getModelCorrectionOffsets(flight, date); // not needed.
 
     return {
       displayName: `Flight Track ${flight}`,
       type: "track",
       displayMechanism: "czml",
       czmlLocation: url ? url : `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
-      modelCorrectionOffsets
+      // modelCorrectionOffsets
     }
   }
 
