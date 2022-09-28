@@ -36,7 +36,6 @@ class LayerGenerator{
     // model orientation correction handled from the backend itself.
     // kept this function, to quickly visualize how the orientation offsets will look.
     return modelCorrectionOffsets;
-    }
   }
 
   getFlightTrack = ({ date, url, flight }) => {
