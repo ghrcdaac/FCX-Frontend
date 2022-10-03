@@ -145,18 +145,12 @@ class Viz extends Component {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
                         let modelReference = ds.entities.getById("Flight Track")
-                        let { modelCorrectionOffsets } = layer;
-                        if (modelCorrectionOffsets == null) modelCorrectionOffsets = {roll: 0, pitch: 0, heading: 0}
-                        let modelCorrectionOffsetsRadian =  {
-                                                                roll: cMath.toRadians(modelCorrectionOffsets.roll),
-                                                                pitch: cMath.toRadians(modelCorrectionOffsets.pitch),
-                                                                heading: cMath.toRadians(modelCorrectionOffsets.heading)
-                                                            }
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            const roll = modelReference.properties.roll.getValue(time) + (modelCorrectionOffsetsRadian.roll);
-                            const pitch = modelReference.properties.pitch.getValue(time) + (modelCorrectionOffsetsRadian.pitch);
-                            const heading = modelReference.properties.heading.getValue(time) + (modelCorrectionOffsetsRadian.heading);
+                            let roll = modelReference.properties.roll.getValue(time);
+                            let pitch = modelReference.properties.pitch.getValue(time);
+                            let heading = modelReference.properties.heading.getValue(time);
+                            // let {roll, pitch, heading} = this.modelOrientationCorrection({roll, pitch, heading});
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
@@ -397,6 +391,26 @@ class Viz extends Component {
             if (updateTime && cameraObj.currentTime) {
                 viewer.clock.currentTime = {...cameraObj.currentTime}
             }
+        }
+    }
+
+    modelOrientationCorrection = ({roll, pitch, heading}) => { // inputs in radian
+        /**
+         * If the orientation is wrong,
+         * use this function to correct orientation
+         * before changing in backend,
+         * For quick visible change.
+         */
+        let modelCorrectionOffsets = {
+            roll: 0, // degrees
+            pitch: 0, // degrees
+            heading: 0 // degrees
+        };
+        // outputs in radian
+        return {
+            roll: roll + cMath.toRadians(modelCorrectionOffsets.roll),
+            pitch: pitch + cMath.toRadians(modelCorrectionOffsets.pitch),
+            heading: heading + cMath.toRadians(modelCorrectionOffsets.heading)
         }
     }
     

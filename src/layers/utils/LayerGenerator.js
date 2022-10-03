@@ -21,33 +21,14 @@ class LayerGenerator{
     }
   }
 
-  getModelCorrectionOffsets(flight, date) {
-    /**
-     * This function takes in flight model type (P3 | ER2 used in layer implementation) and returns correction offsets for the model.
-     * You can change the correction offset for entire flight type (dont use switch)
-     * Even change the correction offset for specific date of a flight type (use switch statement)
-     */
-    // default correction offsets is zero
-    let modelCorrectionOffsets = {
-      heading: 0,
-      pitch: 0,
-      roll: 0
-    };
-    // model orientation correction handled from the backend itself.
-    // kept this function, to quickly visualize how the orientation offsets will look.
-    return modelCorrectionOffsets;
-  }
-
   getFlightTrack = ({ date, url, flight }) => {
     let fileName = flight.toLowerCase() === 'er2' ? `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` : `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`;
-    // const modelCorrectionOffsets = this.getModelCorrectionOffsets(flight, date); // not needed.
 
     return {
       displayName: `Flight Track ${flight}`,
       type: "track",
       displayMechanism: "czml",
       czmlLocation: url ? url : `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/${flight.toLowerCase()}/${fileName}`,
-      // modelCorrectionOffsets
     }
   }
 
