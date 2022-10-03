@@ -147,11 +147,16 @@ class Viz extends Component {
                         let modelReference = ds.entities.getById("Flight Track")
                         let { modelCorrectionOffsets } = layer;
                         if (modelCorrectionOffsets == null) modelCorrectionOffsets = {roll: 0, pitch: 0, heading: 0}
+                        let modelCorrectionOffsetsRadian =  {
+                                                                roll: cMath.toRadians(modelCorrectionOffsets.roll),
+                                                                pitch: cMath.toRadians(modelCorrectionOffsets.pitch),
+                                                                heading: cMath.toRadians(modelCorrectionOffsets.heading)
+                                                            }
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            const roll = modelReference.properties.roll.getValue(time) + cMath.toRadians(modelCorrectionOffsets.roll);
-                            const pitch = modelReference.properties.pitch.getValue(time) + cMath.toRadians(modelCorrectionOffsets.pitch);
-                            const heading = modelReference.properties.heading.getValue(time) + cMath.toRadians(modelCorrectionOffsets.heading);
+                            const roll = modelReference.properties.roll.getValue(time) + (modelCorrectionOffsetsRadian.roll);
+                            const pitch = modelReference.properties.pitch.getValue(time) + (modelCorrectionOffsetsRadian.pitch);
+                            const heading = modelReference.properties.heading.getValue(time) + (modelCorrectionOffsetsRadian.heading);
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
