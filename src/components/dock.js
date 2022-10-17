@@ -1,7 +1,9 @@
 import React from "react"
+import ReactDOM from 'react-dom';
+
 import { DockLayout } from "rc-dock"
 
-import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion } from "cesium"
+import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 // eslint-disable-next-line
 import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
@@ -16,8 +18,13 @@ import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
 
+import Modal from "./Modal"
+import Marker from './Marker'
+import geoJson from './chicago-parks2.json'
+
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
+// import { url } from "inspector";
 
 let viewer
 
@@ -192,6 +199,52 @@ let createViewer = () => {
     imageryProviderViewModels: getProviderViewModels(),
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
+
+  // geoJson.fieldCampaignImages.forEach((element)=>{
+  //   var image = new Image()
+  //   image.crossOrigin = 'anonymous';
+  //   image.src = element.imageURL
+
+  //   var pinBuilder = new PinBuilder();
+  //   //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
+  //   viewer.entities.add({
+  //     position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
+  //     name:element.id,
+  //     billboard : {
+  //       image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
+  //       width : 32,
+  //       height : 32,
+  //     },
+  //     label : {
+  //       // text: element.id.toString(),
+  //       font : '14pt monospace',
+  //       style: LabelStyle.FILL_AND_OUTLINE,
+  //       outlineWidth : 2,
+  //       verticalOrigin : VerticalOrigin.TOP,
+  //       pixelOffset : new Cartesian2(1, 32)
+  //     }
+  //   });
+  // })
+
+
+  viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
+    if (defined(selectedEntity)) {
+        if (defined(selectedEntity.name)) {
+          console.log('Selected ' + selectedEntity.name);
+          const ref = React.createRef();
+          ref.current = document.createElement('div');
+          ReactDOM.render(
+            <Modal id={selectedEntity.name}/>,
+            ref.current
+          )
+          viewer.selectedEntity = undefined
+        } else {
+          console.log('Unknown entity selected.');
+        }
+    } else {
+      console.log('Deselected.');
+    }
+  });
 }
 
 let checkViewer = () => {
@@ -234,6 +287,7 @@ class Dock extends React.Component {
   render() {
     emitter.emit("dockRender")
     return (
+      <>
       <DockLayout
         defaultLayout={
           box(this.props.campaign)
@@ -247,6 +301,7 @@ class Dock extends React.Component {
         }}
         onLayoutChange={this.onLayoutChange}
       />
+      </>
     )
   }
 }

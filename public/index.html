@@ -40,12 +40,14 @@
     <div id="earthdata-notification-banner" ></div> -->
 
     <div id="root"></div>
+    <div id="portal" style="position:fixed;height: 100vh;width: 100vw;z-index: 2000;display: flex;justify-content: center;align-items: center;text-align: center;border-radius: 12px;"></div>
 
     <!-- Add the Earthdata Status App notifications -->
     <script src="https://status.earthdata.nasa.gov/assets/banner_widget.js"></script>
 
     <!-- Add and initialize the Earthdata Feedback notification -->
     <script type="text/javascript" src="https://fbm.earthdata.nasa.gov/for/GHRC/feedback.js"></script>
+    <script src="https://cesiumjs.org/Cesium/Build/Cesium/Cesium.js" />
     <script type="text/javascript">
       feedback.init({ showIcon: false })
     </script>

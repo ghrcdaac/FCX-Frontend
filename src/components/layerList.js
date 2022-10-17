@@ -21,6 +21,13 @@ import AccordionDetails from "@material-ui/core/AccordionDetails"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
 import moment from "moment"
 import allActions from "../state/actions"
+import {BsCardImage} from 'react-icons/bs'
+
+import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
+import { Dock, viewer } from "./dock"
+import Modal from "./Modal"
+import Marker from './Marker'
+import geoJson from './chicago-parks2.json'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+let imageToggle = false;
 export default function LayerList({ campaign }) {
   const classes = useStyles()
   const state = useSelector((state) => state)
@@ -146,6 +154,37 @@ export default function LayerList({ campaign }) {
       expanded = true
     }
 
+    const changeHandler = (e) =>{
+      imageToggle = !imageToggle;
+      if(imageToggle){
+        geoJson.fieldCampaignImages.forEach((element)=>{
+      
+          var pinBuilder = new PinBuilder();
+          //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
+          viewer.entities.add({
+            position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
+            name:element.id,
+            billboard : {
+              image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
+              width : 32,
+              height : 32,
+            },
+            label : {
+              // text: element.id.toString(),
+              font : '14pt monospace',
+              style: LabelStyle.FILL_AND_OUTLINE,
+              outlineWidth : 2,
+              verticalOrigin : VerticalOrigin.TOP,
+              pixelOffset : new Cartesian2(1, 32)
+            }
+          });
+        })
+        console.log(viewer.entities)
+      }else{
+        viewer.entities.removeAll();
+      }
+    }
+
     dates.push(
       <Accordion key={"panel" + itemIndex} defaultExpanded={expanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" key={"summary-panel" + itemIndex}>
@@ -157,6 +196,23 @@ export default function LayerList({ campaign }) {
             </Box>
           </div>
         </AccordionSummary>
+        {layerItems.date === '2017-05-17' && <div style={{display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', height:'100px', width:'100%'}}>
+          <div style={{height:'100%',display:'flex', width:'90%',justifyContent:'center', alignItems:'center', textAlign:'center', border:'1px solid #dfdede', borderRadius:'5px'}}>
+            <div style={{width:'75%'}}>
+              <div style={{display:'flex', marginTop:'1rem', marginLeft:'20px'}}>
+                <div style={{marginTop:'1rem', marginRight:'30px'}}><BsCardImage /></div>
+                <div style={{fontSize:'20px', marginTop:'10px'}}>Image Viewer</div>
+              </div>
+              <h6>Toggle to enable/disable Markers</h6>
+            </div>
+            <div style={{width:'25%', marginBottom:'50px'}}>
+            <Switch
+                edge="end"
+                onChange={changeHandler}
+              />
+            </div>
+          </div>
+        </div>}
         <AccordionDetails key={"details-panel" + itemIndex}>
           <List key={itemIndex} className={classes.root}>
             {layers}
