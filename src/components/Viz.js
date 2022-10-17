@@ -28,6 +28,7 @@ import {
     PointPrimitiveCollection,
     NearFarScalar,
     Color as ColorCesium,
+    Math as cMath
 } from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import { isEmpty } from "lodash"
@@ -139,18 +140,17 @@ class Viz extends Component {
 
             if (layer.displayMechanism === "czml") {
                 const dataSource = new CzmlDataSource()
-
                 // eslint-disable-next-line no-loop-func
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
                         let modelReference = ds.entities.getById("Flight Track")
-
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            const roll = modelReference.properties.roll.getValue(time)
-                            const pitch = modelReference.properties.pitch.getValue(time)
-                            const heading = modelReference.properties.heading.getValue(time)
+                            let roll = modelReference.properties.roll.getValue(time);
+                            let pitch = modelReference.properties.pitch.getValue(time);
+                            let heading = modelReference.properties.heading.getValue(time);
+                            // let {roll, pitch, heading} = this.modelOrientationCorrection({roll, pitch, heading});
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
@@ -391,6 +391,26 @@ class Viz extends Component {
             if (updateTime && cameraObj.currentTime) {
                 viewer.clock.currentTime = {...cameraObj.currentTime}
             }
+        }
+    }
+
+    modelOrientationCorrection = ({roll, pitch, heading}) => { // inputs in radian
+        /**
+         * If the orientation is wrong,
+         * use this function to correct orientation
+         * before changing in backend,
+         * For quick visible change.
+         */
+        let modelCorrectionOffsets = {
+            roll: 0, // degrees
+            pitch: 0, // degrees
+            heading: 0 // degrees
+        };
+        // outputs in radian
+        return {
+            roll: roll + cMath.toRadians(modelCorrectionOffsets.roll),
+            pitch: pitch + cMath.toRadians(modelCorrectionOffsets.pitch),
+            heading: heading + cMath.toRadians(modelCorrectionOffsets.heading)
         }
     }
     

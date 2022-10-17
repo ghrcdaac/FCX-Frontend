@@ -22,9 +22,7 @@ class LayerGenerator{
   }
 
   getFlightTrack = ({ date, url, flight }) => {
-    const fileName = flight.toLowerCase() === 'er2' ?
-        `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` :
-        `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`
+    let fileName = flight.toLowerCase() === 'er2' ? `${this.fieldCampaignName}_MetNav_${flight.toUpperCase()}_${getDateString(date)}_R0` : `${this.fieldCampaignName}_MetNav_P3B_${getDateString(date)}_R0`;
 
     return {
       displayName: `Flight Track ${flight}`,
