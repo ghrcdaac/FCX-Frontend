@@ -175,6 +175,24 @@ let box = (campaign) => ({
             id: "tabTimeline",
             content: <FcxTimeline campaign={campaign} />,
           },
+          {
+            title: (
+              <div>
+                <FiLayers /> Subsetting{" "}
+              </div>
+            ),
+            id: "subsettingTool",
+            content: <div>Hello! lets start Subsetting</div>,
+          },
+          {
+            title: (
+              <div>
+                <FiLayers /> Subsets{" "}
+              </div>
+            ),
+            id: "subsets",
+            content: <div>Subset Data</div>,
+          },
         ],
       },
     ],
