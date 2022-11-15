@@ -9,6 +9,7 @@ import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
+import SubsettingTool from "./subsettingTool";
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -200,11 +201,11 @@ let box = (campaign) => ({
                 </div>
               ),
               id: "subsettingTool",
-              closable: false,
-              content: <div>Hello! lets start Subsetting</div>,
+              closable: true,
+              content: <SubsettingTool style={{width: "100%", height: "100%"}}/>
             },
         ],
-        x: (1920-400-35), y: (983-200), w: 400, h: 200 // based off component with .dock-layout class. TODO: make dynamic
+        x: (1920-400-40), y: (983-200), w: 400, h: 200 // based off component with .dock-layout class. TODO: make dynamic
       }
     ]
   }
