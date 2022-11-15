@@ -178,15 +178,6 @@ let box = (campaign) => ({
           {
             title: (
               <div>
-                <FiLayers /> Subsetting{" "}
-              </div>
-            ),
-            id: "subsettingTool",
-            content: <div>Hello! lets start Subsetting</div>,
-          },
-          {
-            title: (
-              <div>
                 <FiLayers /> Subsets{" "}
               </div>
             ),
@@ -197,6 +188,26 @@ let box = (campaign) => ({
       },
     ],
   },
+  floatbox: {
+    mode: 'float',
+    children: [
+      {
+        tabs: [
+            {
+              title: (
+                <div>
+                  <FiLayers /> Subsetting{" "}
+                </div>
+              ),
+              id: "subsettingTool",
+              closable: false,
+              content: <div>Hello! lets start Subsetting</div>,
+            },
+        ],
+        x: (1920-400-35), y: (983-200), w: 400, h: 200 // based off component with .dock-layout class. TODO: make dynamic
+      }
+    ]
+  }
 })
 
 let createViewer = () => {
