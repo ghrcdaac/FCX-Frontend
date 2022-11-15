@@ -28,6 +28,7 @@ import "../css/dock.css"
 // import { url } from "inspector";
 
 let viewer
+let viewerObj = { viewer: null } // to be able to pass by reference to other components.
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -202,7 +203,7 @@ let box = (campaign) => ({
               ),
               id: "subsettingTool",
               closable: true,
-              content: <SubsettingTool style={{width: "100%", height: "100%"}}/>
+              content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>
             },
         ],
         x: (1920-400-40), y: (983-200), w: 400, h: 200 // based off component with .dock-layout class. TODO: make dynamic
@@ -229,6 +230,8 @@ let createViewer = () => {
     imageryProviderViewModels: getProviderViewModels(),
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
+
+  viewerObj.viewer = viewer;
 
   // geoJson.fieldCampaignImages.forEach((element)=>{
   //   var image = new Image()
