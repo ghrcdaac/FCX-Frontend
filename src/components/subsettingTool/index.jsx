@@ -1,7 +1,9 @@
 import React, { Component } from "react";
+import moment from "moment/moment";
+import { JulianDate } from "cesium";
+
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import { JulianDate } from "cesium";
 
 class SubsettingTool extends Component {
     constructor(props) {
@@ -16,37 +18,38 @@ class SubsettingTool extends Component {
     }
 
     JulainToISO(julianDate) {
-        // rewrite this method.
-        const fdate = "2017-05-17";
-        function str2d(num){ return String(num).padStart(2,'0') };
-        const Time0= JulianDate.fromIso8601(fdate+"T00:00:00Z");
-        const Tc = JulianDate.clone(julianDate);
-        const tstart = JulianDate.secondsDifference(Tc, Time0);
-        const TSh = Math.floor(tstart/3600);
-        const TSm = Math.floor((tstart-TSh*3600)/60);
-        const TSs = Math.floor(tstart-TSh*3600-TSm*60);
-        const TstartLab = str2d(TSh)+':'+str2d(TSm)+':'+str2d(TSs)+' UTC';
-        return TstartLab;
+        let cJulianDate = JulianDate.clone(julianDate);
+        let iso8601Date = JulianDate.toIso8601(cJulianDate);
+        return iso8601Date;
+    }
+
+    isoToGeroian(date) {
+        return moment(date).utc().format('MMMM Do YYYY, h:mm:ss a');
     }
 
     handleStart = (event) => {
         event.stopPropagation();
         // get the clock time from cesium, and assign it to start state
-        console.log(this.props.cesiumViewer.viewer.clock.currentTime)
         if (this.props.cesiumViewer.viewer) {
             let currentTime = this.JulainToISO(this.props.cesiumViewer.viewer.clock.currentTime);
-            this.setState({start: currentTime.toString()});
+            let formattedCurrentTime = moment(currentTime).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC";
+            this.setState({start: formattedCurrentTime});
         }
     }
 
     handleStop = (event) => {
         event.stopPropagation();
         // get the clock time from cesium, and assign it to end state
-        console.log(this.props.cesiumViewer.viewer.clock.currentTime)
         if (this.props.cesiumViewer.viewer) {
             let currentTime = this.JulainToISO(this.props.cesiumViewer.viewer.clock.currentTime);
-            this.setState({end: currentTime});
+            let formattedCurrentTime = moment(currentTime).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC";
+            this.setState({end: formattedCurrentTime});
         }
+    }
+
+    handleSubmit = (event) => {
+        event.stopPropagation();
+
     }
 
     render() {
@@ -54,8 +57,8 @@ class SubsettingTool extends Component {
         <div>
             <div style={{marginBottom: "20px"}}>
                 <b>Outputs</b><br/>
-                    Start: {this.state.start}<br/>
-                    End: {this.state.end}<br/>
+                    Start: {this.state.start && this.isoToGeroian(this.state.start)}<br/>
+                    End:   {this.state.end && this.isoToGeroian(this.state.end)}<br/>
             </div>
             <div className="center_horizontally_child">
                 <ButtonGroup aria-label="small outlined button group">
