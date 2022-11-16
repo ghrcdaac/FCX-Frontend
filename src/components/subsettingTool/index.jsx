@@ -52,16 +52,17 @@ class SubsettingTool extends Component {
     render() {
       return (
         <div>
+            <div style={{marginBottom: "20px"}}>
+                <b>Outputs</b><br/>
+                    Start: {this.state.start}<br/>
+                    End: {this.state.end}<br/>
+            </div>
             <div className="center_horizontally_child">
-                <ButtonGroup disableElevation variant="contained" color="primary">
+                <ButtonGroup aria-label="small outlined button group">
                     <Button onClick={this.handleStart}>Start</Button>
                     <Button onClick={this.handleStop}>Stop</Button>
                 </ButtonGroup>
-            </div>
-            <div>
-                Outputs:<br/>
-                    Start: {this.state.start}<br/>
-                    End: {this.state.end}<br/>
+                <Button variant="outlined" color="primary"> Submit </Button>
             </div>
         </div>
       )
