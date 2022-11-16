@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import moment from "moment/moment";
 import { JulianDate } from "cesium";
 
+import { Resources, mapStateToProps } from "./redux";
+
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 
@@ -49,6 +51,9 @@ class SubsettingTool extends Component {
 
     handleSubmit = (event) => {
         event.stopPropagation();
+        // first call the endpoint
+        // update the redux state; not exactly necessary for now. but, will be handy later.
+        // then change the state
         this.setState({start: "", end: ""});
     }
 
