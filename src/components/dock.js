@@ -198,7 +198,7 @@ let box = (campaign) => ({
             {
               title: (
                 <div>
-                  <FiLayers /> Subsetting{" "}
+                  <FiLayers /> Subsetting Tool{" "}
                 </div>
               ),
               id: "subsettingTool",
