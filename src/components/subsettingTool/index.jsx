@@ -49,7 +49,7 @@ class SubsettingTool extends Component {
 
     handleSubmit = (event) => {
         event.stopPropagation();
-
+        this.setState({start: "", end: ""});
     }
 
     render() {
@@ -65,7 +65,7 @@ class SubsettingTool extends Component {
                     <Button onClick={this.handleStart}>Start</Button>
                     <Button onClick={this.handleStop}>Stop</Button>
                 </ButtonGroup>
-                <Button variant="outlined" color="primary"> Submit </Button>
+                <Button variant="outlined" color="primary" onClick={this.handleSubmit}> Submit </Button>
             </div>
         </div>
       )
