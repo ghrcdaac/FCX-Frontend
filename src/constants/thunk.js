@@ -1,13 +1,14 @@
 import APICall from "./ApiCall";
+import { subsettingApiKey } from "../config";
 
 const apiCaller = new APICall();
-apiCaller.setHeader(process.env.SUBSETTING_API_KEY);
+apiCaller.setHeader(subsettingApiKey);
 
 export const Get = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
   return (dispatch, getState) => {
     dispatch(handleInit(init, undefined));
-    apiCaller.Get(Resources.url)
+    apiCaller.get(Resources.url)
       .then(data => {
         dispatch(handleSuccess(success, data));
       })
@@ -21,7 +22,7 @@ export const Post = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
   return (dispatch, getState) => {
     dispatch(handleInit(init, undefined));
-    apiCaller.Post(Resources.url, Resources.body)
+    apiCaller.post(Resources.url, Resources.body)
       .then(data => {
         dispatch(handleSuccess(success, data));
       })
