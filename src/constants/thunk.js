@@ -5,7 +5,7 @@ apiCaller.setHeader(process.env.SUBSETTING_API_KEY);
 
 export const Get = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     dispatch(handleInit(init, undefined));
     apiCaller.Get(Resources.url)
       .then(data => {
@@ -19,7 +19,7 @@ export const Get = Resources => {
 
 export const Post = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
-  return async (dispatch, getState) => {
+  return (dispatch, getState) => {
     dispatch(handleInit(init, undefined));
     apiCaller.Post(Resources.url, Resources.body)
       .then(data => {
