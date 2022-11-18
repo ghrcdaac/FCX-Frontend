@@ -53,7 +53,6 @@ class SubsettingTool extends Component {
 
     handleSubmit = (event) => {
         event.stopPropagation();
-        // first call the endpoint
         const { triggerSubsettingTool } = Resources;
         triggerSubsettingTool.body = {
             body: {
@@ -102,9 +101,7 @@ class SubsettingTool extends Component {
                 ]
             }
         }
-        this.props.Post(triggerSubsettingTool);
-        // update the redux state implicitly done, by POST reducer; not exactly necessary for now. but, will be handy later.
-        // then change the state
+        this.props.Post(triggerSubsettingTool); // Note: updating the redux state, implicitly done, by POST thunk. Cool!
         this.setState({start: "", end: ""});
     }
 
