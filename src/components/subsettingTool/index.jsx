@@ -55,6 +55,53 @@ class SubsettingTool extends Component {
         event.stopPropagation();
         // first call the endpoint
         const { triggerSubsettingTool } = Resources;
+        triggerSubsettingTool.body = {
+            body: {
+                subDir: "https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset_test11/",
+                date: moment(this.state.start).utc().format('YYYY-MM-DD'),
+                Start: this.state.start,
+                End: this.state.end,
+                latRange: "-",
+                lonRange: "-",
+                DataSets: [
+                    {
+                        id: "1",
+                        cat_id: "CRS",
+                        state: 1
+                    },
+                    {
+                        id: "2",
+                        cat_id: "LIP",
+                        state: 1
+                    },
+                    {
+                        id: "3",
+                        cat_id: "FEGS",
+                        state: 1
+                    },
+                    {
+                        id: "4",
+                        cat_id: "LMA",
+                        state: 1
+                    },
+                    {
+                        id: "5",
+                        cat_id: "LIS",
+                        state: 1
+                    },
+                    {
+                        id: "6",
+                        cat_id: "GLM",
+                        state: 1
+                    },
+                    {
+                        id: "7",
+                        cat_id: "ABI",
+                        state: 1
+                    }
+                ]
+            }
+        }
         this.props.Post(triggerSubsettingTool);
         // update the redux state implicitly done, by POST reducer; not exactly necessary for now. but, will be handy later.
         // then change the state
