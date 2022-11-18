@@ -1,3 +1,9 @@
+// New way of writing reducers with the component itself,
+// and importing it here
+import {onTriggeredSubsettingTool} from "../../components/subsettingTool/redux";
+
+
+// Old way of writing the reducers in one place
 const selectedLayers = (state = ["a"], action) => {
   if (action.type === "ADD_DEFAULT_SELECTED_LAYERS"){
     return [...action.defaultSelectedLayers]
@@ -46,4 +52,4 @@ const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
   return state
 }
 
-export { selectedLayers, layerStatus }
+export default { selectedLayers, layerStatus, onTriggeredSubsettingTool }
