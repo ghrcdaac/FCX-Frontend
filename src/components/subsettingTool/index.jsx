@@ -5,6 +5,7 @@ import { JulianDate } from "cesium";
 
 import * as thunk from "../../constants/thunk";
 import { Resources, mapStateToProps } from "./redux";
+import { bodyForPost } from "./helper";
 
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
@@ -16,9 +17,6 @@ class SubsettingTool extends Component {
             start: "",
             end: ""
         };
-    }
-
-    componentDidMount() {
     }
 
     JulainToISO(julianDate) {
@@ -54,53 +52,7 @@ class SubsettingTool extends Component {
     handleSubmit = (event) => {
         event.stopPropagation();
         const { triggerSubsettingTool } = Resources;
-        triggerSubsettingTool.body = {
-            body: {
-                subDir: "https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset_test11/",
-                date: moment(this.state.start).utc().format('YYYY-MM-DD'),
-                Start: this.state.start,
-                End: this.state.end,
-                latRange: "-",
-                lonRange: "-",
-                DataSets: [
-                    {
-                        id: "1",
-                        cat_id: "CRS",
-                        state: 1
-                    },
-                    {
-                        id: "2",
-                        cat_id: "LIP",
-                        state: 1
-                    },
-                    {
-                        id: "3",
-                        cat_id: "FEGS",
-                        state: 1
-                    },
-                    {
-                        id: "4",
-                        cat_id: "LMA",
-                        state: 1
-                    },
-                    {
-                        id: "5",
-                        cat_id: "LIS",
-                        state: 1
-                    },
-                    {
-                        id: "6",
-                        cat_id: "GLM",
-                        state: 1
-                    },
-                    {
-                        id: "7",
-                        cat_id: "ABI",
-                        state: 1
-                    }
-                ]
-            }
-        }
+        triggerSubsettingTool.body = bodyForPost(this.state.start, this.state.end);
         this.props.Post(triggerSubsettingTool); // Note: updating the redux state, implicitly done, by POST thunk. Cool!
         this.setState({start: "", end: ""});
     }

@@ -36,7 +36,8 @@
         "redux-thunk": "^2.4.2",
         "styled-components": "^5.3.5",
         "temporal-3d-tile": "^1.0.1",
-        "typescript": "^4.4.2"
+        "typescript": "^4.4.2",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "@craco/craco": "^3.6.0",
