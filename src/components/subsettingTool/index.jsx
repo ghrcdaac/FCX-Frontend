@@ -1,7 +1,9 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import moment from "moment/moment";
 import { JulianDate } from "cesium";
 
+import { Post } from "../../constants/thunk";
 import { Resources, mapStateToProps } from "./redux";
 
 import Button from '@material-ui/core/Button';
@@ -52,6 +54,9 @@ class SubsettingTool extends Component {
     handleSubmit = (event) => {
         event.stopPropagation();
         // first call the endpoint
+        const { triggerSubsettingTool } = Resources;
+        let xxx = Post(triggerSubsettingTool);
+        this.props.dispatch(xxx);
         // update the redux state; not exactly necessary for now. but, will be handy later.
         // then change the state
         this.setState({start: "", end: ""});
@@ -77,5 +82,5 @@ class SubsettingTool extends Component {
     }
 }
   
-export default SubsettingTool;
+export default connect(null, null)(SubsettingTool);
   
