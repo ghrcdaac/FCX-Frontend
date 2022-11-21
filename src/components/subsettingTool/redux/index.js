@@ -31,7 +31,12 @@ export function onTriggeredSubsettingTool(state = initialState, action = {}) {
     }
 
     case success: {
-      return {...state, subsettingStarted: true};
+      const newSubsetDir = action.payload.data.subsetDir
+      return {
+        ...state,
+        subsettingStarted: true,
+        subsetsDir: [...state.subsetsDir, newSubsetDir]
+      };
     }
 
     case error: {
@@ -47,9 +52,9 @@ export function onTriggeredSubsettingTool(state = initialState, action = {}) {
 // map state to props
 export const mapStateToProps = state => {
   const {
-    onTriggeredSubsettingTool: {subsettingStarted},
+    onTriggeredSubsettingTool: {subsettingStarted, subsetsDir},
   } = state;
-  return {subsettingStarted};
+  return {subsettingStarted, subsetsDir};
 };
 
 // action dispatchers
