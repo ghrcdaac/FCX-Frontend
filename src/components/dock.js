@@ -10,6 +10,7 @@ import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
 import SubsettingTool from "./subsettingTool";
+import {SubsetsList} from "./subsettingTool/components";
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -184,7 +185,7 @@ let box = (campaign) => ({
               </div>
             ),
             id: "subsets",
-            content: <div>Subset Data</div>,
+            content: <SubsetsList/>,
           },
         ],
       },
