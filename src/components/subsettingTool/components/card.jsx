@@ -39,7 +39,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function RecipeReviewCard() {
+export default function RecipeReviewCard(props) {
+  const {subsetDir, subsetIndex} = props;
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
 
@@ -48,14 +49,15 @@ export default function RecipeReviewCard() {
   };
 
   return (
-    <Card className={classes.root}>
+    <Card className={classes.root} style={{maxWidth: "initial"}}>
       <CardHeader
-        title="Subset 0"
-        subheader="Date time"
+        title={`Subset ${subsetIndex}`}
+        // subheader="Date time"
       />
       <CardContent>
         <Typography variant="body2" color="textSecondary" component="p">
-          Expand to see the python script to download.
+          Expand to see the python script.
+          Click on download to save it locally.
         </Typography>
       </CardContent>
       <CardActions disableSpacing>

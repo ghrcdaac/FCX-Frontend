@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Resources, mapStateToProps } from "../redux";
+import { mapStateToProps } from "../redux";
 
 import RecipeReviewCard from "./card";
 
@@ -12,7 +12,10 @@ class SubsetsList extends Component {
     render() {
       return (
         <div>
-            <RecipeReviewCard/>
+        {
+            this.props.subsetsDir.map((dir, index) =>
+            <RecipeReviewCard subsetDir={dir} subsetIndex={index}/>)
+        }
         </div>
       )
     }
