@@ -13,6 +13,9 @@ import { red } from '@material-ui/core/colors';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import CodeHighlight from "./codeHighlight";
+import {code as downloadScript} from '../helper/downloadScript.js';
+
 const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
@@ -74,7 +77,9 @@ export default function RecipeReviewCard() {
         <CardContent>
           <Typography paragraph>Code:</Typography>
           <Typography paragraph>
-            Hello World!
+            <CodeHighlight className="code_block">
+              {downloadScript()}
+            </CodeHighlight>
           </Typography>
         </CardContent>
       </Collapse>

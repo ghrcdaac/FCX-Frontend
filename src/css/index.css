@@ -42,3 +42,9 @@ a {
 .center_horizontally_child{
   text-align: center;
 }
+
+.code_block{
+  display: block;
+  font-size: .75rem;
+  overflow: scroll;
+}
