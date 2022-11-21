@@ -39,8 +39,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const getHref = (script) => {
+  const file = new Blob([script], {type: 'text/plain'});
+  return URL.createObjectURL(file);
+}
+
 export default function RecipeReviewCard(props) {
   const {subsetDir, subsetIndex} = props;
+  const dlScript = downloadScript(subsetDir);
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
 
@@ -61,9 +67,11 @@ export default function RecipeReviewCard(props) {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="download">
-          <CloudDownloadIcon />
-        </IconButton>
+        <a href={getHref(dlScript)} download="download_subset.py">
+          <IconButton aria-label="download">
+            <CloudDownloadIcon />
+          </IconButton>
+        </a>
         <IconButton
           className={clsx(classes.expand, {
             [classes.expandOpen]: expanded,
@@ -80,7 +88,7 @@ export default function RecipeReviewCard(props) {
           <Typography paragraph>Code:</Typography>
           <Typography paragraph>
             <CodeHighlight className="code_block">
-              {downloadScript(subsetDir)}
+              {dlScript}
             </CodeHighlight>
           </Typography>
         </CardContent>
