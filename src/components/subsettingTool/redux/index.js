@@ -14,7 +14,8 @@ export const Resources = {
 
 // Initial State Reference for reducers
 const initialState = {
-  subsettingStarted: false
+  subsettingStarted: false,
+  subsetsDir: []
 };
 
 // Reducer

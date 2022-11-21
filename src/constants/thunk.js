@@ -25,32 +25,36 @@ apiCaller.setHeader(subsettingApiKey);
 
 export const Get = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(initDispatchAction(init, undefined));
-    apiCaller.get(Resources.url)
+    return apiCaller.get(Resources.url)
       .then(data => {
         handleSuccess(data.status, data.body);
         dispatch(successDispatchAction(success, data));
+        return data;
       })
       .catch(err => {
         handleError(err.status, "Something went wrong. Call Support.");
         dispatch(errorDispatchAction(error, err));
+        return err;
       });
   };
 };
 
 export const Post = Resources => {
   const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(initDispatchAction(init, undefined));
-    apiCaller.post(Resources.url, Resources.body)
+    return apiCaller.post(Resources.url, Resources.body)
       .then(data => {
         handleSuccess(data.status, data.body);
         dispatch(successDispatchAction(success, data));
+        return data;
       })
       .catch(err => {
         handleError(400, "Something went wrong. Call Support.");
         dispatch(errorDispatchAction(error, err));
+        return err;
       });
   };
 };
