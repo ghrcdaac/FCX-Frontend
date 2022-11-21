@@ -80,7 +80,7 @@ export default function RecipeReviewCard(props) {
           <Typography paragraph>Code:</Typography>
           <Typography paragraph>
             <CodeHighlight className="code_block">
-              {downloadScript()}
+              {downloadScript(subsetDir)}
             </CodeHighlight>
           </Typography>
         </CardContent>
