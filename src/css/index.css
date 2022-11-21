@@ -46,5 +46,5 @@ a {
 .code_block{
   display: block;
   font-size: .75rem;
-  overflow: scroll;
+  /* overflow: scroll; */
 }
