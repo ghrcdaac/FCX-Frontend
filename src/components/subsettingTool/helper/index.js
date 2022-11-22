@@ -1,5 +1,6 @@
 import {v4 as uuidv4} from 'uuid';
 import moment from "moment/moment";
+import {outputSubsetsBucket} from "../../../config";
 
 export function bodyForPost(start, end) {
     /**
@@ -9,7 +10,7 @@ export function bodyForPost(start, end) {
     const date = start ? moment(start).utc().format('YYYY-MM-DD') : "";
     const startDateTime = start ? moment(start).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC" : "";
     const endDateTime = end ? moment(end).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC" : "";
-    const outputbucket = "szg-ghrc-fcx-viz-output";
+    const outputbucket = outputSubsetsBucket;
     const dir1 = "subsets";
     const dir2 = `subset-${moment().format("YYMMDDHHmmss")}-${uuidv4()}`; // unique dir, where subsets sits
     return {

@@ -18,8 +18,10 @@ const cesiumDefaultAccessToken = process.env.REACT_APP_BAMBOO_CESIUM_DEFAULT_TOK
 const supportEmail = process.env.REACT_APP_BAMBOO_GHRC_SUPPORT_EMAIL || "support-ghrc@earthdata.nasa.gov"
 const subsettingEndpoint = process.env.REACT_APP_SUBSETTING_ENDPOINT || "https://w390d81cg2.execute-api.us-east-1.amazonaws.com"
 const subsettingApiKey = process.env.REACT_APP_SUBSETTING_API_KEY
+const outputSubsetsBucket = process.env.REACT_APP_OUTPUT_SUBSETS_BUCKET
+const outputSubsetsBucketRegion = process.env.REACT_APP_OUTPUT_SUBSETS_BUCKET_REGION
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, subsettingEndpoint, subsettingApiKey }
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, subsettingEndpoint, subsettingApiKey, outputSubsetsBucket, outputSubsetsBucketRegion }
 
 /*
   dataBaseUrl -  (S3) URL root address where the data resides

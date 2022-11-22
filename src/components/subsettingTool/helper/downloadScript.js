@@ -1,10 +1,12 @@
-export const code = (dir="https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-3927f8d03660/") => (
+import {outputSubsetsBucket, outputSubsetsBucketRegion} from "../../../config"
+
+export const code = (dir=`https://${outputSubsetsBucket}.s3.amazonaws.com/subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-3927f8d03660/`) => (
 `
 import os
 import boto3
 from pathlib import Path 
-s3bucket = 'szg-ghrc-fcx-viz-output'
-AWSregion= 'us-east-1' 
+s3bucket = '${outputSubsetsBucket}'
+AWSregion= '${outputSubsetsBucketRegion}'
 s3 = boto3.resource('s3', region_name=AWSregion)
 bucket = s3.Bucket(s3bucket)
 
