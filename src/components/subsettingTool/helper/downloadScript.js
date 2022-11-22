@@ -18,7 +18,7 @@ subPrefix = f"subsets/{subsetFolder}"
 localDir = subsetFolder
 Path(subsetFolder).mkdir(parents=True, exist_ok=True)
 
-print("\nDownload starting...")
+print("Download starting...")
 for obj in bucket.objects.filter(Prefix=subPrefix):
     s3path, filename = os.path.split(obj.key)
     if(f"{s3path}/" != subPrefix):
@@ -32,6 +32,6 @@ for obj in bucket.objects.filter(Prefix=subPrefix):
         print(f'*Downloading {filename}....')
         bucket.download_file(obj.key, os.path.join(localDir, filename))
 
-print(f"\nDownload complete. Check './{subsetFolder}' dir.")
+print(f"Download complete. Check './{subsetFolder}' dir.")
 `
 );
