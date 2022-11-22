@@ -44,7 +44,7 @@ const getHref = (script) => {
   return URL.createObjectURL(file);
 }
 
-export default function RecipeReviewCard(props) {
+export default function SubsetCard(props) {
   const {subsetDir, subsetIndex} = props;
   const dlScript = downloadScript(subsetDir);
   const classes = useStyles();

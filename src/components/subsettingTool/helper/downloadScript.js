@@ -1,4 +1,4 @@
-export const code = (dir="subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-3927f8d03660/") => (
+export const code = (dir="https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-3927f8d03660/") => (
 `
 import os
 import boto3
@@ -8,7 +8,7 @@ AWSregion= 'us-east-1'
 s3 = boto3.resource('s3', region_name=AWSregion)
 bucket = s3.Bucket(s3bucket)
 
-subDir = 'https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset-221122105403-67bdeeb0-cd2b-42b7-930e-c137572ddeff/'
+subDir = '${dir}'
 subsetFolder = subDir.split('subsets/')[1]
 subPrefix = f"subsets/{subsetFolder}"
 
