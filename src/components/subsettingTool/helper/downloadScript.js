@@ -3,34 +3,33 @@ export const code = (dir="subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-39
 import os
 import boto3
 from pathlib import Path 
-
 s3bucket = 'szg-ghrc-fcx-viz-output'
 AWSregion= 'us-east-1' 
 s3 = boto3.resource('s3', region_name=AWSregion)
 bucket = s3.Bucket(s3bucket)
 
-subDir = '${dir}'
-subset = subDir.split('subsets/')[1]
+subDir = 'https://szg-ghrc-fcx-viz-output.s3.amazonaws.com/subsets/subset-221122105403-67bdeeb0-cd2b-42b7-930e-c137572ddeff/'
+subsetFolder = subDir.split('subsets/')[1]
+subPrefix = f"subsets/{subsetFolder}"
 
-downloadDir = str(os.path.join(Path.home(), "Downloads"));
-localDir = downloadDir+'/'+subset
-Path(localDir).mkdir(parents=True, exist_ok=True)
+# local path; The same dir, where the download script is.
+localDir = subsetFolder
+Path(subsetFolder).mkdir(parents=True, exist_ok=True)
 
-for obj in bucket.objects.filter(Prefix=subDir):
-    
+print("\nDownload starting...")
+for obj in bucket.objects.filter(Prefix=subPrefix):
     s3path, filename = os.path.split(obj.key)
-
-    if(s3path+'/' != subDir):
+    if(f"{s3path}/" != subPrefix):
         # if file inside another dir
         Dir = s3path.split('/')[-1]
-        Path(localDir+Dir).mkdir(parents=True, exist_ok=True)
-        print('*Downloading '+os.path.join(subset,Dir,filename)+'....')
-        bucket.download_file(obj.key, os.path.join(localDir,Dir,filename))
-    
-    elif(obj.key != subDir):
-        print('*Downloading '+os.path.join(subset,filename)+'....')
-        bucket.download_file(obj.key, os.path.join(localDir,filename))
+        # create that dir in local
+        Path(os.path.join(localDir,Dir)).mkdir(parents=True, exist_ok=True)
+        print(f'*Downloading {os.path.join(Dir, filename)}....')
+        bucket.download_file(obj.key, os.path.join(localDir, Dir, filename))
+    else:
+        print(f'*Downloading {filename}....')
+        bucket.download_file(obj.key, os.path.join(localDir, filename))
 
-print(f"Download complete. Check '{localDir}'")
+print(f"\nDownload complete. Check './{subsetFolder}' dir.")
 `
 );
