@@ -34,8 +34,13 @@ class SubsettingTool extends Component {
 
     handleStart = (event) => {
         event.stopPropagation();
-        // get the clock time from cesium, and assign it to start state
-        if (this.props.cesiumViewer.viewer) {
+        // if text input, take date from text field
+        if (event.target.value) {
+            this.setState({start: event.target.value})
+        }
+        // else if button pressed, take date from cesium viewer
+        else if (this.props.cesiumViewer.viewer) {
+            // get the clock time from cesium, and assign it to start state
             let currentTime = this.JulainToISO(this.props.cesiumViewer.viewer.clock.currentTime);
             let formattedCurrentTime = moment(currentTime).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC";
             this.setState({start: formattedCurrentTime});
@@ -44,8 +49,13 @@ class SubsettingTool extends Component {
 
     handleStop = (event) => {
         event.stopPropagation();
-        // get the clock time from cesium, and assign it to end state
-        if (this.props.cesiumViewer.viewer) {
+        // if text input, take date from text field
+        if (event.target.value) {
+            this.setState({end: event.target.value})
+        }
+        // if button pressed, take date from cesium viewer
+        else if (this.props.cesiumViewer.viewer) {
+            // get the clock time from cesium, and assign it to end state
             let currentTime = this.JulainToISO(this.props.cesiumViewer.viewer.clock.currentTime);
             let formattedCurrentTime = moment(currentTime).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC";
             this.setState({end: formattedCurrentTime});
@@ -70,8 +80,8 @@ class SubsettingTool extends Component {
       return (
         <div>
             <div>
-                <TextField id="standard-basic" style={{width: "100%"}} label="Start:" value={this.state.start && this.isoToGeroian(this.state.start)} />
-                <TextField id="standard-basic" style={{width: "100%"}} label="End:" value={this.state.end && this.isoToGeroian(this.state.end)} />
+                <TextField id="standard-basic" style={{width: "100%"}} label="Start:" value={this.state.start && (this.state.start)} onChange={this.handleStart}/>
+                <TextField id="standard-basic" style={{width: "100%"}} label="End:" value={this.state.end && (this.state.end)} onChange={this.handleStop}/>
                 <FormHelperText error={true}>{this.state.validationMessage}</FormHelperText>
             </div>
             <div className="center_horizontally_child">
