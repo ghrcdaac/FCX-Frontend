@@ -9,13 +9,15 @@ import { bodyForPost } from "./helper";
 
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 class SubsettingTool extends Component {
     constructor(props) {
         super(props);
         this.state = {
             start: "",
-            end: ""
+            end: "",
+            validationMessage: ""
         };
     }
 
@@ -51,21 +53,47 @@ class SubsettingTool extends Component {
 
     handleSubmit = (event) => {
         event.stopPropagation();
+        const {start, end} = this.state;
+        if (!this.validationCheck(start, end)) return;
         const { triggerSubsettingTool } = Resources;
-        triggerSubsettingTool.body = bodyForPost(this.state.start, this.state.end);
+        triggerSubsettingTool.body = bodyForPost(start, end);
         this.props.Post(triggerSubsettingTool); // Note: updating the redux state, implicitly done, by POST thunk. Cool!
-        this.setState({start: "", end: ""});
+        this.setState({start: "", end: "", validationMessage: ""});
+    }
+
+    validationCheck = (start, end) => {
+        // check if the start end is in correct format
+        if(!moment(start)) {
+            this.setState({validationMessage: "Start date time format is wrong."});
+            return false;
+        }
+        if(!moment(end)) {
+            this.setState({validationMessage: "End date time format is wrong."});
+            return false;
+        }
+        // check, end should be after start
+        if((moment(start).isAfter(end))){
+            this.setState({validationMessage: "End time should be greater than start time."});
+            return false;
+        }
+        //check if the subsetting is for more than 10 seconds.
+        if(moment(end).diff(moment(start), "seconds") < 10){
+            this.setState({validationMessage: "A valid subset should be greater than 10 seconds."});
+            return false;
+        }
+        return true;
     }
 
     render() {
       return (
         <div>
-            <div style={{marginBottom: "20px"}}>
+            <div>
                 <b>Outputs</b><br/>
                     Start: {this.state.start && this.isoToGeroian(this.state.start)}<br/>
                     End:   {this.state.end && this.isoToGeroian(this.state.end)}<br/>
             </div>
-            <div className="center_horizontally_child">
+            <FormHelperText error={true}>{this.state.validationMessage}</FormHelperText>
+            <div className="center_horizontally_child" style={{marginTop: "10px"}}>
                 <ButtonGroup aria-label="small outlined button group">
                     <Button onClick={this.handleStart}>Start</Button>
                     <Button onClick={this.handleStop}>Stop</Button>
