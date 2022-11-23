@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { mapStateToProps } from "../redux";
 
-import RecipeReviewCard from "./card";
+import SubsetCard from "./card";
 
 class SubsetsList extends Component {
     constructor(props) {
@@ -14,7 +14,7 @@ class SubsetsList extends Component {
         <div>
         {
             this.props.subsetsDir.map((dir, index) =>
-            <RecipeReviewCard subsetDir={dir} subsetIndex={index}/>)
+            <SubsetCard key={`subset-${index}`} subsetDir={dir} subsetIndex={index}/>)
         }
         </div>
       )

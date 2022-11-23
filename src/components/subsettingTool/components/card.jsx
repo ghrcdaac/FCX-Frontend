@@ -86,11 +86,9 @@ export default function SubsetCard(props) {
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
           <Typography paragraph>Code:</Typography>
-          <Typography paragraph>
             <CodeHighlight className="code_block">
               {dlScript}
             </CodeHighlight>
-          </Typography>
         </CardContent>
       </Collapse>
     </Card>
