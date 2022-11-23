@@ -207,7 +207,7 @@ let box = (campaign) => ({
               content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>
             },
         ],
-        x: (1920-400-40), y: (983-200), w: 400, h: 200 // based off component with .dock-layout class. TODO: make dynamic
+        x: (1920-400-40), y: (983-200), w: 400, h: 240 // based off component with .dock-layout class. TODO: make dynamic
       }
     ]
   }

@@ -1,8 +1,9 @@
 import {v4 as uuidv4} from 'uuid';
 import moment from "moment/moment";
 import {outputSubsetsBucket} from "../../../config";
+import { validationCheck } from './validation';
 
-export function bodyForPost(start, end) {
+function bodyForPost(start, end) {
     /**
      * Take in start and end datetime.
      * generate a random 'dir2' (inside subset dir inside bucket)
@@ -61,3 +62,5 @@ export function bodyForPost(start, end) {
         }
     }
 }
+
+export {bodyForPost, validationCheck};
