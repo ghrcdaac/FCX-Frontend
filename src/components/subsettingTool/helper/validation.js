@@ -10,12 +10,12 @@ export const validationCheck = (start, end, validationMessageSet) => {
         validationMessageSet("End date is empty.");
         return false;
     }
-    if(!moment(start)) {
-        validationMessageSet("Start date time format is wrong.");
+    if(!moment(start, "YYYY-MM-DD HH:mm:ss UTC").isValid()) {
+        validationMessageSet("Start date time format is wrong. (format: YYYY-MM-DD HH:mm:ss UTC)");
         return false;
     }
-    if(!moment(end)) {
-        validationMessageSet("End date time format is wrong.");
+    if(!moment(end, "YYYY-MM-DD HH:mm:ss UTC").isValid()) {
+        validationMessageSet("End date time format is wrong. (format: YYYY-MM-DD HH:mm:ss UTC)");
         return false;
     }
     // check, end should be after start
