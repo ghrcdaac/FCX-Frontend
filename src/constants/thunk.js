@@ -67,7 +67,7 @@ const errorDispatchAction = (type, payload) => ({type, payload});
 
 const handleSuccess = (status, body) => {
   if (200 <= status < 300) {
-    toast.success('Subsetting invoke successful. It will take some time to finish subsetting.', {
+    toast.success('Subsetting invocation successful. It will take some time to finish subsetting. Please look inside subsets tab.', {
       position: "bottom-left",
       autoClose: 5000,
       hideProgressBar: false,
