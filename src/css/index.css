@@ -50,5 +50,9 @@ a {
 }
 
 .dock-panel.dock-style-subsettingtool{
-  inset: auto 0 0 auto; /* Bottom Right */
+  inset: auto 10px 35px auto; /* Bottom Right */
+}
+
+.dock-panel.dock-style-subsettingtool .dock-panel-max-btn{
+  display: none;
 }
