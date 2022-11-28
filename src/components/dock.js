@@ -204,10 +204,12 @@ let box = (campaign) => ({
               ),
               id: "subsettingTool",
               closable: true,
-              content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>
+              content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>,
+              group: "subsettingtool"
             },
         ],
-        x: (1920-400-40), y: (983-200), w: 400, h: 240 // based off component with .dock-layout class. TODO: make dynamic
+        // x: (1920-400-40), y: (983-200), w: 400, h: 240 // based off component with .dock-layout class. making it movable, takes over css for bottom right
+        w: 400, h: 240 // always on bottom right, with .dock-panel.dock-style-subsettingtool css. linked using xxx-group
       }
     ]
   }
