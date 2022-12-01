@@ -2,6 +2,9 @@ import {v4 as uuidv4} from 'uuid';
 import moment from "moment/moment";
 import {outputSubsetsBucket} from "../../../config";
 import { validationCheck } from './validation';
+import Jsona from 'jsona';
+
+const dataFormatter = new Jsona();
 
 function bodyForPost(start, end) {
     /**
@@ -14,17 +17,15 @@ function bodyForPost(start, end) {
     const outputbucket = outputSubsetsBucket;
     const dir1 = "subsets";
     const dir2 = `subset-${moment().format("YYMMDDHHmmss")}-${uuidv4()}`; // unique dir, where subsets sits
-    return {
-        "data": {
-            "type": "subset_trigger_request",
-            "attributes": {
-                "subDir": `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,
-                "date": date,
-                "Start": startDateTime,
-                "End": endDateTime
-            }
-        }
+    const body =  {
+        "type": "subset_trigger_request",
+        "subDir": `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,
+        "date": date,
+        "Start": startDateTime,
+        "End": endDateTime
     }
+    const serializedPost = dataFormatter.serialize({stuff: body});
+    return serializedPost;
 }
 
 export {bodyForPost, validationCheck};
