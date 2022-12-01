@@ -28,10 +28,10 @@ export const Get = Resources => {
   return async (dispatch, getState) => {
     dispatch(initDispatchAction(init, undefined));
     return apiCaller.get(Resources.url)
-      .then(data => {
-        handleSuccess(data.status, data.body);
-        dispatch(successDispatchAction(success, data));
-        return data;
+      .then(res => {
+        handleSuccess(res.status, res.body);
+        dispatch(successDispatchAction(success, res));
+        return res;
       })
       .catch(err => {
         handleError(err.status, "Something went wrong. Call Support.");
@@ -46,10 +46,10 @@ export const Post = Resources => {
   return async (dispatch, getState) => {
     dispatch(initDispatchAction(init, undefined));
     return apiCaller.post(Resources.url, Resources.body)
-      .then(data => {
-        handleSuccess(data.status, data.body);
-        dispatch(successDispatchAction(success, data));
-        return data;
+      .then(res => {
+        handleSuccess(res.status, res.body);
+        dispatch(successDispatchAction(success, res));
+        return res;
       })
       .catch(err => {
         handleError(400, "Something went wrong. Call Support.");
