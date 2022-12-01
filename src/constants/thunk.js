@@ -1,7 +1,9 @@
 import APICall from "./ApiCall";
 import { subsettingApiKey } from "../config";
 import { toast } from 'react-toastify';
+import Jsona from 'jsona';
 
+const dataFormatter = new Jsona();
 const apiCaller = new APICall();
 apiCaller.setHeader(subsettingApiKey);
 
@@ -29,9 +31,11 @@ export const Get = Resources => {
     dispatch(initDispatchAction(init, undefined));
     return apiCaller.get(Resources.url)
       .then(res => {
-        handleSuccess(res.status, res.body);
-        dispatch(successDispatchAction(success, res));
-        return res;
+        let jsonApiSpecificationData = res.data;
+        let deserializedData = dataFormatter.deserialize(jsonApiSpecificationData);
+        handleSuccess(res.status, deserializedData);
+        dispatch(successDispatchAction(success, deserializedData));
+        return deserializedData;
       })
       .catch(err => {
         handleError(err.status, "Something went wrong. Call Support.");
@@ -47,9 +51,11 @@ export const Post = Resources => {
     dispatch(initDispatchAction(init, undefined));
     return apiCaller.post(Resources.url, Resources.body)
       .then(res => {
-        handleSuccess(res.status, res.body);
-        dispatch(successDispatchAction(success, res));
-        return res;
+        let jsonApiSpecificationData = res.data;
+        let deserializedData = dataFormatter.deserialize(jsonApiSpecificationData);
+        handleSuccess(res.status, deserializedData);
+        dispatch(successDispatchAction(success, deserializedData));
+        return deserializedData;
       })
       .catch(err => {
         handleError(400, "Something went wrong. Call Support.");

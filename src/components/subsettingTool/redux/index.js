@@ -31,7 +31,7 @@ export function onTriggeredSubsettingTool(state = initialState, action = {}) {
     }
 
     case success: {
-      const newSubsetDir = action.payload.data.subsetDir
+      const newSubsetDir = action.payload.subsetDir
       return {
         ...state,
         subsettingStarted: true,
