@@ -15,50 +15,14 @@ function bodyForPost(start, end) {
     const dir1 = "subsets";
     const dir2 = `subset-${moment().format("YYMMDDHHmmss")}-${uuidv4()}`; // unique dir, where subsets sits
     return {
-        body: {
-            subDir: `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,
-            date,
-            Start: startDateTime,
-            End: endDateTime,
-            latRange: "-",
-            lonRange: "-",
-            DataSets: [
-                {
-                    id: "1",
-                    cat_id: "CRS",
-                    state: 1
-                },
-                {
-                    id: "2",
-                    cat_id: "LIP",
-                    state: 1
-                },
-                {
-                    id: "3",
-                    cat_id: "FEGS",
-                    state: 1
-                },
-                {
-                    id: "4",
-                    cat_id: "LMA",
-                    state: 1
-                },
-                {
-                    id: "5",
-                    cat_id: "LIS",
-                    state: 1
-                },
-                {
-                    id: "6",
-                    cat_id: "GLM",
-                    state: 1
-                },
-                {
-                    id: "7",
-                    cat_id: "ABI",
-                    state: 1
-                }
-            ]
+        "data": {
+            "type": "subset_trigger_request",
+            "attributes": {
+                "subDir": `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,
+                "date": date,
+                "Start": startDateTime,
+                "End": endDateTime
+            }
         }
     }
 }
