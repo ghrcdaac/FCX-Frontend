@@ -9,6 +9,8 @@ import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
+import SubsettingTool from "./subsettingTool";
+import {SubsetsList} from "./subsettingTool/components";
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -27,6 +29,7 @@ import "../css/dock.css"
 // import { url } from "inspector";
 
 let viewer
+let viewerObj = { viewer: null } // to be able to pass by reference to other components.
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -175,10 +178,41 @@ let box = (campaign) => ({
             id: "tabTimeline",
             content: <FcxTimeline campaign={campaign} />,
           },
+          {
+            title: (
+              <div>
+                <FiLayers /> Subsets{" "}
+              </div>
+            ),
+            id: "subsets",
+            content: <SubsetsList/>,
+          },
         ],
       },
     ],
   },
+  floatbox: {
+    mode: 'float',
+    children: [
+      {
+        tabs: [
+            {
+              title: (
+                <div>
+                  <FiLayers /> Subsetting Tool{" "}
+                </div>
+              ),
+              id: "subsettingTool",
+              closable: true,
+              content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>,
+              group: "subsettingtool"
+            },
+        ],
+        // x: (1920-400-40), y: (983-200), w: 400, h: 240 // based off component with .dock-layout class. making it movable, takes over css for bottom right
+        w: 400, h: 240 // always on bottom right, with .dock-panel.dock-style-subsettingtool css. linked using xxx-group
+      }
+    ]
+  }
 })
 
 let createViewer = () => {
@@ -199,6 +233,8 @@ let createViewer = () => {
     imageryProviderViewModels: getProviderViewModels(),
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
+
+  viewerObj.viewer = viewer;
 
   // geoJson.fieldCampaignImages.forEach((element)=>{
   //   var image = new Image()

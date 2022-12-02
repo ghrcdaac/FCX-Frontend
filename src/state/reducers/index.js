@@ -1,4 +1,4 @@
-import { selectedLayers, layerStatus } from "./listReducer"
+import reducers from "./listReducer"
 import { combineReducers } from "redux"
 import { cloneDeep } from 'lodash'
 
@@ -11,10 +11,7 @@ const initialState = {
   }
 }
 
-const appReducer = combineReducers({
-  selectedLayers,
-  layerStatus,
-})
+const appReducer = combineReducers({...reducers});
 
 const rootReducer = (state, action) => {
   if (action.type === "RESET_STORE"){
