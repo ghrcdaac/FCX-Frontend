@@ -17,6 +17,7 @@ import Settings from "./settings"
 import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
+import InstrumentsHistogram from "./instrumentsHistogram";
 
 import Modal from "./Modal"
 import Marker from './Marker'
@@ -175,6 +176,15 @@ let box = (campaign) => ({
             id: "tabTimeline",
             content: <FcxTimeline campaign={campaign} />,
           },
+          {
+            title: (
+              <div>
+                <FiLayers /> Histogram{" "}
+              </div>
+            ),
+            id: "histogram",
+            content: <InstrumentsHistogram/>,
+          }
         ],
       },
     ],
