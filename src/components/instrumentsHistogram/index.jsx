@@ -15,6 +15,8 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import ListItem from '@material-ui/core/ListItem';
 
+import {HistogramVizBox} from "./components";
+
 ChartJS.register(
 CategoryScale,
 LinearScale,
@@ -45,19 +47,10 @@ let data = {
     ],
   };
 
-let options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-      },
-      title: {
-        display: true,
-        text: 'Histogram for FlashID vs Peak',
-      },
-    },
-  };
-
+let labels = {
+    xaxis: "FlashID",
+    yaxis: JSON.parse(rawData["data"]["attributes"]["data"])["columns"][0]
+}
 
 class InstrumentsHistogram extends Component {
     /**
@@ -105,7 +98,7 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
-            <Bar options={options} data={data} />
+            <HistogramVizBox labels={labels} data={data}/>
         </div>
       )
     }
