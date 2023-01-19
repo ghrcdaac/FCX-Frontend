@@ -11,6 +11,10 @@ import {
   } from 'chart.js';
   import { Bar } from 'react-chartjs-2';
 
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import ListItem from '@material-ui/core/ListItem';
+
 ChartJS.register(
 CategoryScale,
 LinearScale,
@@ -30,13 +34,12 @@ let rawData = {
     }
 }
 
-
 let data = {
     labels: JSON.parse(rawData["data"]["attributes"]["data"])["index"],
     datasets: [
       {
-        label: 'Dataset 1',
-        data: JSON.parse(rawData["data"]["attributes"]["data"])["index"],
+        label: 'Peak',
+        data: JSON.parse(rawData["data"]["attributes"]["data"])["data"],
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       }
     ],
@@ -50,7 +53,7 @@ let options = {
       },
       title: {
         display: true,
-        text: 'Chart.js Bar Chart',
+        text: 'Histogram for FlashID vs Peak',
       },
     },
   };
@@ -64,12 +67,44 @@ class InstrumentsHistogram extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {};
+        this.state = {
+            anchorEl: null,
+            selectedInstrument: "FEGS"
+        };
     }
+
+    handleInstrumentSelectionClick = (event) => {
+        this.setState({anchorEl: event.currentTarget});
+    };
+
+    handleInstrumentSelectionSaveAndClose = (event) => {
+        event.stopPropagation();
+        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null});
+    };
+
+    handleInstrumentSelectionClose = (event) => {
+        event.stopPropagation();
+        this.setState({anchorEl: null});
+    };
 
     render() {
       return (
         <div>
+            Instrument: <Button aria-controls="simple-menu" aria-haspopup="true" onClick={this.handleInstrumentSelectionClick}>
+                {this.state.selectedInstrument}
+            </Button>
+            <Menu
+            id="simple-menu"
+            anchorEl={this.state.anchorEl}
+            keepMounted
+            open={Boolean(this.state.anchorEl)}
+            onClose={this.handleInstrumentSelectionClose}
+            >
+                <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="FEGS">FEGS</ListItem>
+                <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="LIP">LIP</ListItem>
+                <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
+                <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
+            </Menu>
             <Bar options={options} data={data} />
         </div>
       )
