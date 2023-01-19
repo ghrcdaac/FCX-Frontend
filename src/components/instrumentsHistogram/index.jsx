@@ -32,11 +32,11 @@ let rawData = {
 
 
 let data = {
-    labels: JSON.parse(x["data"]["attributes"]["data"])["index"],
+    labels: JSON.parse(rawData["data"]["attributes"]["data"])["index"],
     datasets: [
       {
         label: 'Dataset 1',
-        data: JSON.parse(x["data"]["attributes"]["data"])["index"],
+        data: JSON.parse(rawData["data"]["attributes"]["data"])["index"],
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       }
     ],
