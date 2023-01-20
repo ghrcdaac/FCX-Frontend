@@ -1,14 +1,36 @@
-/** 
-* Calls the api and fetches the data.
-* @summary API call to the histogram preprocessing lambda backend and receives data.
-* @param {instruments} parameterNameHere - Brief description of the parameter here. Note: For other notations of data types, please refer to JSDocs: DataTypes command.
-* @return {ReturnValueDataTypeHere} Brief description of the returning value here.
+import axios from "axios";
+
+/**
+* A api caller.
+* TODO: Use this through thunk, if thunk is available in later merge.
+* instead of direct usage.
 */
+export default class APICaller {
+  constructor() {
+    this.config = {
+      headers: {
+        Accept: "application/json",
+      }
+    };
+  }
 
-function APICALL(URL) {
-   // call the api and fetch the data in appropriate format
-}
+  setHeader = apiKey => {
+    if (apiKey) {
+      this.config.headers['x-api-key'] = apiKey;
+    }
+  };
 
-function InstrumentsHandler(instrumentType, datetime, coordType, dataType, params, pageno, pagesize, density) {
+  async get(resourceURL, apiKey) {
+    if (apiKey) this.setHeader(apiKey);
+    return await axios
+      .get(resourceURL, this.config)
+      .catch(e => e.response);
+  }
 
+  async post(resourceURL, body, apiKey) {
+    if (apiKey) this.setHeader(apiKey);
+    return await axios
+      .post(resourceURL, body, this.config)
+      .catch(e => e.response);
+  }
 }
