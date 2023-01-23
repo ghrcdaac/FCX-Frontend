@@ -11,6 +11,7 @@ import {
   } from 'chart.js';
 
 import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Menu from '@material-ui/core/Menu';
 import ListItem from '@material-ui/core/ListItem';
 
@@ -56,9 +57,9 @@ class InstrumentsHistogram extends Component {
             anchorEl: null,
             selectedInstrument: "FEGS",
             datetime: "2017-03-21", //later get it from redux store
-            pagesize: "200",
-            pageno: "1",
-            density: "1",
+            pagesize: 200,
+            pageno: 1,
+            density: 1,
             // below depend on the type of instrument selected.
             coordType: "FlashID", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "peak", // const thing for a instrument type, for now. Later make it selectable???
@@ -97,6 +98,32 @@ class InstrumentsHistogram extends Component {
         this.setState({anchorEl: null});
     };
 
+    handlePageBack = () => {
+        this.setState((prevState, props) => {
+        if ((prevState.pageno > 1)) return ({
+            pageno: prevState.pageno - 1
+          })
+        }, function () {
+            let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
+                InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
+                    let {data, labels} = res;
+                    this.setState({data, labels});
+                });
+        });
+    }
+
+    handlePageNext = () => {
+        this.setState((prevState, props) => ({
+                pageno: prevState.pageno + 1
+              }), function () {
+                let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
+                InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
+                    let {data, labels} = res;
+                    this.setState({data, labels});
+                });
+              });
+        }
+
     render() {
       return (
         <div>
@@ -115,6 +142,16 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
+            <ButtonGroup size="small" aria-label="large outlined primary button group">
+                <Button
+                    color="disabled"
+                    onClick={this.handlePageBack}
+                > Back </Button>
+                <Button
+                    color="primary"
+                    onClick={this.handlePageNext}
+                > Next </Button>
+            </ButtonGroup>
             {(this.state.data && this.state.labels) ?
              <HistogramVizBox labels={this.state.labels} data={this.state.data}/> :
              "Loading..."

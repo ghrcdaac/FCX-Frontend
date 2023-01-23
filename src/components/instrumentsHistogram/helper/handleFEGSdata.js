@@ -5,9 +5,9 @@ export default async function fetchFEGSData(datetime="2017-03-21", pagesize="200
 * FEGS data handler
 * @summary Takes the necessary common data from the input fields and fills some of the instrument specific fields, needed for the FEGS data fetch.
 * @param {string} datetime - The date time of the data collected by FEGS instrument
-* @param {string} pagesize- The data elements per page.
-* @param {string} pageno - The page from which data is to be fetched.
-* @param {string} density - The amount of data that is sampled out of the page. 100%, 50% or 25%
+* @param {number} pagesize- The data elements per page.
+* @param {number} pageno - The page from which data is to be fetched.
+* @param {number} density - The amount of data that is sampled out of the page. 100%, 50% or 25%
 * @return {object} with keys data and labels
 */
     let coordType = "FlashID";
@@ -27,9 +27,9 @@ export default async function fetchFEGSData(datetime="2017-03-21", pagesize="200
                             "coord_type" : coordType,
                             "data_type" : dataType,
                             "params" : params,
-                            "pageno" : pageno,
-                            "pagesize" : pagesize,
-                            "density": density,
+                            "pageno" : String(pageno),
+                            "pagesize" : String(pagesize),
+                            "density": String(density),
                         }
                     }
                 }
