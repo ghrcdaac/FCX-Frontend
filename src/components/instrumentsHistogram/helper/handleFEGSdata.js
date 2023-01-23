@@ -35,20 +35,22 @@ export default async function fetchFEGSData(datetime="2017-03-21", pagesize="200
                 }
             
     let rawData = await apiCaller.post(url, body);
+    let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
     let data = {
-        labels: JSON.parse(rawData["data"]["attributes"]["data"])["index"],
+        labels: preprocessedData["index"],
         datasets: [
           {
             label: 'Peak',
-            data: JSON.parse(rawData["data"]["attributes"]["data"])["data"],
+            data: preprocessedData["data"],
             backgroundColor: 'rgba(255, 99, 132, 0.5)',
           }
         ],
       };
     let labels = {
         xaxis: "FlashID",
-        yaxis: JSON.parse(rawData["data"]["attributes"]["data"])["columns"][0]
+        yaxis: preprocessedData["columns"][0]
     }
+
     return {
         data, labels
     }
