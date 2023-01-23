@@ -14,6 +14,8 @@ import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Menu from '@material-ui/core/Menu';
 import ListItem from '@material-ui/core/ListItem';
+import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
 
 import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
@@ -44,6 +46,21 @@ async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, de
     }
     return handleFEGSdata(datetime, pagesize, pageno, density);
 }
+
+const densityMarks = [
+    {
+      value: 0.1,
+      label: '10%',
+    },
+    {
+      value: 0.5,
+      label: '50%',
+    },
+    {
+      value: 1.0,
+      label: '100%',
+    }
+  ];
 
 class InstrumentsHistogram extends Component {
     /**
@@ -124,6 +141,16 @@ class InstrumentsHistogram extends Component {
               });
         }
 
+    handleDensity = (event, density) => {
+        this.setState({ density }, function () {
+            let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
+            InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
+                let {data, labels} = res;
+                this.setState({data, labels});
+            });
+          });
+    };
+
     render() {
       return (
         <div>
@@ -142,9 +169,24 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
+            <div>
+                <Typography id="discrete-slider-small-steps" gutterBottom>
+                  Density
+                </Typography>
+                <Slider
+                defaultValue={0.50}
+                aria-labelledby="discrete-slider-small-steps"
+                step={null}
+                marks={densityMarks}
+                min={0.0}
+                max={1.0}
+                valueLabelDisplay="auto"
+                onChange={this.handleDensity}
+                />
+            </div>
             <ButtonGroup size="small" aria-label="large outlined primary button group">
                 <Button
-                    color="disabled"
+                    color="default"
                     onClick={this.handlePageBack}
                 > Back </Button>
                 <Button
