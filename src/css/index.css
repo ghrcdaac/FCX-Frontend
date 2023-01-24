@@ -30,3 +30,14 @@ a {
   width: 100vw;
   height: 32px;
 }
+
+.histogram-density-slider {
+  display: flex;
+  width: 20%;
+  margin-right: 3rem;
+}
+
+.histogram-sampling-box {
+  display: flex;
+  flex-direction: row-reverse;
+}

@@ -155,31 +155,33 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
-            <div>
-                <Typography id="discrete-slider-small-steps" gutterBottom>
-                  Density
-                </Typography>
-                <Slider
-                defaultValue={0.50}
-                aria-labelledby="discrete-slider-small-steps"
-                step={null}
-                marks={densityMarks}
-                min={0.0}
-                max={1.0}
-                valueLabelDisplay="auto"
-                onChange={this.handleDensity}
-                />
+            <div className="histogram-sampling-box">
+                <ButtonGroup size="small" aria-label="large outlined primary button group">
+                    <Button
+                        color="default"
+                        onClick={this.handlePageBack}
+                    > Back </Button>
+                    <Button
+                        color="primary"
+                        onClick={this.handlePageNext}
+                    > Next </Button>
+                </ButtonGroup>
+                <div className="histogram-density-slider">
+                    <Typography id="discrete-slider-small-steps" gutterBottom>
+                    Density
+                    </Typography>
+                    <Slider
+                    defaultValue={0.50}
+                    aria-labelledby="discrete-slider-small-steps"
+                    step={null}
+                    marks={densityMarks}
+                    min={0.0}
+                    max={1.0}
+                    valueLabelDisplay="auto"
+                    onChange={this.handleDensity}
+                    />
+                </div>
             </div>
-            <ButtonGroup size="small" aria-label="large outlined primary button group">
-                <Button
-                    color="default"
-                    onClick={this.handlePageBack}
-                > Back </Button>
-                <Button
-                    color="primary"
-                    onClick={this.handlePageNext}
-                > Next </Button>
-            </ButtonGroup>
             {(this.state.data && this.state.labels) ?
              <HistogramVizBox labels={this.state.labels} data={this.state.data}/> :
              "Loading..."
