@@ -34,7 +34,7 @@ a {
 .histogram-density-slider {
   display: flex;
   width: 20%;
-  margin-right: 3rem;
+  margin: auto 3rem;
 }
 
 .histogram-sampling-box {

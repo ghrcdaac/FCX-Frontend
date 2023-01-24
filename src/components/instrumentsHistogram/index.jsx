@@ -16,6 +16,7 @@ import Menu from '@material-ui/core/Menu';
 import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
+import TextField from '@material-ui/core/TextField';
 
 import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
@@ -113,6 +114,18 @@ class InstrumentsHistogram extends Component {
         this.setState({anchorEl: null});
     };
 
+    handleSizePerPage = (event) => {
+        let pagesize = event.target.value;
+        if (pagesize > 0) this.setState({ pagesize });
+    }
+
+    handleSizePerPageSumbit = (event) => {
+        if (event.key === 'Enter') {
+            event.stopPropagation();
+            this.fetchDataAndUpdateState();
+        }
+    }
+
     handlePageBack = () => {
         this.setState((prevState, props) => {
         if ((prevState.pageno > 1)) return ({
@@ -132,9 +145,7 @@ class InstrumentsHistogram extends Component {
         }
 
     handleDensity = (event, density) => {
-        this.setState({ density }, function () {
-            return this.fetchDataAndUpdateState();
-          });
+        this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
     };
 
     render() {
@@ -167,9 +178,9 @@ class InstrumentsHistogram extends Component {
                     > Next </Button>
                 </ButtonGroup>
                 <div className="histogram-density-slider">
-                    <Typography id="discrete-slider-small-steps" gutterBottom>
+                    {/* <Typography id="discrete-slider-small-steps" gutterBottom>
                     Density
-                    </Typography>
+                    </Typography> */}
                     <Slider
                     defaultValue={0.50}
                     aria-labelledby="discrete-slider-small-steps"
@@ -181,6 +192,19 @@ class InstrumentsHistogram extends Component {
                     onChange={this.handleDensity}
                     />
                 </div>
+                <TextField
+                    inputProps={{type: "number"}}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    id="outlined-number"
+                    label="Data Per page"
+                    value={this.state.pagesize}
+                    min={1}
+                    onChange={this.handleSizePerPage}
+                    onKeyPress={this.handleSizePerPageSumbit}
+                    variant="outlined"
+                />
             </div>
             {(this.state.data && this.state.labels) ?
              <HistogramVizBox labels={this.state.labels} data={this.state.data}/> :
