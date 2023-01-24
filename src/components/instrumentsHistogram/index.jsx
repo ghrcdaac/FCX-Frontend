@@ -49,8 +49,8 @@ async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, de
 
 const densityMarks = [
     {
-      value: 0.1,
-      label: '10%',
+      value: 0.2,
+      label: '20%',
     },
     {
       value: 0.5,
@@ -88,6 +88,10 @@ class InstrumentsHistogram extends Component {
 
     componentDidMount() {
         // using the inital state, fetch the data and labels and set it in state
+        this.fetchDataAndUpdateState();
+    }
+
+    fetchDataAndUpdateState = () => {
         let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
         InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
             let {data, labels} = res;
@@ -101,13 +105,7 @@ class InstrumentsHistogram extends Component {
 
     handleInstrumentSelectionSaveAndClose = (event) => {
         event.stopPropagation();
-        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null}).then(() => {
-            let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-            InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
-                let {data, labels} = res;
-                this.setState({data, labels});
-            });
-        });
+        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null}).then(() => this.fetchDataAndUpdateState());
     };
 
     handleInstrumentSelectionClose = (event) => {
@@ -121,11 +119,7 @@ class InstrumentsHistogram extends Component {
             pageno: prevState.pageno - 1
           })
         }, function () {
-            let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-                InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
-                    let {data, labels} = res;
-                    this.setState({data, labels});
-                });
+            return this.fetchDataAndUpdateState();
         });
     }
 
@@ -133,21 +127,13 @@ class InstrumentsHistogram extends Component {
         this.setState((prevState, props) => ({
                 pageno: prevState.pageno + 1
               }), function () {
-                let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-                InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
-                    let {data, labels} = res;
-                    this.setState({data, labels});
-                });
+                return this.fetchDataAndUpdateState();
               });
         }
 
     handleDensity = (event, density) => {
         this.setState({ density }, function () {
-            let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-            InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
-                let {data, labels} = res;
-                this.setState({data, labels});
-            });
+            return this.fetchDataAndUpdateState();
           });
     };
 
