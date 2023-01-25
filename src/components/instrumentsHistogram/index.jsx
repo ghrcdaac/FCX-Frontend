@@ -21,6 +21,7 @@ import TextField from '@material-ui/core/TextField';
 import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
 import handleLIPdata from "./helper/handleLIPdata";
+import handleCRSdata from "./helper/handleCRSdata";
 
 ChartJS.register(
 CategoryScale,
@@ -47,6 +48,9 @@ async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, de
         return handleFEGSdata(datetime, pagesize, pageno, density);
     } else if (instrumentType == "LIP") {
         return handleLIPdata(datetime, pagesize, pageno, density);
+    } else if (instrumentType == "CRS") {
+        let params="1011.825";
+        return handleCRSdata(datetime, params, pagesize, pageno, density);
     }
     return handleFEGSdata(datetime, pagesize, pageno, density);
 }
@@ -76,7 +80,7 @@ class InstrumentsHistogram extends Component {
         super(props);
         this.state = {
             anchorEl: null,
-            selectedInstrument: "FEGS",
+            selectedInstrument: "CRS",
             datetime: "2017-03-21", //later get it from redux store
             pagesize: 200,
             pageno: 1,
@@ -171,6 +175,26 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
+            {
+                (this.state.selectedInstrument == "CRS") &&
+                <div className="histogram-params-selection">
+                    <TextField
+                        id="outlined-select-currency"
+                        select
+                        label="params"
+                        value={this.state.params}
+                        onChange={this.handleParams}
+                        // helperText="Please select params"
+                        variant="outlined"
+                        >
+                        {/* {currencies.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                            </MenuItem>
+                        ))} */}
+                    </TextField>
+                </div>
+            }
             <div className="histogram-sampling-box">
                 <ButtonGroup size="small" aria-label="large outlined primary button group">
                     <Button
