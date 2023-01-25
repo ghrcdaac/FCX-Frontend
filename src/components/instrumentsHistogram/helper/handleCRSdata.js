@@ -1,6 +1,6 @@
 import APICaller from "./apiCaller.js";
 
-export default async function fetchLIPData(datetime="2017-05-17", params="1011.825", pagesize="200", pageno="1", density="1") {
+export default async function fetchCRSData(datetime="2017-05-17", params="1011.825", pagesize="200", pageno="1", density="1") {
 /** 
 * LIP data handler
 * @summary Takes the necessary common data from the input fields and fills some of the instrument specific fields, needed for the FEGS data fetch.

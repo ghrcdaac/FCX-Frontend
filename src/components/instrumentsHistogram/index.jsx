@@ -81,8 +81,8 @@ class InstrumentsHistogram extends Component {
         this.state = {
             anchorEl: null,
             selectedInstrument: "CRS",
-            datetime: "2017-03-21", //later get it from redux store
-            pagesize: 200,
+            datetime: "2017-05-17", //later get it from redux store
+            pagesize: 20,
             pageno: 1,
             density: 1,
             // below depend on the type of instrument selected.
