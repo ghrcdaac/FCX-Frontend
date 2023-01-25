@@ -137,9 +137,11 @@ class InstrumentsHistogram extends Component {
     }
 
     handlePageNext = () => {
-        this.setState((prevState, props) => ({
-                pageno: prevState.pageno + 1
-              }), function () {
+        this.setState((prevState, props) => {
+            if (prevState.data && (prevState.data.datasets[0].data.length !== 0) && (prevState.data.labels.length !== 0)) {
+              return { pageno: prevState.pageno + 1 }
+            }
+        }, function () {
                 return this.fetchDataAndUpdateState();
               });
         }
