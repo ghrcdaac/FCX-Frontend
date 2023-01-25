@@ -20,6 +20,7 @@ import TextField from '@material-ui/core/TextField';
 
 import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
+import handleLIPdata from "./helper/handleLIPdata";
 
 ChartJS.register(
 CategoryScale,
@@ -44,6 +45,8 @@ async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, de
      */
     if (instrumentType == "FEGS") {
         return handleFEGSdata(datetime, pagesize, pageno, density);
+    } else if (instrumentType == "LIP") {
+        return handleLIPdata(datetime, pagesize, pageno, density);
     }
     return handleFEGSdata(datetime, pagesize, pageno, density);
 }
