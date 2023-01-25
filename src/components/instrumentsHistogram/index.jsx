@@ -106,7 +106,7 @@ class InstrumentsHistogram extends Component {
 
     handleInstrumentSelectionSaveAndClose = (event) => {
         event.stopPropagation();
-        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null}).then(() => this.fetchDataAndUpdateState());
+        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null}, function () { return this.fetchDataAndUpdateState() });
     };
 
     handleInstrumentSelectionClose = (event) => {

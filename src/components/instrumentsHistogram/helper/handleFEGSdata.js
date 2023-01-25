@@ -40,15 +40,15 @@ export default async function fetchFEGSData(datetime="2017-03-21", pagesize="200
         labels: preprocessedData["index"],
         datasets: [
           {
-            label: 'Peak',
+            label: preprocessedData["columns"][0],
             data: preprocessedData["data"],
             backgroundColor: 'rgba(255, 99, 132, 0.5)',
           }
         ],
       };
     let labels = {
-        xaxis: "FlashID",
-        yaxis: preprocessedData["columns"][0]
+        xaxis: coordType,
+        yaxis: dataType
     }
 
     return {
