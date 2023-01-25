@@ -17,11 +17,12 @@ import ListItem from '@material-ui/core/ListItem';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
 import handleLIPdata from "./helper/handleLIPdata";
-import handleCRSdata from "./helper/handleCRSdata";
+import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
 
 ChartJS.register(
 CategoryScale,
@@ -90,7 +91,8 @@ class InstrumentsHistogram extends Component {
             dataType: "peak", // const thing for a instrument type, for now. Later make it selectable???
             params: "None", // only for certain instruments
             data: null,
-            labels: null
+            labels: null,
+            paramsList: null
         };
     }
 
@@ -101,6 +103,11 @@ class InstrumentsHistogram extends Component {
 
     fetchDataAndUpdateState = () => {
         let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
+        if (selectedInstrument == "CRS") {
+            fetchCRSparams(datetime).then((data) => {
+                this.setState({paramsList: data});
+            });
+        }
         InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
             let {data, labels} = res;
             this.setState({data, labels});
@@ -183,15 +190,15 @@ class InstrumentsHistogram extends Component {
                         select
                         label="params"
                         value={this.state.params}
-                        onChange={this.handleParams}
+                        // onChange={this.handleParams}
                         // helperText="Please select params"
                         variant="outlined"
                         >
-                        {/* {currencies.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                            {option.label}
+                        {this.state.paramsList && this.state.paramsList.map((elem) => (
+                            <MenuItem key={elem} value={elem}>
+                            {elem}
                             </MenuItem>
-                        ))} */}
+                        ))}
                     </TextField>
                 </div>
             }
