@@ -102,8 +102,9 @@ class InstrumentsHistogram extends Component {
     }
 
     fetchDataAndUpdateState = () => {
+        // Do the following steps to preprare necessary data before handling the vizs specific to a instrument.
         let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-        if (selectedInstrument == "CRS") {
+        if (selectedInstrument == "CRS" && this.state.paramsList==null) {
             fetchCRSparams(datetime).then((data) => {
                 this.setState({paramsList: data});
             });
@@ -115,13 +116,26 @@ class InstrumentsHistogram extends Component {
     }
 
     handleInstrumentSelectionClick = (event) => {
+        event.stopPropagation();
         this.setState({anchorEl: event.currentTarget});
     };
 
     handleInstrumentSelectionSaveAndClose = (event) => {
+        // after a new instrument is selected for the histogram viz, do the following steps.
         event.stopPropagation();
-        this.setState({selectedInstrument: event.target.innerHTML, anchorEl: null}, function () { return this.fetchDataAndUpdateState() });
+        this.setState({selectedInstrument: event.target.innerHTML,
+            anchorEl: null,
+            data: null,
+            labels: null,
+            paramsList: null,
+            params: "None"
+        }, function () { return this.fetchDataAndUpdateState() });
     };
+
+    handleParamsSelection = (event) => {
+        event.stopPropagation();
+        this.setState({params: event.target.value});
+    }
 
     handleInstrumentSelectionClose = (event) => {
         event.stopPropagation();
@@ -129,11 +143,13 @@ class InstrumentsHistogram extends Component {
     };
 
     handleSizePerPage = (event) => {
+        event.stopPropagation();
         let pagesize = event.target.value;
         if (pagesize > 0) this.setState({ pagesize });
     }
 
     handleSizePerPageSumbit = (event) => {
+        event.stopPropagation();
         if (event.key === 'Enter') {
             event.stopPropagation();
             this.fetchDataAndUpdateState();
@@ -161,6 +177,7 @@ class InstrumentsHistogram extends Component {
         }
 
     handleDensity = (event, density) => {
+        event.stopPropagation();
         this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
     };
 
@@ -190,11 +207,11 @@ class InstrumentsHistogram extends Component {
                         select
                         label="params"
                         value={this.state.params}
-                        // onChange={this.handleParams}
+                        onChange={this.handleParamsSelection}
                         // helperText="Please select params"
                         variant="outlined"
                         >
-                        {this.state.paramsList && this.state.paramsList.map((elem) => (
+                        {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
                             <MenuItem key={elem} value={elem}>
                             {elem}
                             </MenuItem>

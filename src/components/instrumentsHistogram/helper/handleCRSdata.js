@@ -83,9 +83,7 @@ export async function fetchCRSparams(datetime="2017-05-17") {
                         }
                     }
         let rawData = await apiCaller.post(url, body);
-        let preprocessedData = rawData["data"]["data"]["attributes"]["data"]
-
+        let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
         let params = preprocessedData["coordinate_value"];
-    
         return params;
     }
