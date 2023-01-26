@@ -215,65 +215,68 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CRS">CRS</ListItem>
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
-            {
-                (this.state.selectedInstrument == "CRS") &&
-                <div className="histogram-params-selection">
+            <div className="histogram-selection-box">
+                {
+                    (this.state.selectedInstrument == "CRS") &&
+                    <div className="histogram-params-selection">
+                        <TextField
+                            id="outlined-select-currency"
+                            select
+                            label="params"
+                            value={this.state.params}
+                            onChange={this.handleParamsSelection}
+                            // helperText="Please select params"
+                            variant="outlined"
+                            style={{width: "100%"}}
+                            >
+                            {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
+                                <MenuItem key={elem} value={String(elem)}>
+                                {elem}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </div>
+                }
+                <div className="histogram-sampling-box">
+                    <ButtonGroup size="small" aria-label="large outlined primary button group">
+                        <Button
+                            color="default"
+                            onClick={this.handlePageBack}
+                        > Back </Button>
+                        <Button
+                            color="primary"
+                            onClick={this.handlePageNext}
+                        > Next </Button>
+                    </ButtonGroup>
+                    <div className="histogram-density-slider">
+                        {/* <Typography id="discrete-slider-small-steps" gutterBottom>
+                        Density
+                        </Typography> */}
+                        <Slider
+                        defaultValue={0.50}
+                        aria-labelledby="discrete-slider-small-steps"
+                        step={null}
+                        marks={densityMarks}
+                        min={0.0}
+                        max={1.0}
+                        valueLabelDisplay="auto"
+                        onChange={this.handleDensity}
+                        />
+                    </div>
                     <TextField
-                        id="outlined-select-currency"
-                        select
-                        label="params"
-                        value={this.state.params}
-                        onChange={this.handleParamsSelection}
-                        // helperText="Please select params"
+                        inputProps={{type: "number"}}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        id="outlined-number"
+                        label="Data Per page"
+                        value={this.state.pagesize}
+                        min={1}
+                        onChange={this.handleSizePerPage}
+                        onKeyPress={this.handleSizePerPageSumbit}
                         variant="outlined"
-                        >
-                        {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
-                            <MenuItem key={elem} value={String(elem)}>
-                            {elem}
-                            </MenuItem>
-                        ))}
-                    </TextField>
-                </div>
-            }
-            <div className="histogram-sampling-box">
-                <ButtonGroup size="small" aria-label="large outlined primary button group">
-                    <Button
-                        color="default"
-                        onClick={this.handlePageBack}
-                    > Back </Button>
-                    <Button
-                        color="primary"
-                        onClick={this.handlePageNext}
-                    > Next </Button>
-                </ButtonGroup>
-                <div className="histogram-density-slider">
-                    {/* <Typography id="discrete-slider-small-steps" gutterBottom>
-                    Density
-                    </Typography> */}
-                    <Slider
-                    defaultValue={0.50}
-                    aria-labelledby="discrete-slider-small-steps"
-                    step={null}
-                    marks={densityMarks}
-                    min={0.0}
-                    max={1.0}
-                    valueLabelDisplay="auto"
-                    onChange={this.handleDensity}
                     />
                 </div>
-                <TextField
-                    inputProps={{type: "number"}}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    id="outlined-number"
-                    label="Data Per page"
-                    value={this.state.pagesize}
-                    min={1}
-                    onChange={this.handleSizePerPage}
-                    onKeyPress={this.handleSizePerPageSumbit}
-                    variant="outlined"
-                />
             </div>
             {(this.state.data && this.state.labels) ?
              <HistogramVizBox labels={this.state.labels} data={this.state.data}/> :

@@ -31,13 +31,26 @@ a {
   height: 32px;
 }
 
-.histogram-density-slider {
+/* instrument histogram visualization css */
+
+.histogram-selection-box {
   display: flex;
-  width: 20%;
-  margin: auto 3rem;
+  justify-content: space-between;
+}
+
+.histogram-params-selection {
+  display: flex;
+  width: 10%;
 }
 
 .histogram-sampling-box {
   display: flex;
   flex-direction: row-reverse;
+  width: 40%;
+}
+
+.histogram-density-slider {
+  display: flex;
+  width: 100%;
+  margin: auto 3rem;
 }
