@@ -88,7 +88,7 @@ class InstrumentsHistogram extends Component {
             // below depend on the type of instrument selected.
             coordType: "FlashID", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "peak", // const thing for a instrument type, for now. Later make it selectable???
-            params: "None", // only for certain instruments
+            params: null,
             data: null,
             labels: null,
             paramsList: null
@@ -97,6 +97,7 @@ class InstrumentsHistogram extends Component {
 
     componentDidMount() {
         // using the inital state, fetch the data and labels and set it in state
+        this.handleDefaultParamsValue(this.state.selectedInstrument);
         this.fetchDataAndUpdateState();
     }
 
@@ -117,23 +118,26 @@ class InstrumentsHistogram extends Component {
         this.setState({anchorEl: event.currentTarget});
     };
 
-    handleInstrumentSelectionSaveAndClose = (event) => {
-        let params = null;
-        // after a new instrument is selected for the histogram viz, do the following steps.
-        event.stopPropagation();
-        if (["CRS", "CPL"].includes(event.target.innerHTML)) {
+    handleDefaultParamsValue = (selectedInstrument) => {
+        if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
                 fetchCRSparams(this.state.datetime).then((data) => {
                     this.setState({paramsList: data});
                 });
             });
-        } else if (["FEGS", "LIP"].includes(event.target.innerHTML)) {
+        } else if (["FEGS", "LIP"].includes(selectedInstrument)) {
         // if the selected instrument is FEGS, LIP, set the param to "None" as required by the api call for these instruments (can fetch for histogram viz). 
             this.setState({params: "None"})
         } else {
             this.setState({params: null})
         }
+    }
+
+    handleInstrumentSelectionSaveAndClose = (event) => {
+        // after a new instrument is selected for the histogram viz, do the following steps.
+        event.stopPropagation();
+        this.handleDefaultParamsValue(event.target.innerHTML);
         this.setState({selectedInstrument: event.target.innerHTML,
             anchorEl: null,
             data: null,
