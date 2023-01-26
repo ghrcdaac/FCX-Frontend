@@ -278,10 +278,10 @@ class InstrumentsHistogram extends Component {
                     />
                 </div>
             </div>
-            {(this.state.data && this.state.labels) ?
-             <HistogramVizBox labels={this.state.labels} data={this.state.data}/> :
-             "Loading..."
-            }
+            {(this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
+            {(!this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
+            {(this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(this.state.params && !this.state.data && !this.state.labels) && <p>"Loading..."</p>}
         </div>
       )
     }
