@@ -228,7 +228,7 @@ class InstrumentsHistogram extends Component {
                         variant="outlined"
                         >
                         {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
-                            <MenuItem key={elem} value={elem}>
+                            <MenuItem key={elem} value={String(elem)}>
                             {elem}
                             </MenuItem>
                         ))}
