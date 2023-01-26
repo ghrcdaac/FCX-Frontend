@@ -121,14 +121,27 @@ class InstrumentsHistogram extends Component {
     };
 
     handleInstrumentSelectionSaveAndClose = (event) => {
+        let params = null;
         // after a new instrument is selected for the histogram viz, do the following steps.
         event.stopPropagation();
+        if (["CRS", "CPL"].includes(event.target.innerHTML)) {
+            // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
+            this.setState({params: null}, function() {
+                fetchCRSparams(this.state.datetime).then((data) => {
+                    this.setState({paramsList: data});
+                });
+            });
+        } else if (["FEGS", "LIP"].includes(event.target.innerHTML)) {
+        // if the selected instrument is FEGS, LIP, set the param to "None" as required by the api call for these instruments (can fetch for histogram viz). 
+            this.setState({params: "None"})
+        } else {
+            this.setState({params: null})
+        }
         this.setState({selectedInstrument: event.target.innerHTML,
             anchorEl: null,
             data: null,
             labels: null,
             paramsList: null,
-            params: "None"
         }, function () { return this.fetchDataAndUpdateState() });
     };
 
