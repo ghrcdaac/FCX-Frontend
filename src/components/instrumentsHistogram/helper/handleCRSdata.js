@@ -34,7 +34,8 @@ export async function fetchCRSData(datetime="2017-05-17", params="1011.825", pag
                 }
             
     let rawData = await apiCaller.post(url, body);
-    let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
+    let rawDatawNull = rawData["data"]["data"]["attributes"]["data"].replace(/\bNaN\b/g, "null")
+    let preprocessedData = JSON.parse(rawDatawNull)
     let data = {
         labels: preprocessedData["index"],
         datasets: [
