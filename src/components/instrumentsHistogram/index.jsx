@@ -33,7 +33,7 @@ Tooltip,
 Legend
 );
 
-async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, density) {
+async function InstrumentsHandler(instrumentType, datetime, params, pagesize, pageno, density) {
     /**
      * InstrumentType: We can easily get the instrument type from local state.
      * datetime: value needs to be fetched. Hard without redux thunk! Think!! actually wont have used redux thunk for this. would directly set the change on the redux state.
@@ -50,7 +50,6 @@ async function InstrumentsHandler(instrumentType, datetime, pagesize, pageno, de
     } else if (instrumentType == "LIP") {
         return handleLIPdata(datetime, pagesize, pageno, density);
     } else if (instrumentType == "CRS") {
-        let params="1011.825";
         return handleCRSdata(datetime, params, pagesize, pageno, density);
     }
     return handleFEGSdata(datetime, pagesize, pageno, density);
@@ -103,16 +102,14 @@ class InstrumentsHistogram extends Component {
 
     fetchDataAndUpdateState = () => {
         // Do the following steps to preprare necessary data before handling the vizs specific to a instrument.
-        let {selectedInstrument, datetime, pageno, pagesize, density} = this.state;
-        if (selectedInstrument == "CRS" && this.state.paramsList==null) {
-            fetchCRSparams(datetime).then((data) => {
-                this.setState({paramsList: data});
+        let {selectedInstrument, datetime, params, pageno, pagesize, density} = this.state;
+        if (selectedInstrument && datetime && params && pageno && pagesize && density) {
+            // only fetch histogram data, once all the necessary parameters for api call are ready
+            InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density).then((res)=> {
+                let {data, labels} = res;
+                this.setState({data, labels});
             });
         }
-        InstrumentsHandler(selectedInstrument, datetime, pagesize, pageno, density).then((res)=> {
-            let {data, labels} = res;
-            this.setState({data, labels});
-        });
     }
 
     handleInstrumentSelectionClick = (event) => {
@@ -147,7 +144,9 @@ class InstrumentsHistogram extends Component {
 
     handleParamsSelection = (event) => {
         event.stopPropagation();
-        this.setState({params: event.target.value});
+        this.setState({params: event.target.value}, function () {
+            return this.fetchDataAndUpdateState();
+        });
     }
 
     handleInstrumentSelectionClose = (event) => {
