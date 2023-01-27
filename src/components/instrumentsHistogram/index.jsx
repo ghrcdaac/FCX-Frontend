@@ -23,6 +23,7 @@ import {HistogramVizBox} from "./components";
 import handleFEGSdata from "./helper/handleFEGSdata";
 import handleLIPdata from "./helper/handleLIPdata";
 import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
+import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
 
 ChartJS.register(
 CategoryScale,
@@ -51,6 +52,8 @@ async function InstrumentsHandler(instrumentType, datetime, params, pagesize, pa
         return handleLIPdata(datetime, pagesize, pageno, density);
     } else if (instrumentType == "CRS") {
         return handleCRSdata(datetime, params, pagesize, pageno, density);
+    } else if (instrumentType == "CPL") {
+        return handleCPLdata(datetime, params, pagesize, pageno, density);
     }
     return handleFEGSdata(datetime, pagesize, pageno, density);
 }
@@ -80,14 +83,14 @@ class InstrumentsHistogram extends Component {
         super(props);
         this.state = {
             anchorEl: null,
-            selectedInstrument: "CRS",
-            datetime: "2017-05-17", //later get it from redux store
+            selectedInstrument: "CPL",
+            datetime: "2017-04-27", //later get it from redux store
             pagesize: 20,
             pageno: 1,
             density: 1,
             // below depend on the type of instrument selected.
-            coordType: "FlashID", // const thing for a instrument type, for now. Later make it selectable???
-            dataType: "peak", // const thing for a instrument type, for now. Later make it selectable???
+            coordType: "Second", // const thing for a instrument type, for now. Later make it selectable???
+            dataType: "ATB_1064", // const thing for a instrument type, for now. Later make it selectable???
             params: null,
             data: null,
             labels: null,
@@ -122,7 +125,10 @@ class InstrumentsHistogram extends Component {
         if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
-                fetchCRSparams(this.state.datetime).then((data) => {
+                if (selectedInstrument == "CRS") fetchCRSparams(this.state.datetime).then((data) => {
+                    this.setState({paramsList: data});
+                });
+                else if (selectedInstrument == "CPL") fetchCPLparams(this.state.datetime).then((data) => {
                     this.setState({paramsList: data});
                 });
             });
@@ -217,7 +223,7 @@ class InstrumentsHistogram extends Component {
             </Menu>
             <div className="histogram-selection-box">
                 {
-                    (this.state.selectedInstrument == "CRS") &&
+                    (["CRS", "CPL"].includes(this.state.selectedInstrument)) &&
                     <div className="histogram-params-selection">
                         <TextField
                             id="outlined-select-currency"
