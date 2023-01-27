@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import {connect} from 'react-redux';
 
 import {
     Chart as ChartJS,
@@ -83,8 +84,7 @@ class InstrumentsHistogram extends Component {
         super(props);
         this.state = {
             anchorEl: null,
-            selectedInstrument: "CPL",
-            datetime: "2017-04-27", //later get it from redux store
+            selectedInstrument: "FEGS",
             pagesize: 500,
             pageno: 1,
             density: 1,
@@ -100,13 +100,24 @@ class InstrumentsHistogram extends Component {
 
     componentDidMount() {
         // using the inital state, fetch the data and labels and set it in state
-        this.handleDefaultParamsValue(this.state.selectedInstrument);
-        this.fetchDataAndUpdateState();
+        this.handleDefaultParamsValue(this.state.selectedInstrument).then(() => {
+            this.fetchDataAndUpdateState();
+        });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.selectedDate !== this.props.selectedDate) {
+        // using the states, fetch the data and labels and set it in state
+            this.handleDefaultParamsValue(this.state.selectedInstrument).then(() => {
+                this.fetchDataAndUpdateState();
+            });
+        }
     }
 
     fetchDataAndUpdateState = () => {
         // Do the following steps to preprare necessary data before handling the vizs specific to a instrument.
-        let {selectedInstrument, datetime, params, pageno, pagesize, density} = this.state;
+        let {selectedInstrument, params, pageno, pagesize, density} = this.state;
+        let datetime = this.props.selectedDate;
         if (selectedInstrument && datetime && params && pageno && pagesize && density) {
             // only fetch histogram data, once all the necessary parameters for api call are ready
             InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density).then((res)=> {
@@ -121,14 +132,14 @@ class InstrumentsHistogram extends Component {
         this.setState({anchorEl: event.currentTarget});
     };
 
-    handleDefaultParamsValue = (selectedInstrument) => {
+    handleDefaultParamsValue = async (selectedInstrument) => {
         if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
-                if (selectedInstrument == "CRS") fetchCRSparams(this.state.datetime).then((data) => {
+                if (selectedInstrument == "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
                     this.setState({paramsList: data});
                 });
-                else if (selectedInstrument == "CPL") fetchCPLparams(this.state.datetime).then((data) => {
+                else if (selectedInstrument == "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
                     this.setState({paramsList: data});
                 });
             });
@@ -294,5 +305,10 @@ class InstrumentsHistogram extends Component {
     }
 }
   
-export default InstrumentsHistogram;
+export default connect((state) => {
+    // map redux state to props
+    let selectedLayer = state.selectedLayers[0];
+    let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
+    return {selectedDate: selectedLayerDate}
+}, null)(InstrumentsHistogram);
   
