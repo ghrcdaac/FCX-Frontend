@@ -85,7 +85,7 @@ class InstrumentsHistogram extends Component {
             anchorEl: null,
             selectedInstrument: "CPL",
             datetime: "2017-04-27", //later get it from redux store
-            pagesize: 20,
+            pagesize: 500,
             pageno: 1,
             density: 1,
             // below depend on the type of instrument selected.
@@ -228,7 +228,7 @@ class InstrumentsHistogram extends Component {
                         <TextField
                             id="outlined-select-currency"
                             select
-                            label="params"
+                            label="params (z-axis)"
                             value={this.state.params}
                             onChange={this.handleParamsSelection}
                             // helperText="Please select params"
@@ -255,9 +255,9 @@ class InstrumentsHistogram extends Component {
                         > Next </Button>
                     </ButtonGroup>
                     <div className="histogram-density-slider">
-                        {/* <Typography id="discrete-slider-small-steps" gutterBottom>
-                        Density
-                        </Typography> */}
+                        <Typography id="histogram-density-slider-label" gutterBottom>
+                        Quantization
+                        </Typography>
                         <Slider
                         defaultValue={0.50}
                         aria-labelledby="discrete-slider-small-steps"
@@ -267,6 +267,7 @@ class InstrumentsHistogram extends Component {
                         max={1.0}
                         valueLabelDisplay="auto"
                         onChange={this.handleDensity}
+                        label="Desnsity"
                         />
                     </div>
                     <TextField

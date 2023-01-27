@@ -50,7 +50,13 @@ a {
 }
 
 .histogram-density-slider {
-  display: flex;
+  display: block;
   width: 100%;
   margin: auto 3rem;
+}
+
+#histogram-density-slider-label {
+  font-size: 0.9rem;
+  line-height: 0.03;
+  color: rgb(0 0 0 / 54%);
 }
