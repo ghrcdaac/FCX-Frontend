@@ -233,27 +233,6 @@ class InstrumentsHistogram extends Component {
                 <ListItem onClick={this.handleInstrumentSelectionSaveAndClose} value="CPL">CPL</ListItem>
             </Menu>
             <div className="histogram-selection-box">
-                {
-                    (["CRS", "CPL"].includes(this.state.selectedInstrument)) &&
-                    <div className="histogram-params-selection">
-                        <TextField
-                            id="outlined-select-currency"
-                            select
-                            label="params (z-axis)"
-                            value={this.state.params}
-                            onChange={this.handleParamsSelection}
-                            // helperText="Please select params"
-                            variant="outlined"
-                            style={{width: "100%"}}
-                            >
-                            {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
-                                <MenuItem key={elem} value={String(elem)}>
-                                {elem}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-                    </div>
-                }
                 <div className="histogram-sampling-box">
                     <ButtonGroup size="small" aria-label="large outlined primary button group">
                         <Button
@@ -295,6 +274,27 @@ class InstrumentsHistogram extends Component {
                         variant="outlined"
                     />
                 </div>
+                {
+                    (["CRS", "CPL"].includes(this.state.selectedInstrument)) &&
+                    <div className="histogram-params-selection">
+                        <TextField
+                            id="outlined-select-currency"
+                            select
+                            label="params (z-axis)"
+                            value={this.state.params}
+                            onChange={this.handleParamsSelection}
+                            // helperText="Please select params"
+                            variant="outlined"
+                            style={{width: "100%"}}
+                            >
+                            {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
+                                <MenuItem key={elem} value={String(elem)}>
+                                {elem}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    </div>
+                }
             </div>
             {(this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
             {(!this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
