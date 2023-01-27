@@ -13,6 +13,9 @@ export default async function fetchLIPData(datetime="2017-05-17", pagesize="200"
     let coordType = "Time";
     let dataType = "Eq";
     let params = "None";
+    let error = false;
+    let data = {};
+    let labels = {};
 
     const apiCaller = new APICaller();
     apiCaller.setHeader('tUS7oors8qawUhT7c8QBn5OXLzH7TPgs6pmiuK2t');
@@ -35,23 +38,26 @@ export default async function fetchLIPData(datetime="2017-05-17", pagesize="200"
                 }
             
     let rawData = await apiCaller.post(url, body);
-    let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
-    let data = {
-        labels: preprocessedData["index"],
-        datasets: [
-          {
-            label: preprocessedData["columns"][0],
-            data: preprocessedData["data"],
-            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-          }
-        ],
-      };
-    let labels = {
-        xaxis: coordType,
-        yaxis: dataType
+    if(rawData["data"]["errors"]) {
+      error = true;
+    } else {
+      let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
+      data = {
+          labels: preprocessedData["index"],
+          datasets: [
+            {
+              label: preprocessedData["columns"][0],
+              data: preprocessedData["data"],
+              backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            }
+          ],
+        };
+      labels = {
+          xaxis: coordType,
+          yaxis: dataType
+      }
     }
-
     return {
-        data, labels
+        data, labels, error
     }
 }
