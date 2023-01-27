@@ -84,7 +84,7 @@ class InstrumentsHistogram extends Component {
         super(props);
         this.state = {
             anchorEl: null,
-            selectedInstrument: "CPL",
+            selectedInstrument: "FEGS",
             pagesize: 500,
             pageno: 1,
             density: 1,
