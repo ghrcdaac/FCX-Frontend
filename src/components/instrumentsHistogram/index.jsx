@@ -84,7 +84,7 @@ class InstrumentsHistogram extends Component {
         super(props);
         this.state = {
             anchorEl: null,
-            selectedInstrument: "FEGS",
+            selectedInstrument: "CPL",
             pagesize: 500,
             pageno: 1,
             density: 1,
@@ -94,7 +94,8 @@ class InstrumentsHistogram extends Component {
             params: null,
             data: null,
             labels: null,
-            paramsList: null
+            paramsList: null,
+            error: false
         };
     }
 
@@ -116,9 +117,9 @@ class InstrumentsHistogram extends Component {
 
     fetchDataAndUpdateState = () => {
         // Do the following steps to preprare necessary data before handling the vizs specific to a instrument.
-        let {selectedInstrument, params, pageno, pagesize, density} = this.state;
+        let {selectedInstrument, params, pageno, pagesize, density, error} = this.state;
         let datetime = this.props.selectedDate;
-        if (selectedInstrument && datetime && params && pageno && pagesize && density) {
+        if (selectedInstrument && datetime && params && pageno && pagesize && density && !error) {
             // only fetch histogram data, once all the necessary parameters for api call are ready
             InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density).then((res)=> {
                 let {data, labels} = res;
@@ -137,10 +138,20 @@ class InstrumentsHistogram extends Component {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
                 if (selectedInstrument == "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
-                    this.setState({paramsList: data});
+                    // error handling incase no data for given date
+                    if(!data["error"]) {
+                        this.setState({paramsList: data["params"]});
+                    } else {
+                        this.setState({error: true});
+                    }
                 });
                 else if (selectedInstrument == "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
-                    this.setState({paramsList: data});
+                    // error handling incase no data for given date
+                    if(!data["error"]) {
+                        this.setState({paramsList: data["params"]});
+                    } else {
+                        this.setState({error: true});
+                    }
                 });
             });
         } else if (["FEGS", "LIP"].includes(selectedInstrument)) {
@@ -160,6 +171,7 @@ class InstrumentsHistogram extends Component {
             data: null,
             labels: null,
             paramsList: null,
+            error: false
         }, function () { return this.fetchDataAndUpdateState() });
     };
 
@@ -296,10 +308,11 @@ class InstrumentsHistogram extends Component {
                     </div>
                 }
             </div>
-            {(this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
-            {(!this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
-            {(this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
-            {(this.state.params && !this.state.data && !this.state.labels) && <p>"Loading..."</p>}
+            {(!this.state.error && this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
+            {(!this.state.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
+            {(!this.state.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.state.error && this.state.params && !this.state.data && !this.state.labels) && <p>"Loading..."</p>}
+            {(this.state.error) && <p>"No instrument data for selected date"</p>}
         </div>
       )
     }
