@@ -1,10 +1,12 @@
 import goes_r_plt_campaign from './goes-r-plt-layers'
 import impacts_campaign from './impacts-layers'
+import olympex_layers from './olympex-layers'
 
 
 const campaigns = {
   "goes-r-plt": goes_r_plt_campaign,
   "impacts": impacts_campaign,
+  "olympex": olympex_layers
 }
 
 const getCampaignInfo = (mission) => {
