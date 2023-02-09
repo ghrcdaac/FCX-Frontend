@@ -1,8 +1,8 @@
 import { flighttrack } from "./helpers";
 
-const dates = ["2015-11-05"];
-// const instruments = ["trackEr2", "trackDc8"]
-const instruments = ["trackDc8"]
+const dates = ["2015-11-10"];
+const instruments = ["trackEr2", "trackDc8"]
+// const instruments = ["trackDc8"]
 
 function getInstrumentsItem(date, instrumentType, index) {
     /** 
@@ -32,5 +32,6 @@ const instrumentLayers = dates.map(date => ({
         date: date,
         items: instruments.map((instrum, index) => getInstrumentsItem(date, instrum, index))
     }));
+// TODO: filter any null values.
 
 export default instrumentLayers;
