@@ -1,7 +1,8 @@
 import { flighttrack } from "./helpers";
 
-const dates = ["2017-05-14"];
-const instruments = ["trackEr2", "trackDc8"]
+const dates = ["2015-11-05"];
+// const instruments = ["trackEr2", "trackDc8"]
+const instruments = ["trackDc8"]
 
 function getInstrumentsItem(date, instrumentType, index) {
     /** 

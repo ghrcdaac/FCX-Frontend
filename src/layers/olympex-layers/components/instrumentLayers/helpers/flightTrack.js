@@ -1,4 +1,4 @@
-import { flightTrackBaseUrl } from "../../../../../config"
+import { newFieldCampaignsBaseUrl } from "../../../../../config"
 
 export default function flighttrack (date, aircraft, index) {
     /** 
@@ -16,7 +16,7 @@ export default function flighttrack (date, aircraft, index) {
             layerId: `${date}-track${index}-er2`,
             shortName: "flight14",
             displayName: "Flight Track",
-            czmlLocation: `${flightTrackBaseUrl}/flight_track/goesrplt_naver2_IWG1_20170514-1922`,
+            czmlLocation: `${newFieldCampaignsBaseUrl}Olympex/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_${date.replace(/-/g,'')}-2308.czml`,
             start: "2017-05-14T10:04:54Z",
             end: "2017-05-14T19:22:07Z",
             date: "2017-05-14",
@@ -29,10 +29,10 @@ export default function flighttrack (date, aircraft, index) {
             layerId: `${date}-track${index}-dc8`,
             shortName: "flight14",
             displayName: "Flight Track",
-            czmlLocation: `${flightTrackBaseUrl}/flight_track/goesrplt_naver2_IWG1_20170514-1922`,
-            start: "2017-05-14T10:04:54Z",
-            end: "2017-05-14T19:22:07Z",
-            date: "2017-05-14",
+            czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_${date.replace(/-/g,'')}-2308.czml`,
+            start: "2015-11-05T10:04:54Z",
+            end: "2015-11-06T19:22:07Z",
+            date: "2015-11-05",
             type: "track",
             platform: "air",
             displayMechanism: "czml",
