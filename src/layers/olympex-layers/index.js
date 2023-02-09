@@ -1,14 +1,14 @@
-const campaign = "olympex"
+import { campaign, logo, description, dois, links, legends, defaultCamera, instrumentLayers } from "./components";
+
 const olympex_campaign = {
     title: `${campaign} Field Campaign`,
-    // logo: `${dataBaseUrl}/fieldcampaign/${campaign.toLowerCase()}/logo/${campaign.toLowerCase()}_logo_small.png`,
-    logo: `missions-logos/impacts.png`,
-    description: "",
-    links: "",
-    dois: "",
-    layers: "",
-    legends: "",
-    defaultCamera: "",
-  }
-  
-  export default olympex_campaign
+    logo: logo,
+    description: description,
+    links: links,
+    dois: dois,
+    legends: legends,
+    defaultCamera: defaultCamera,
+    layers: instrumentLayers
+}
+
+export default olympex_campaign
