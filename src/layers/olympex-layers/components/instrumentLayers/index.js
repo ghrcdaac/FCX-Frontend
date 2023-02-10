@@ -18,7 +18,7 @@ function getInstrumentsItem(date, instrumentType, index) {
         case "trackDc8":
             return flighttrack(date, "dc8", index);
         default:
-            return {}
+            return null
     }
 }
 

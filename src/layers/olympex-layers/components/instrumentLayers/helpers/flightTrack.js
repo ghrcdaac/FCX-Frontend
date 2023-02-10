@@ -37,5 +37,7 @@ export default function flighttrack (date, aircraft, index) {
             platform: "air",
             displayMechanism: "czml",
         }
+    } else {
+        return null
     }
 }
