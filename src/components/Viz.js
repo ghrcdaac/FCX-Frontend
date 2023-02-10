@@ -30,6 +30,8 @@ import {
     Color as ColorCesium,
     Math as cMath
 } from "cesium"
+
+import * as Cesium from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import { isEmpty } from "lodash"
 
@@ -109,22 +111,23 @@ class Viz extends Component {
             const viewerStart = addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
             const viewerEnd = addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
-            if (layerDate !== viewerDate) {
-                // remove layers with other dates
-                setTimeout(() => {
-                    if(!checkPath()) return;
-                    store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
-                }, 1000)
+            // if (layerDate !== viewerDate) {
+            //     // remove layers with other dates
+            //     setTimeout(() => {
+            //         if(!checkPath()) return;
+            //         store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
+            //     }, 1000)
 
-                viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
+            //     viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
 
-                if (campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
-                    this.restoreCamera(campaign.defaultCamera[layerDate])
-                }
-            }
-            viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
-            viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
-            viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
+            //     if (campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
+            //         this.restoreCamera(campaign.defaultCamera[layerDate])
+            //     }
+            // }
+
+            // viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
+            // viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
+            // viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
 
             let found = false
             for (const [, activeLayerItem] of this.activeLayers.entries()) {
@@ -144,9 +147,36 @@ class Viz extends Component {
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
+                        let initialPosition;
                         let modelReference = ds.entities.getById("Flight Track")
+                        
+                        // set camera angle
+                        // const position = ""
+                        // const transform = Cesium.Transforms.eastNorthUpToFixedFrame(position);
+
+                        // // View in east-north-up frame
+                        // const camera = viewer.camera;
+                        // // camera.constrainedAxis = Cesium.Cartesian3.UNIT_Z;
+                        // camera.lookAtTransform(
+                        //   transform,
+                        //   new Cesium.Cartesian3(-120000.0, -120000.0, 120000.0)
+                        // );
+
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
+                            if (!initialPosition) {
+                                // Run it only once in the initial
+                                initialPosition = position;
+                                const transform = Cesium.Transforms.eastNorthUpToFixedFrame(initialPosition);
+
+                                // View in east-north-up frame
+                                const camera = viewer.camera;
+                                // camera.constrainedAxis = Cesium.Cartesian3.UNIT_Z;
+                                camera.lookAtTransform(
+                                    transform,
+                                    new Cesium.Cartesian3(-120000.0, -120000.0, 120000.0)
+                                );
+                            }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
                             let heading = modelReference.properties.heading.getValue(time);
@@ -155,8 +185,12 @@ class Viz extends Component {
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
 
+                        if(initialPosition) {
+
+                        }
+
                         this.trackedEntity = ds.entities.getById("Flight Track")
-                        this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
+                        // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
                         if (this.trackEntity) {
                             viewer.trackedEntity = this.trackedEntity
                             viewer.clock.shouldAnimate = true

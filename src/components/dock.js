@@ -190,7 +190,7 @@ let createViewer = () => {
     // terrainProvider: createWorldTerrain(),
     baseLayerPicker: true,
     skyBox: false,
-    automaticallyTrackDataSourceClocks: false,
+    automaticallyTrackDataSourceClocks: true,
     navigationHelpButton: true,
     homeButton: false,
     sceneModePicker: true,
