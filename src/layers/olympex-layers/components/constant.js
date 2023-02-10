@@ -4,7 +4,7 @@ import { dataBaseUrl } from "../../../config"
 
 const campaign = "olympex";
 
-const logo = `missions-logos/impacts.png`;
+const logo = `missions-logos/olympex.png`;
 
 const description = "The GPM Ground Validation field campaign the Olympic Mountains Experiment (OLYMPEX) was held in the Pacific Northwest. The goal of OLYMPEX was to validate rain and snow measurements in midlatitude frontal systems as they move from ocean to coast to mountains.";
 
@@ -12,8 +12,8 @@ const description = "The GPM Ground Validation field campaign the Olympic Mounta
 const dois = [
     {
       shortName: "goesrpltcrs",
-      longName: "GOES-R PLT Cloud Radar System (CRS)",
-      doi: "http://dx.doi.org/10.5067/GOESRPLT/CRS/DATA101",
+      longName: "GPM Ground Validation Cloud Radar System (CRS) OLYMPEX V1",
+      doi: "https://cmr.earthdata.nasa.gov/search/concepts/C1979140648-GHRC_DAAC.html",
     }
 ]
 
@@ -21,19 +21,27 @@ const dois = [
 // ref. used in Links
 const links = [
     {
-      url: "https://ghrc.nsstc.nasa.gov/uso/ds_details/collections/goesrpltC.html",
+      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/olympex",
       title: "Landing Page",
     },
     {
-      url: "https://ghrc.nsstc.nasa.gov/home/micro-articles/goes-r-post-launch-test-plt",
+      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/olympex/data_access",
+      title: "Data Access",
+    },
+    {
+      url: "https://ghrc.nsstc.nasa.gov/uso/ds_details/collections/gpmolyxC.html",
+      title: "Collection DOI",
+    },
+    {
+      url: "http://olympex.atmos.washington.edu/",
+      title: "University of Washington OLYMPEX site",
+    },
+    {
+      url: "https://ghrc.nsstc.nasa.gov/home/micro-articles/olympic-mountains-experiment-olympex",
       title: "Micro Article",
     },
     {
-      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/goes-r_plt",
-      title: "Description",
-    },
-    {
-      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/goes-r_plt/instruments",
+      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/OLYMPEX/instruments",
       title: "Instruments",
     }
 ]
