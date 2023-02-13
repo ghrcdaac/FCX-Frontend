@@ -149,18 +149,6 @@ class Viz extends Component {
                     if (layer.type === "track") {
                         let initialPosition;
                         let modelReference = ds.entities.getById("Flight Track")
-                        
-                        // set camera angle
-                        // const position = ""
-                        // const transform = Cesium.Transforms.eastNorthUpToFixedFrame(position);
-
-                        // // View in east-north-up frame
-                        // const camera = viewer.camera;
-                        // // camera.constrainedAxis = Cesium.Cartesian3.UNIT_Z;
-                        // camera.lookAtTransform(
-                        //   transform,
-                        //   new Cesium.Cartesian3(-120000.0, -120000.0, 120000.0)
-                        // );
 
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
@@ -169,13 +157,12 @@ class Viz extends Component {
                                 initialPosition = position;
                                 const transform = Cesium.Transforms.eastNorthUpToFixedFrame(initialPosition);
 
-                                // View in east-north-up frame
                                 const camera = viewer.camera;
-                                // camera.constrainedAxis = Cesium.Cartesian3.UNIT_Z;
                                 camera.lookAtTransform(
                                     transform,
-                                    new Cesium.Cartesian3(-120000.0, -120000.0, 120000.0)
+                                    new Cesium.Cartesian3(20000.0, 20000.0, 20000.0)
                                 );
+                                viewer.trackedEntity = null;
                             }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
@@ -184,10 +171,6 @@ class Viz extends Component {
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
-
-                        if(initialPosition) {
-
-                        }
 
                         this.trackedEntity = ds.entities.getById("Flight Track")
                         // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
