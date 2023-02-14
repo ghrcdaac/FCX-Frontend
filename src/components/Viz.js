@@ -164,6 +164,7 @@ class Viz extends Component {
                             if (this.layerChanged) {
                                 // Run it only once in the initial
                                 this.setCameraDefaultInitialPosition(viewer, position);
+                                this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
                             }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
@@ -405,6 +406,7 @@ class Viz extends Component {
             new Cartesian3(20000.0, 20000.0, 20000.0)
         );
         viewer.trackedEntity = null;
+        return;
     }
 
     readStateAndRender(campaign) {
