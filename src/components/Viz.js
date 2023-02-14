@@ -61,9 +61,8 @@ class Viz extends Component {
         this.trackedEntity = null
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
-        this.state = {
-            initialPosition: false
-        }
+        this.initialPosition = false
+        this.layerChanged = false
     }
 
     renderLayers(selectedLayers, campaign) {
@@ -105,7 +104,6 @@ class Viz extends Component {
 
         for (const [, selectedLayerId] of selectedLayers.entries()) {
             const layer = getLayer(selectedLayerId, campaign)
-            console.log("LLLLLLLL>>>", layer)
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
             const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
             const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
@@ -113,10 +111,10 @@ class Viz extends Component {
             const viewerStart = layer.start && addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
             const viewerEnd = layer.end && addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
-            console.log("current>>>>>", layerDate, "   old>>>>>>", viewerDate)
-
             if (layerDate !== viewerDate) {
                 // i.e. when layers is getting changed (currentLayerDate vs OldLayerDate)
+                this.layerChanged = true;
+                this.initialPosition = false; // for camera
                 // remove layers with other dates
                 setTimeout(() => {
                     if(!checkPath()) return;
@@ -129,7 +127,10 @@ class Viz extends Component {
                     // if desired camera position availabe in layer meta, use that.
                     this.restoreCamera(campaign.defaultCamera[layerDate])
                 }
+            } else {
+                this.layerChanged = false;
             }
+
             if ( viewerStart && viewerEnd ) {
                 // if desired zoom time availabe in layer meta, use that.
                 viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
@@ -159,13 +160,15 @@ class Viz extends Component {
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
+                        console.log("1111 ip>>", this.initialPosition, "11111 lc> ", this.layerChanged)
                         let modelReference = ds.entities.getById("Flight Track");
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            if (!this.state.initialPosition) {
+                            if (this.layerChanged && !this.initialPosition) {
+                                console.log("!!!!!!!!!>>>", this.layerChanged, "vs", !this.initialPosition )
                                 // Run it only once in the initial
                                 this.setCameraDefaultInitialPosition(viewer, position);
-                                this.setState( {initialPosition: !!position })
+                                this.initialPosition= !!position;
                             }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
