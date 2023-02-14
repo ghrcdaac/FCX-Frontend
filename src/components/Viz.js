@@ -31,7 +31,6 @@ import {
     Math as cMath
 } from "cesium"
 
-import * as Cesium from "cesium"
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import { isEmpty } from "lodash"
 
@@ -62,7 +61,9 @@ class Viz extends Component {
         this.trackedEntity = null
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
-
+        this.state = {
+            initialPosition: false
+        }
     }
 
     renderLayers(selectedLayers, campaign) {
@@ -104,30 +105,41 @@ class Viz extends Component {
 
         for (const [, selectedLayerId] of selectedLayers.entries()) {
             const layer = getLayer(selectedLayerId, campaign)
+            console.log("LLLLLLLL>>>", layer)
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
             const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
             const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
             
-            const viewerStart = addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
-            const viewerEnd = addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
+            const viewerStart = layer.start && addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+            const viewerEnd = layer.end && addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
-            // if (layerDate !== viewerDate) {
-            //     // remove layers with other dates
-            //     setTimeout(() => {
-            //         if(!checkPath()) return;
-            //         store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
-            //     }, 1000)
+            console.log("current>>>>>", layerDate, "   old>>>>>>", viewerDate)
 
-            //     viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
+            if (layerDate !== viewerDate) {
+                // i.e. when layers is getting changed (currentLayerDate vs OldLayerDate)
+                // remove layers with other dates
+                setTimeout(() => {
+                    if(!checkPath()) return;
+                    store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
+                }, 1000)
 
-            //     if (campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
-            //         this.restoreCamera(campaign.defaultCamera[layerDate])
-            //     }
-            // }
+                if (viewerStart) viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
 
-            // viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
-            // viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
-            // viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
+                if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
+                    // if desired camera position availabe in layer meta, use that.
+                    this.restoreCamera(campaign.defaultCamera[layerDate])
+                }
+            }
+            if ( viewerStart && viewerEnd ) {
+                // if desired zoom time availabe in layer meta, use that.
+                viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
+                viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
+                viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
+                viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
+            } else {
+                // automatically set the clock using the czml data.
+                viewer.automaticallyTrackDataSourceClocks = true;
+            }
 
             let found = false
             for (const [, activeLayerItem] of this.activeLayers.entries()) {
@@ -147,27 +159,17 @@ class Viz extends Component {
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
-                        let initialPosition;
-                        let modelReference = ds.entities.getById("Flight Track")
-
+                        let modelReference = ds.entities.getById("Flight Track");
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            if (!initialPosition) {
+                            if (!this.state.initialPosition) {
                                 // Run it only once in the initial
-                                initialPosition = position;
-                                const transform = Cesium.Transforms.eastNorthUpToFixedFrame(initialPosition);
-
-                                const camera = viewer.camera;
-                                camera.lookAtTransform(
-                                    transform,
-                                    new Cesium.Cartesian3(20000.0, 20000.0, 20000.0)
-                                );
-                                viewer.trackedEntity = null;
+                                this.setCameraDefaultInitialPosition(viewer, position);
+                                this.setState( {initialPosition: !!position })
                             }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
                             let heading = modelReference.properties.heading.getValue(time);
-                            // let {roll, pitch, heading} = this.modelOrientationCorrection({roll, pitch, heading});
                             const hpr = new HeadingPitchRoll(heading, pitch, roll)
                             return Transforms.headingPitchRollQuaternion(position, hpr)
                         }, false)
@@ -388,6 +390,23 @@ class Viz extends Component {
 
             }
         }
+    }
+
+    setCameraDefaultInitialPosition(viewer, position) {
+    /**
+    * Sets the camera to the initial position of the flight aircraft entity and sets the reference frame to view it from orthographic view.
+    * Immediately untracks the aircraft entity. This leave the reference frame to desired position while allowing the mouse movement.
+    * @param {object} viewer - cesium viewer (viewport) object instance. camera is attached to the viewer.
+    * @param {object} position - position of the aircraft entity.
+    */
+        const transform = Transforms.eastNorthUpToFixedFrame(position);
+
+        const camera = viewer.camera;
+        camera.lookAtTransform(
+            transform,
+            new Cartesian3(20000.0, 20000.0, 20000.0)
+        );
+        viewer.trackedEntity = null;
     }
 
     readStateAndRender(campaign) {

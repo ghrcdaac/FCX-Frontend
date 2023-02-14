@@ -67,14 +67,6 @@ const legends = {
 }
 
 // Camera position in cesium world
-const defaultCamera = {
-    "2017-05-14": {
-      position: { x: 2178874.724313431, y: -6252303.521673192, z: 2830275.025980942 },
-      direction: { x: -0.6397966148728539, y: 0.7196893691232018, z: 0.26964328949240535 },
-      up: { x: -0.21680367143594015, y: -0.5056113590934348, z: 0.8350768357508109 },
-      right: { x: 0.7373306311615802, y: 0.47581967753208537, z: 0.47951973350856814 },
-      currentTime: { dayNumber: 2457888, secondsOfDay: 3755.5650040790497 },
-    }
-}
+const defaultCamera = {}
 
 export { campaign, logo, description, dois, links, legends, defaultCamera }
