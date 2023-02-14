@@ -61,7 +61,6 @@ class Viz extends Component {
         this.trackedEntity = null
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
-        this.initialPosition = false
         this.layerChanged = false
     }
 
@@ -113,8 +112,7 @@ class Viz extends Component {
 
             if (layerDate !== viewerDate) {
                 // i.e. when layers is getting changed (currentLayerDate vs OldLayerDate)
-                this.layerChanged = true;
-                this.initialPosition = false; // for camera
+                this.layerChanged = true; // FOR CAMERA INITIAL POSITION
                 // remove layers with other dates
                 setTimeout(() => {
                     if(!checkPath()) return;
@@ -160,15 +158,12 @@ class Viz extends Component {
                 dataSource.load(layer.czmlLocation).then((ds) => {
                     store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                     if (layer.type === "track") {
-                        console.log("1111 ip>>", this.initialPosition, "11111 lc> ", this.layerChanged)
                         let modelReference = ds.entities.getById("Flight Track");
                         modelReference.orientation = new CallbackProperty((time, _result) => {
                             const position = modelReference.position.getValue(time)
-                            if (this.layerChanged && !this.initialPosition) {
-                                console.log("!!!!!!!!!>>>", this.layerChanged, "vs", !this.initialPosition )
+                            if (this.layerChanged) {
                                 // Run it only once in the initial
                                 this.setCameraDefaultInitialPosition(viewer, position);
-                                this.initialPosition= !!position;
                             }
                             let roll = modelReference.properties.roll.getValue(time);
                             let pitch = modelReference.properties.pitch.getValue(time);
