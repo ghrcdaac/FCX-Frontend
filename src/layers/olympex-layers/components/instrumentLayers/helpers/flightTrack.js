@@ -13,7 +13,7 @@ export default function flighttrack (date, aircraft, index) {
         return {
             layerId: `${date}-track${index}-er2`,
             shortName: "flight14",
-            displayName: "Flight Track",
+            displayName: "Flight Track ER2",
             czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/nav_er2/olympex_naver2_IWG1_${date.replace(/-/g,'')}.czml`,
             date,
             type: "track",
@@ -24,7 +24,7 @@ export default function flighttrack (date, aircraft, index) {
         return {
             layerId: `${date}-track${index}-dc8`,
             shortName: "flight14",
-            displayName: "Flight Track",
+            displayName: "Flight Track DC8",
             czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_${date.replace(/-/g,'')}.czml`,
             date,
             type: "track",
