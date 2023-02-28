@@ -213,6 +213,13 @@ class Viz extends Component {
                             tileset.style.color = getColorExpression();
                         } else if (layer.displayName === "Cloud Physics LiDAR") {
                             tileset.style.pointSize = 4.0;
+                            if (layer.fieldCampaignName === "Olympex") {
+                                tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
+                                // tileset.pointCloudShading.attenuation = true;
+                            }
+                        } else {
+                            tileset.style.pointSize = 1.0;
+                            tileset.style.color = getColorExpression();
                         }
                         this.viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), this.epoch)
                         tileset.style.show = getShowExpression(this.viewerTime, this.linger)

@@ -9,6 +9,7 @@ export default function cpl (date, index) {
     */
     return {
         layerId: `${date}-${index}-cpl`,
+        addOnTickEventListener: true,
         fieldCampaignName: "Olympex",
         shortName: "olympexcpl",
         addOnTickEventListener: true,
