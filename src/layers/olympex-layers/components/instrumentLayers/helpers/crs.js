@@ -11,7 +11,7 @@ export default function crs (date, index) {
         layerId: `${date}-${index}-crs`,
         fieldCampaignName: "Olympex",
         shortName: "olympexcrs",
-        addOnTickEventListener: true,
+        addOnTickEventListener: true, // helps to update viz on temporal change.
         displayName: "Cloud Radar System",
         variableName: "Radar Reflectivity",
         unit: "dBZ",

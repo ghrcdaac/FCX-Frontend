@@ -11,7 +11,7 @@ export default function hiwrap (date, index) {
         layerId: `${date}-${index}-hiwrap`,
         fieldCampaignName: "Olympex",
         shortName: "olympexhiwrap",
-        addOnTickEventListener: true,
+        addOnTickEventListener: true, // helps to update viz on temporal change.
         displayName: "High Altitude Imaging Wind and Rain Airborne Profiler (HIWRAP)",
         variableName: "zku (ka/ku Radar Reflectivity)",
         unit: "dBZ",
