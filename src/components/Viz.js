@@ -180,6 +180,8 @@ class Viz extends Component {
                             viewer.clock.shouldAnimate = true
                             viewer.clock.canAnimate = true
                         }
+                    } else if (layer.type === "imagery") {
+                        if (!this.trackEntity) viewer.zoomTo(ds);
                     }
 
                     this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
