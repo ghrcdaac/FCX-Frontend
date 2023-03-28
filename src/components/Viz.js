@@ -92,6 +92,9 @@ class Viz extends Component {
             if (layersToRemove[i].layer.displayMechanism === "czml") {
                 viewer.dataSources.remove(layersToRemove[i].cesiumLayerRef)
             } else if (layersToRemove[i].layer.displayMechanism === "3dtile" || layersToRemove[i].layer.displayMechanism === "points") {
+                /** If the removal is for NPOL dataset, remember it contanins set of layers for a single date.
+                 * So, remove all those referenced layers by iterating over all those freq-20-mins layers.
+                 * **/
                 viewer.scene.primitives.remove(layersToRemove[i].cesiumLayerRef)
                 if (layersToRemove[i].eventCallback) {
                     layersToRemove[i].eventCallback()
@@ -198,6 +201,11 @@ class Viz extends Component {
                     this.errorLayers.push(selectedLayerId)
                 })
             } else if (layer.displayMechanism === "3dtile") {
+                /** If 3d tile is for NPOL insturment, it has several 3d tiles (per 20 mins) across a single day
+                 * So, for all those 3d tiles, add it to viewer scene primitive.
+                 * Then create a list of cesium layer refs. (Later needed for removal.)
+                 * **/
+
                 //use TimeDynamicPointCloud from Brian's npm package temporal-3d-tile
                 const newTileset = new this.Temporal3DTileset({
                     url: layer.tileLocation,
