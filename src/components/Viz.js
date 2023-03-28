@@ -65,6 +65,7 @@ class Viz extends Component {
     }
 
     renderLayers(selectedLayers, campaign) {
+        /** Filter layers to remove; from active layers if its not in selected layer **/
         const layersToRemove = []
         for (const [, activeLayerItem] of this.activeLayers.entries()) {
             // if layer is not found in current list of selected layers, remove it
@@ -79,10 +80,14 @@ class Viz extends Component {
                 layersToRemove.push(activeLayerItem)
             }
         }
+
+        /** For layers with error, update that in global redux store. **/
         for (const e of this.errorLayers) {
             store.dispatch(allActions.listActions.markLoaded(e))
             store.dispatch(allActions.listActions.markUnLoaded(e))
         }
+
+        /** Remove the layers, that needs to be removed. Prior remove it from cesium viewer (using 'cesiumLayerRef') **/
         for (let i = 0; i < layersToRemove.length; i++) {
             if (layersToRemove[i].layer.displayMechanism === "czml") {
                 viewer.dataSources.remove(layersToRemove[i].cesiumLayerRef)
@@ -101,6 +106,7 @@ class Viz extends Component {
             })
         }
 
+        /** For the remainder of the selected layers, iterate over it and visualize in cesium viewer. **/
         for (const [, selectedLayerId] of selectedLayers.entries()) {
             const layer = getLayer(selectedLayerId, campaign)
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
@@ -460,10 +466,12 @@ class Viz extends Component {
     }
     
     componentDidMount() {
+        /** Fetch the campaign **/
         const campaign = (() => this.props.campaign)()
 
+        /** Error messages if viewer or campaign missing **/
+
         // printCameraAnglesInterval(viewer)
-        
         if (!viewer) {
             alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
         }
@@ -480,8 +488,12 @@ class Viz extends Component {
             }
         })
       
+        /** Set Viewer clock settings **/
+
         viewer.clock.clockRange = ClockRange.LOOP_STOP
         viewer.clock.multiplier = 10
+
+        /** Save the camera instance, after camera is set in viewer **/
 
         setInterval(() => {
             let camera = viewer.scene.camera
@@ -494,6 +506,8 @@ class Viz extends Component {
             }
         }, 2000)
 
+        /** Select current set of layers (in component state); by checking if layers changed (using redux store) **/
+
         //check for default selected layers
         this.readStateAndRender(campaign)
 
@@ -501,6 +515,9 @@ class Viz extends Component {
             this.readStateAndRender(campaign)
         })
 
+        /******* EVENT LISTNERS *******/
+
+        /** Prepare layers to render, if the dock where cesium is displayed is ready. **/
         emitter.on("dockRender", () => {
             setTimeout(() => {
                 if (!checkPath()) return
@@ -539,6 +556,9 @@ class Viz extends Component {
             this.renderLayers(selectedLayers, campaign)
         })
 
+
+        /** Adjust the height of dock where cesium is displayed. **/
+
         adjustHeightOfPanels()
 
         setTimeout(() => {
@@ -546,6 +566,7 @@ class Viz extends Component {
             adjustHeightOfPanels()
         }, 5000)
 
+        /** display logos on initial load. Kind of splash screen **/
         setTimeout(() => {
             if (!checkPath()) return
             let logoElement = document.querySelector(".fcx-logo")
