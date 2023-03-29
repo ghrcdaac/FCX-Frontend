@@ -17,7 +17,9 @@ export default function npol (date, index) {
         variableName: "ZZ Radar Reflectivity",
         unit: "dBZ",
         // for each data available accross each date, create a list of tile locations. 
-        tileLocation: [`${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/${date.replace(/-/g,'')}/tileset.json`],
+        // tileLocation: [`${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/${date.replace(/-/g,'')}/tileset.json`],
+        tileLocation: [ `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/20151203b/tileset.json`,
+                        `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/20151203/tileset.json` ],
         date,
         type: "instrument",
         platform: "ground",
