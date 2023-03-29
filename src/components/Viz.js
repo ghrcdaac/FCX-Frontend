@@ -201,6 +201,13 @@ class Viz extends Component {
                     this.errorLayers.push(selectedLayerId)
                 })
             } else if (layer.displayMechanism === "3dtile") {
+                if(layer.tileLocation instanceof Array) {
+                    return layer.tileLocation.forEach((location, index) => {
+                        let modifiedLayer = {...layer, tileLocation: location, layerId: `${layer.layerId}-${index}`}
+                        return this.handle3dTiles(modifiedLayer, selectedLayerId)
+                    });
+                }
+                return this.handle3dTiles(layer, selectedLayerId)
                 /** If 3d tile is for NPOL insturment, it has several 3d tiles (per 20 mins) across a single day
                  * So, for all those 3d tiles, add it to viewer scene primitive.
                  * Then create a list of cesium layer refs. (Later needed for removal.)
@@ -412,6 +419,81 @@ class Viz extends Component {
 
             }
         }
+    }
+
+    // first try of breaking the visualization handlers for different visualization types.
+
+    handle3dTiles(layer, selectedLayerId) {
+    /** If 3d tile is for NPOL insturment, it has several 3d tiles (per 20 mins) across a single day
+     * So, for all those 3d tiles, add it to viewer scene primitive.
+     * Then create a list of cesium layer refs. (Later needed for removal.)
+     * **/
+
+    //use TimeDynamicPointCloud from Brian's npm package temporal-3d-tile
+    const newTileset = new this.Temporal3DTileset({
+        url: layer.tileLocation,
+        layerId: layer.layerId, // currently not used
+    })
+    this.activeLayers.push({ layer: layer, cesiumLayerRef: newTileset })
+
+    viewer.scene.primitives.add(newTileset)
+
+    let previousTime = JulianDate.clone(viewer.clock.currentTime)
+
+    newTileset.readyPromise
+        // eslint-disable-next-line no-loop-func
+        .then((tileset) => {
+            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+
+            this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
+            tileset.style = new Cesium3DTileStyle()
+            if (layer.displayName === "Cloud Radar System") {
+                tileset.style.pointSize = 2.0;
+                tileset.style.color = getColorExpression();
+            } else if (layer.displayName === "Cloud Physics LiDAR") {
+                tileset.style.pointSize = 4.0;
+                if (layer.fieldCampaignName === "Olympex") {
+                    tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
+                    // tileset.pointCloudShading.attenuation = true;
+                }
+            } else {
+                tileset.style.pointSize = 1.0;
+                tileset.style.color = getColorExpression();
+            }
+            this.viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), this.epoch)
+            tileset.style.show = getShowExpression(this.viewerTime, this.linger)
+            tileset.makeStyleDirty()
+
+            emitter.on("lingerTimeChange", (value) => {
+                this.linger = value
+                tileset.style.show = getShowExpression(this.viewerTime, this.linger)
+                tileset.makeStyleDirty()
+            })
+
+            if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
+                const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
+                    if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
+                        previousTime = JulianDate.clone(viewer.clock.currentTime)
+                        this.viewerTime = JulianDate.secondsDifference(previousTime, this.epoch)
+                        tileset.style.show = getShowExpression(this.viewerTime, this.linger)
+                        tileset.makeStyleDirty()
+                    }
+                })
+
+                for (const [, activeLayerItem] of this.activeLayers.entries()) {
+                    if (activeLayerItem.layer.layerId === layer.layerId) {
+                        activeLayerItem.eventCallback = eventCallback
+                        break
+                    }
+                }
+            }
+        })
+        .otherwise((_error) => {
+        console.error(_error)
+            window.alert("Error Loading Data")
+            this.errorLayers.push(selectedLayerId)
+            // this.activeLayers.push({ layer: layer })
+        })
     }
 
     setCameraDefaultInitialPosition(viewer, position) {
