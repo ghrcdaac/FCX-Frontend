@@ -13,8 +13,8 @@ export default function npol (date, index) {
         fieldCampaignName: "Olympex",
         shortName: "olympexnpol",
         addOnTickEventListener: true, // helps to update viz on temporal change.
-        displayName: "NASA S-Band Dual Polarimetric (NPOL) Doppler Radar",
-        variableName: "ZZ Radar Reflectivity",
+        displayName: "NASA S-Band Dual Polarimetric Doppler Radar (NPOL)",
+        variableName: "ZZ Radar Reflectivity in RHI-A mode",
         unit: "dBZ",
         // for each data available accross each date, create a list of tile locations. 
         // tileLocation: [`${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/${date.replace(/-/g,'')}/tileset.json`],

@@ -52,6 +52,7 @@ const legends = {
     olympexcpl: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexhiwrap: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexnexrad: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`, color: "lightred" },
+    olympexnpol: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`, color: "lightred" },
     track: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/flighttrack_legend.png`, color: "darkgreen" },
     abi_c13: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/abi_c13_legend.png`, color: "lightgray" },
     lma_stations: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`, color: "lightred" },
