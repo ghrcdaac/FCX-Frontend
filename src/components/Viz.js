@@ -201,17 +201,6 @@ class Viz extends Component {
                     this.errorLayers.push(selectedLayerId)
                 })
             } else if (layer.displayMechanism === "3dtile") {
-                if(layer.tileLocation instanceof Array) {
-                    /** If 3d tile is for NPOL insturment, it has several 3d tiles (per 20 mins) across a single day
-                     * So, for all those 3d tiles, add it to viewer scene primitive.
-                     * cesiumLayerRef is used to remove layer from viewer. So handled implicitly
-                     * layerId used to remove/unload it from global store. So, make it unique
-                     * **/
-                    return layer.tileLocation.forEach((location, index) => {
-                        let modifiedLayer = {...layer, tileLocation: location, layerId: `${layer.layerId}-${index}`}
-                        return this.handle3dTiles(modifiedLayer, selectedLayerId)
-                    });
-                }
                 return this.handle3dTiles(layer, selectedLayerId)
             }
             else if (layer.displayMechanism === "points") {

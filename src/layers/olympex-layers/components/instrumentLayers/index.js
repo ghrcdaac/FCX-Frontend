@@ -13,8 +13,6 @@ class LayerGenerator {
         this.nexradKLGX_dates = ["2016-05-01", "2016-04-30", "2016-04-29", "2016-04-28", "2016-04-27", "2016-04-26", "2016-04-25", "2016-04-24", "2016-04-23", "2016-04-22", "2016-04-21", "2016-04-20", "2016-04-19", "2016-04-18", "2016-04-17", "2016-04-16", "2016-04-15", "2016-04-14", "2016-04-13", "2016-04-12", "2016-04-11", "2016-04-10", "2016-04-09", "2016-04-08", "2016-04-07", "2016-04-06", "2016-04-05", "2016-04-04", "2016-04-03", "2016-04-02", "2016-04-01", "2016-03-31", "2015-12-31", "2015-12-30", "2015-12-29", "2015-12-28", "2015-12-27", "2015-12-26", "2015-12-25", "2015-12-24", "2015-12-23", "2015-12-22", "2015-12-21", "2015-12-20", "2015-12-19", "2015-12-18", "2015-12-17", "2015-12-16", "2015-12-15", "2015-12-14", "2015-12-13", "2015-12-12", "2015-12-11", "2015-12-10", "2015-12-09", "2015-12-08", "2015-12-07", "2015-12-06", "2015-12-05", "2015-12-04", "2015-12-03", "2015-12-02", "2015-12-01", "2015-11-30"]
         this.npol_dates = ["2015-12-03"]
         // add dates when data for new instrument are available
-
-        this.npol_upper_bound = [2] // corresponds to npol_dates index. represents the number of data points for that specific date.
     }
 
     sortedUniqueDates(date) {
@@ -60,10 +58,7 @@ class LayerGenerator {
                 return nexradKLGX(date, index);
             case "npol":
                 if(!this.npol_dates.includes(date)) return null;
-                // pass the npol_upper_bound for that date.
-                let idxUpperBound = this.npol_dates.findIndex((el) => el == date);
-                let dataPoints = this.npol_upper_bound[idxUpperBound];
-                return npol(date, index, dataPoints);
+                return npol(date, index);
             default:
                 return null
             // add case for new instrument here
