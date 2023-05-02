@@ -5,7 +5,7 @@ import { JulianDate } from "cesium";
 
 import * as thunk from "../../constants/thunk";
 import { Resources, mapStateToProps } from "./redux";
-import { bodyForPost, validationCheck } from "./helper";
+import { bodyForPost, validationCheck, tokenGenerator } from "./helper";
 
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
@@ -67,9 +67,30 @@ class SubsettingTool extends Component {
         const {start, end} = this.state;
         if (!validationCheck(start, end, this.validationMessageSet)) return;
         const { triggerSubsettingTool } = Resources;
-        triggerSubsettingTool.body = bodyForPost(start, end);
+        const wsTokenId = tokenGenerator();
+        triggerSubsettingTool.body = bodyForPost(start, end, wsTokenId);
+        this.handleWebsocketConnection(wsTokenId);
         this.props.Post(triggerSubsettingTool); // Note: updating the redux state, implicitly done, by POST thunk. Cool!
         this.setState({start: "", end: "", validationMessage: ""});
+    }
+
+    handleWebsocketConnection = (wsTokenId = "random12345id") => {
+        let url = "wss://97cwyclmwd.execute-api.us-east-1.amazonaws.com/development"; // put in .env
+        let webSocket = new WebSocket(url);
+        webSocket.onopen = (e) => {
+            // set the websocket Token Id; a unique identifier for ws connection.
+            let afterConnectMsg = {
+                action: "afterconnect", wsTokenId
+            }
+            webSocket.send(JSON.stringify(afterConnectMsg));
+            // webSocket.send(JSON.stringify({"action":"sendmessage", "data":"hello world!!!!!"}))
+          };
+
+        webSocket.onmessage = (event) => {
+            console.log(">>>>> Incomming message", event.data);
+            // use this data to show progress bar for each subsets.
+        };
+        // webSocket.close(); // on progress complete
     }
 
     validationMessageSet = (message) => {

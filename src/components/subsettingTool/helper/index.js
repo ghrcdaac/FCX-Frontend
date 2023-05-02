@@ -2,11 +2,12 @@ import {v4 as uuidv4} from 'uuid';
 import moment from "moment/moment";
 import {outputSubsetsBucket} from "../../../config";
 import { validationCheck } from './validation';
+import tokenGenerator from "./tokenGenerator";
 import Jsona from 'jsona';
 
 const dataFormatter = new Jsona();
 
-function bodyForPost(start, end) {
+function bodyForPost(start, end, wsTokenId) {
     /**
      * Take in start and end datetime.
      * generate a random 'dir2' (inside subset dir inside bucket)
@@ -22,10 +23,11 @@ function bodyForPost(start, end) {
         "subDir": `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,
         "date": date,
         "Start": startDateTime,
-        "End": endDateTime
+        "End": endDateTime,
+        "wsTokenId": wsTokenId
     }
     const serializedPost = dataFormatter.serialize({stuff: body});
     return serializedPost;
 }
 
-export {bodyForPost, validationCheck};
+export {bodyForPost, validationCheck, tokenGenerator};
