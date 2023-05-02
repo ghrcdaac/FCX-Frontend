@@ -9,13 +9,12 @@ import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
-import CircularProgress, {
-} from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
 
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import CircularProgressBar from './circularProgressBar';
 import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
 
@@ -66,7 +65,7 @@ export default function SubsetCard(props) {
       </CardHeader>
       <CardContent>
       <Box style={{textAlign: "right"}}>
-        <CircularProgressWithLabel value={80}/>
+        <CircularProgressBar value={80}/>
       </Box>
         <Typography variant="body2" color="textSecondary" component="p">
           Expand to see the python script.
@@ -99,30 +98,5 @@ export default function SubsetCard(props) {
         </CardContent>
       </Collapse>
     </Card>
-  );
-}
-
-
-function CircularProgressWithLabel(props) {
-  return (
-    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-      <CircularProgress variant="determinate" {...props} />
-      <Box
-        sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: 'absolute',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="caption" component="div" color="text.secondary">
-          {`${Math.round(props.value)}%`}
-        </Typography>
-      </Box>
-    </Box>
   );
 }
