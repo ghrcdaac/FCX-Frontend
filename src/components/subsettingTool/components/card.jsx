@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import { red } from '@material-ui/core/colors';
 import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
 
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -102,7 +103,10 @@ function _SubsetCard(props) {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
+          <Typography paragraph>Progress:</Typography>
           <DetailedProgressBar progressPercentage={progressPercentage} progress={progress}/>
+          <Divider/>
+          <br/>
           <Typography paragraph>Code:</Typography>
             <CodeHighlight className="code_block">
               {dlScript}

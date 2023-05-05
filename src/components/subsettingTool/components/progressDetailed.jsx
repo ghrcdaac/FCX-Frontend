@@ -1,6 +1,7 @@
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
+import Paper from '@material-ui/core/Paper';
 
 export default function DetailedProgressBar(props) {
     // {progress && progress.map((elem, index) => (<p key={`${index}-${elem['wstokenid']}`}>{elem.message}</p>))}
@@ -9,9 +10,11 @@ export default function DetailedProgressBar(props) {
         <Box sx={{ width: '100%' }}>
             <LinearProgressWithLabel value={props.progressPercentage} />
         </Box>
-        <Typography paragraph>
-            {props.progress && props.progress.map((elem, index) => (<p key={`${index}-${elem['wstokenid']}`}>{elem.message}</p>))}
-        </Typography>
+        <Paper>
+            <div style={{margin: "1rem", padding: "1rem"}}>
+                {props.progress && props.progress.map((elem, index) => (<Typography variant="h6" key={`${index}-${elem['wstokenid']}`}>{elem.message}</Typography>))}
+            </div>
+        </Paper>
     </Box>
     );
 }
