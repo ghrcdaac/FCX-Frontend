@@ -37,7 +37,7 @@ switch (action.type) {
     const { wstokenid } = action.payload;
     return {
         ...state,
-        [`${wstokenid}`]: [...state[`${wstokenid}`], action.payload]
+        [`${wstokenid}`]: state[`${wstokenid}`] ? [...state[`${wstokenid}`], action.payload] : [action.payload]
     };
     }
 
