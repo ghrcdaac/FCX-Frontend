@@ -15,6 +15,7 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import CircularProgressBar from './circularProgressBar';
+import DetailedProgressBar from './progressDetailed';
 import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
 import { connect } from 'react-redux';
@@ -101,9 +102,7 @@ function _SubsetCard(props) {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
-          <div>
-            {progress && progress.map((elem, index) => (<p key={`${index}-${elem['wstokenid']}`}>{elem.message}</p>))}
-          </div>
+          <DetailedProgressBar progressPercentage={progressPercentage} progress={progress}/>
           <Typography paragraph>Code:</Typography>
             <CodeHighlight className="code_block">
               {dlScript}
