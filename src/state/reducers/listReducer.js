@@ -1,7 +1,7 @@
 // New way of writing reducers with the component itself,
 // and importing it here
 import {onTriggeredSubsettingTool} from "../../components/subsettingTool/redux";
-
+import {progressbarSubsettingTool} from "../../components/subsettingTool/redux/wsMessage";
 
 // Old way of writing the reducers in one place
 const selectedLayers = (state = ["a"], action) => {
@@ -52,4 +52,4 @@ const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
   return state
 }
 
-export default { selectedLayers, layerStatus, onTriggeredSubsettingTool }
+export default { selectedLayers, layerStatus, onTriggeredSubsettingTool, progressbarSubsettingTool }

@@ -7,6 +7,8 @@ import * as thunk from "../../constants/thunk";
 import { Resources, mapStateToProps } from "./redux";
 import { bodyForPost, validationCheck, tokenGenerator } from "./helper";
 
+import { mapStateToProps as mapStateToPropsNew, actionDispatchers } from "./redux/wsMessage";
+
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -117,5 +119,5 @@ class SubsettingTool extends Component {
     }
 }
   
-export default connect(mapStateToProps, {...thunk})(SubsettingTool);
+export default connect(mapStateToPropsNew, actionDispatchers)(connect(mapStateToProps, {...thunk})(SubsettingTool));
   
