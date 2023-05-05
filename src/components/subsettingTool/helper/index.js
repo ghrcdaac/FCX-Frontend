@@ -1,4 +1,3 @@
-import {v4 as uuidv4} from 'uuid';
 import moment from "moment/moment";
 import {outputSubsetsBucket} from "../../../config";
 import { validationCheck } from './validation';
@@ -17,7 +16,7 @@ function bodyForPost(start, end, wsTokenId) {
     const endDateTime = end ? moment(end).utc().format('YYYY-MM-DD HH:mm:ss') + " UTC" : "";
     const outputbucket = outputSubsetsBucket;
     const dir1 = "subsets";
-    const dir2 = `subset-${moment().format("YYMMDDHHmmss")}-${uuidv4()}`; // unique dir, where subsets sits
+    const dir2 = `subset-${wsTokenId}`; // unique dir, where subsets sits
     const body =  {
         "type": "subset_trigger_request",
         "subDir": `https://${outputbucket}.s3.amazonaws.com/${dir1}/${dir2}/`,

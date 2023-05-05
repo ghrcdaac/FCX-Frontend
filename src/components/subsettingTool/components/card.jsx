@@ -17,6 +17,8 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CircularProgressBar from './circularProgressBar';
 import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
+import { connect } from 'react-redux';
+import { mapStateToProps } from '../redux/wsMessage';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,11 +48,18 @@ const getHref = (script) => {
   return URL.createObjectURL(file);
 }
 
-export default function SubsetCard(props) {
+function _SubsetCard(props) {
   const {subsetDir, subsetIndex} = props;
   const dlScript = downloadScript(subsetDir);
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
+
+  const progressbarWsId = subsetDir.split("subset-")[1].split("/")[0];
+  const progress = props.progressbarSubsettingTool[`${progressbarWsId}`];
+  let progressPercentage = 0;
+  if (progress) {
+    progressPercentage = (progress.length / 7) * 100;
+  }
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -65,9 +74,10 @@ export default function SubsetCard(props) {
       </CardHeader>
       <CardContent>
       <Box style={{textAlign: "right"}}>
-        <CircularProgressBar value={80}/>
+        <CircularProgressBar value={Number(progressPercentage)}/>
       </Box>
         <Typography variant="body2" color="textSecondary" component="p">
+          {}
           Expand to see the python script.
           Click on download to save it locally.
         </Typography>
@@ -91,6 +101,9 @@ export default function SubsetCard(props) {
       </CardActions>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
+          <div>
+            {progress && progress.map((elem, index) => (<p key={`${index}-${elem['wstokenid']}`}>{elem.message}</p>))}
+          </div>
           <Typography paragraph>Code:</Typography>
             <CodeHighlight className="code_block">
               {dlScript}
@@ -100,3 +113,6 @@ export default function SubsetCard(props) {
     </Card>
   );
 }
+
+const SubsetCard = connect(mapStateToProps, null)(_SubsetCard);
+export default SubsetCard;
