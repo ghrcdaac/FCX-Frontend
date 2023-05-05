@@ -89,7 +89,7 @@ class SubsettingTool extends Component {
           };
 
         webSocket.onmessage = (event) => {
-            console.log(">>>>> Incomming message", event.data);
+            this.props.updateProgressbar(JSON.parse(event.data));
             // use this data to show progress bar for each subsets.
         };
         // webSocket.close(); // on progress complete
