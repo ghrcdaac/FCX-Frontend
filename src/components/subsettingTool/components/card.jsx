@@ -126,10 +126,14 @@ function _SubsetCard(props) {
           <DetailedProgressBar progressPercentage={progressPercentage} progress={progress}/>
           <Divider/>
           <br/>
-          <Typography paragraph>Code:</Typography>
+          <Typography paragraph>Subsets:</Typography>
+          <div>
+            {props.downloadListSubsettingTool[`${progressbarWsId}`] && props.downloadListSubsettingTool[`${progressbarWsId}`].map(elem => (<div><a href={elem.url}>{elem.name}</a></div>))}
+          </div>
+          {/* <Typography paragraph>Code:</Typography>
             <CodeHighlight className="code_block">
               {dlScript}
-            </CodeHighlight>
+            </CodeHighlight> */}
         </CardContent>
       </Collapse>
     </Card>
