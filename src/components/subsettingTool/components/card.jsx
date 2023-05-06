@@ -15,12 +15,15 @@ import Divider from '@material-ui/core/Divider';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import axios from "axios";
+
 import CircularProgressBar from './circularProgressBar';
 import DetailedProgressBar from './progressDetailed';
 import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
 import { connect } from 'react-redux';
 import { mapStateToProps } from '../redux/wsMessage';
+import { Resources } from "../redux/subsetDownloadList";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -61,6 +64,22 @@ function _SubsetCard(props) {
   let progressPercentage = 0;
   if (progress) {
     progressPercentage = (progress.length / 7) * 100;
+    // also call for list of downloadable items.
+    const config = { headers: {
+        Accept: "application/json",
+      }
+    }
+    Resources.body = {
+      "wsTokenId": `subset-${progressbarWsId}`
+    }
+    axios
+      .post("https://2parqipqkc.execute-api.us-east-1.amazonaws.com/development/", Resources.body, config)
+      .catch(e => e.response)
+      .then(res => {
+        let downloadableSubsetsList = JSON.parse(res.data.body);
+        // dispatch.
+        console.log("----------->", downloadableSubsetsList)
+      });
   }
 
   const handleExpandClick = () => {
