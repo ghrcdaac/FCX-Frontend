@@ -33,7 +33,7 @@ switch (action.type) {
 
     case success: {
     let {wstokenid} = action.payload;
-    const newDownloadList = action.payload.downloadList.map(url => ({
+    const newDownloadList = action.payload.downloadList.length > 0 && action.payload.downloadList.map(url => ({
         name: url.split("/").slice(-1)[0],
         url
     }));
@@ -55,9 +55,37 @@ switch (action.type) {
   
 // map state to props
 export const mapStateToProps = state => {
-const { progressbarSubsettingTool } = state;
-return { progressbarSubsettingTool };
+const { downloadListSubsettingTool } = state;
+return { downloadListSubsettingTool };
 };
   
 // action dispatchers
-// use default post.
+
+// action dispatchers
+
+const initProgressbar = (payload) => {
+    const {init} = Resources.downloadListSubsettingTool.asyncActions;
+    return (dispatch, getState) => {
+      dispatch({type: init, payload});
+    };
+  };
+
+const updateProgressbar = (payload) => {
+    const {success} = Resources.downloadListSubsettingTool.asyncActions;
+    return (dispatch, getState) => {
+        dispatch({type: success, payload});
+    };
+};
+
+const errorProgressbar = (payload) => {
+    const {error} = Resources.downloadListSubsettingTool.asyncActions;
+    return (dispatch, getState) => {
+        dispatch({type: error, payload});
+    };
+};
+
+export const actionDispatchers = {
+initProgressbar,
+updateProgressbar,
+errorProgressbar
+};

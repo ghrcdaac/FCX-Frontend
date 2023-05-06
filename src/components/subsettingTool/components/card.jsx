@@ -23,7 +23,7 @@ import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
 import { connect } from 'react-redux';
 import { mapStateToProps } from '../redux/wsMessage';
-import { Resources } from "../redux/subsetDownloadList";
+import { Resources, mapStateToProps as mapStateToPropsSubsetList, actionDispatchers } from "../redux/subsetDownloadList";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -76,9 +76,9 @@ function _SubsetCard(props) {
       .post("https://2parqipqkc.execute-api.us-east-1.amazonaws.com/development/", Resources.body, config)
       .catch(e => e.response)
       .then(res => {
-        let downloadableSubsetsList = JSON.parse(res.data.body);
+        let downloadList = JSON.parse(res.data.body);
         // dispatch.
-        console.log("----------->", downloadableSubsetsList)
+        props.updateProgressbar({"wstokenid": progressbarWsId, "downloadList": downloadList.subsetfiles});
       });
   }
 
@@ -136,5 +136,5 @@ function _SubsetCard(props) {
   );
 }
 
-const SubsetCard = connect(mapStateToProps, null)(_SubsetCard);
+const SubsetCard = connect(mapStateToPropsSubsetList, actionDispatchers)(connect(mapStateToProps, null)(_SubsetCard));
 export default SubsetCard;
