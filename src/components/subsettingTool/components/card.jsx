@@ -99,8 +99,7 @@ function _SubsetCard(props) {
       </Box>
         <Typography variant="body2" color="textSecondary" component="p">
           {}
-          Expand to see the python script.
-          Click on download to save it locally.
+          Expand to see the detailed progress and download the completed subsets.
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
