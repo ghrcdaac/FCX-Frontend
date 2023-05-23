@@ -9,6 +9,8 @@ import { bodyForPost, validationCheck, tokenGenerator } from "./helper";
 
 import { mapStateToProps as mapStateToPropsNew, actionDispatchers } from "./redux/wsMessage";
 
+import { WSEndpoint } from "../../config";
+
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -77,7 +79,7 @@ class SubsettingTool extends Component {
     }
 
     handleWebsocketConnection = (wsTokenId = "random12345id") => {
-        let url = "wss://97cwyclmwd.execute-api.us-east-1.amazonaws.com/development"; // put in .env
+        let url = WSEndpoint;
         let webSocket = new WebSocket(url);
         webSocket.onopen = (e) => {
             // set the websocket Token Id; a unique identifier for ws connection.
@@ -89,10 +91,9 @@ class SubsettingTool extends Component {
           };
 
         webSocket.onmessage = (event) => {
-            this.props.updateProgressbar(JSON.parse(event.data));
             // use this data to show progress bar for each subsets.
+            this.props.updateProgressbar(JSON.parse(event.data));
         };
-        // webSocket.close(); // on progress complete
     }
 
     validationMessageSet = (message) => {
