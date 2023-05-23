@@ -1,9 +1,11 @@
+import { subsetFilenamesListEndpoint } from "../../../config";
+
 // Handles download list for completed subsets.
 
 // ACTION_TYPE DEFINATOPMS
 export const Resources = {
     downloadListSubsettingTool: {
-        url: "https://2parqipqkc.execute-api.us-east-1.amazonaws.com",
+        url: subsetFilenamesListEndpoint,
         body: { wsTokenId: "token-123" },
         asyncActions: {
             init: 'subsetlist_INIT',

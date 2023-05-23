@@ -15,6 +15,7 @@ import Divider from '@material-ui/core/Divider';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
+import { subsetFilenamesListEndpoint, subsettingApiKey } from "../../../config";
 import axios from "axios";
 
 import CircularProgressBar from './circularProgressBar';
@@ -69,11 +70,12 @@ function _SubsetCard(props) {
         Accept: "application/json",
       }
     }
+    config.headers['x-api-key'] = subsettingApiKey;
     Resources.body = {
       "wsTokenId": `subset-${progressbarWsId}`
     }
     axios
-      .post("https://2parqipqkc.execute-api.us-east-1.amazonaws.com/development/", Resources.body, config)
+      .post(subsetFilenamesListEndpoint, Resources.body, config)
       .catch(e => e.response)
       .then(res => {
         let downloadList = JSON.parse(res.data.body);
