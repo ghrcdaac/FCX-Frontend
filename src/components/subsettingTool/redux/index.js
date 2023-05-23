@@ -1,7 +1,9 @@
+import { subsettingEndpoint } from "../../../config";
+
 // ACTION_TYPE DEFINATOPMS
 export const Resources = {
   triggerSubsettingTool: {
-    url: "/default/sanjog-subsetting-fcx-trigger",
+    url: subsettingEndpoint,
     body: {},
     syncActions: {},
     asyncActions: {
@@ -58,3 +60,4 @@ export const mapStateToProps = state => {
 };
 
 // action dispatchers
+// thunk.js handles the dispatching

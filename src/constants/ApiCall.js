@@ -1,7 +1,4 @@
 import axios from "axios";
-import { subsettingEndpoint } from "../config";
-
-axios.defaults.baseURL = subsettingEndpoint;
 
 export default class APICall {
   constructor() {
