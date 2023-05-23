@@ -16,12 +16,18 @@ const mapboxUsername = process.env.REACT_APP_BAMBOO_MAPBOX_USERNAME
 const mapboxUrl = "https://api.mapbox.com/styles/v1/" + mapboxUsername + "/" + mapboxStyleId + "/tiles/256/{z}/{x}/{y}?access_token=" + mapboxAccessToken
 const cesiumDefaultAccessToken = process.env.REACT_APP_BAMBOO_CESIUM_DEFAULT_TOKEN 
 const supportEmail = process.env.REACT_APP_BAMBOO_GHRC_SUPPORT_EMAIL || "support-ghrc@earthdata.nasa.gov"
-const subsettingEndpoint = process.env.REACT_APP_SUBSETTING_ENDPOINT || "https://w390d81cg2.execute-api.us-east-1.amazonaws.com"
-const subsettingApiKey = process.env.REACT_APP_SUBSETTING_API_KEY
-const outputSubsetsBucket = process.env.REACT_APP_OUTPUT_SUBSETS_BUCKET
-const outputSubsetsBucketRegion = process.env.REACT_APP_OUTPUT_SUBSETS_BUCKET_REGION
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, subsettingEndpoint, subsettingApiKey, outputSubsetsBucket, outputSubsetsBucketRegion }
+// SUBSETTING TOOL ENVS
+const subsettingEndpoint = process.env.REACT_APP_SUBSET_TRIGGER_API
+const subsettingApiKey = process.env.REACT_APP_SUBSETTING_TOOL_API_KEY
+const outputSubsetsBucket = process.env.REACT_APP_SUBSET_OUTPUT_BUCKET
+const outputSubsetsBucketRegion = process.env.REACT_APP_SUBSET_OUTPUT_BUCKET_REGION
+const subsetCloudfrontUrl = process.env.REACT_APP_SUBSET_CLOUDFRONT_URL
+const subsetFilenamesListEndpoint = process.env.REACT_APP_SUBSET_FILENAMES_LIST_API
+const WSEndpoint = process.env.REACT_APP_WS_ENDPOINT
+
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail,
+  subsettingEndpoint, subsettingApiKey, outputSubsetsBucket, outputSubsetsBucketRegion, subsetCloudfrontUrl, subsetFilenamesListEndpoint, WSEndpoint }
 
 /*
   dataBaseUrl -  (S3) URL root address where the data resides
@@ -31,6 +37,12 @@ export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAc
   mapboxStyleId - Generate from Map box website
   mapboxUsername - Generate from Map box website
   cesiumDefaultAccessToken - Create an access Token from CesiumJS website.
+
   subsettingEndpoint - Base Gateway API endpoint to trigger subsetting tool.
   subsettingApiKey - Key to invoke the subetting endpoint.
+  outputSubsetsBucket - bucket to hold the subsets data.
+  outputSubsetsBucketRegion- region of the output subsets bucket.
+  subsetCloudfrontUrl- cloudfront url that opens get access to private subsets data.
+  subsetFilenamesListEndpoint- API GATEWAY endpoint to get the list of available subset files.
+  WSEndpoint - API GATEWAY to support websocket connection in serverless architecture.
 */
