@@ -1,5 +1,10 @@
 import {outputSubsetsBucket, outputSubsetsBucketRegion} from "../../../config"
 
+/**
+ *
+ * Depreciated. Subside by subset direct download feature / subsetsList.js
+ */
+
 export const code = (dir=`https://${outputSubsetsBucket}.s3.amazonaws.com/subsets/subset-221118121928-f2a0493f-8769-4ff5-9b84-3927f8d03660/`) => (
 `
 import os

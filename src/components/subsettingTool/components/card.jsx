@@ -20,7 +20,6 @@ import axios from "axios";
 
 import CircularProgressBar from './circularProgressBar';
 import DetailedProgressBar from './progressDetailed';
-import CodeHighlight from "./codeHighlight";
 import {code as downloadScript} from '../helper/downloadScript.js';
 import { connect } from 'react-redux';
 import { mapStateToProps } from '../redux/wsMessage';
@@ -49,11 +48,6 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const getHref = (script) => {
-  const file = new Blob([script], {type: 'text/plain'});
-  return URL.createObjectURL(file);
-}
-
 function _SubsetCard(props) {
   const {subsetDir, subsetIndex} = props;
   const dlScript = downloadScript(subsetDir);
@@ -63,6 +57,8 @@ function _SubsetCard(props) {
   // get wsId from subsetDir. Unique ID is used for both ws id and creating unique dir.
   const progressbarWsId = subsetDir.split("/subset-")[1].split("/")[0];
   const progress = props.progressbarSubsettingTool[`${progressbarWsId}`];
+
+  /** Progress bar logic start */
   let progressPercentage = 0;
   if (progress) {
     progressPercentage = (progress.length / 7) * 100;
@@ -80,10 +76,11 @@ function _SubsetCard(props) {
       .catch(e => e.response)
       .then(res => {
         let downloadList = res.data;
-        // dispatch.
+        // dispatch. The updated states after dispatch are used to list out downloadable subsets
         props.updateProgressbar({"wstokenid": progressbarWsId, "downloadList": downloadList.subsetfiles});
       });
   }
+  /** Progress bar logic end */
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -106,11 +103,9 @@ function _SubsetCard(props) {
         </Typography>
       </CardContent>
       <CardActions disableSpacing>
-        <a href={getHref(dlScript)} download="download_subset.py">
-          <IconButton aria-label="download">
-            <CloudDownloadIcon />
-          </IconButton>
-        </a>
+        <IconButton aria-label="download">
+          <CloudDownloadIcon />
+        </IconButton>
         <IconButton
           className={clsx(classes.expand, {
             [classes.expandOpen]: expanded,
