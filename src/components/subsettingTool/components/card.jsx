@@ -60,7 +60,8 @@ function _SubsetCard(props) {
   const classes = useStyles();
   const [expanded, setExpanded] = React.useState(false);
 
-  const progressbarWsId = subsetDir.split("subset-")[1].split("/")[0];
+  // get wsId from subsetDir. Unique ID is used for both ws id and creating unique dir.
+  const progressbarWsId = subsetDir.split("/subset-")[1].split("/")[0];
   const progress = props.progressbarSubsettingTool[`${progressbarWsId}`];
   let progressPercentage = 0;
   if (progress) {
