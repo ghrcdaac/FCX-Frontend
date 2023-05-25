@@ -79,7 +79,7 @@ function _SubsetCard(props) {
       .post(subsetFilenamesListEndpoint, Resources.body, config)
       .catch(e => e.response)
       .then(res => {
-        let downloadList = JSON.parse(res.data.body);
+        let downloadList = res.data;
         // dispatch.
         props.updateProgressbar({"wstokenid": progressbarWsId, "downloadList": downloadList.subsetfiles});
       });
