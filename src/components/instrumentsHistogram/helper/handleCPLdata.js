@@ -37,7 +37,7 @@ export async function fetchCPLData(datetime="2017-04-27", params="0", pagesize="
                 }
             
     let rawData = await apiCaller.post(url, body);
-    if(rawData["data"]["errors"]) {
+    if(rawData && rawData["data"] && rawData["data"]["errors"]) {
         error = true;
     } else {
         let rawDatawNull = rawData["data"]["data"]["attributes"]["data"].replace(/\bInfinity\b/g, "null")

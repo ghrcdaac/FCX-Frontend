@@ -292,7 +292,7 @@ class InstrumentsHistogram extends Component {
                         <TextField
                             id="outlined-select-currency"
                             select
-                            label="params (z-axis)"
+                            label= {`${(this.state.selectedInstrument === "CRS") ? "range" : "Second"} (z-axis)`} // if crs, range. if cpl, Second
                             value={this.state.params}
                             onChange={this.handleParamsSelection}
                             // helperText="Please select params"

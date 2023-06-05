@@ -38,7 +38,7 @@ export default async function fetchFEGSData(datetime="2017-03-21", pagesize="200
                 }
             
     let rawData = await apiCaller.post(url, body);
-    if(rawData["data"]["errors"]) {
+    if(rawData && rawData["data"] && rawData["data"]["errors"]) {
       error = true;
     } else {
       let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])

@@ -37,7 +37,7 @@ export async function fetchCRSData(datetime="2017-05-17", params="1011.825", pag
                 }
             
     let rawData = await apiCaller.post(url, body);
-    if(rawData["data"]["errors"]) {
+    if(rawData && rawData["data"] && rawData["data"]["errors"]) {
         error = true;
     } else {
         let rawDatawNull = rawData["data"]["data"]["attributes"]["data"].replace(/\bNaN\b/g, "null")
