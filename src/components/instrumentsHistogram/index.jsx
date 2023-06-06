@@ -21,10 +21,12 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import {HistogramVizBox} from "./components";
-import handleFEGSdata from "./helper/handleFEGSdata";
+import {requestBodyFEGS} from "./helper/handleFEGSdata";
 import handleLIPdata from "./helper/handleLIPdata";
 import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
 import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
+
+import { Resources, Post } from "./redux/index";
 
 ChartJS.register(
 CategoryScale,
@@ -34,30 +36,6 @@ Title,
 Tooltip,
 Legend
 );
-
-async function InstrumentsHandler(instrumentType, datetime, params, pagesize, pageno, density) {
-    /**
-     * InstrumentType: We can easily get the instrument type from local state.
-     * datetime: value needs to be fetched. Hard without redux thunk! Think!! actually wont have used redux thunk for this. would directly set the change on the redux state.
-     *           So, it wont be dependent on the GHRC4145 merge
-     * coordType: put it constant for now, later can make it selectable (using dropdown).
-     * dataType: put it constant for now, later can make it selectable (using dropdown).
-     * params: varies according to the instrument type. For certain insturments, need to fetch another set of data. Use that fetched data for a select option.
-     * pagesize: a text field to edit the page size.
-     * pageno: a next button, to fetch next set of paged data.
-     * density: a stepwise slider to set the density value.
-     */
-    if (instrumentType == "FEGS") {
-        return handleFEGSdata(datetime, pagesize, pageno, density);
-    } else if (instrumentType == "LIP") {
-        return handleLIPdata(datetime, pagesize, pageno, density);
-    } else if (instrumentType == "CRS") {
-        return handleCRSdata(datetime, params, pagesize, pageno, density);
-    } else if (instrumentType == "CPL") {
-        return handleCPLdata(datetime, params, pagesize, pageno, density);
-    }
-    return handleFEGSdata(datetime, pagesize, pageno, density);
-}
 
 const densityMarks = [
     {
@@ -121,10 +99,36 @@ class InstrumentsHistogram extends Component {
         let datetime = this.props.selectedDate;
         if (selectedInstrument && datetime && params && pageno && pagesize && density && !error) {
             // only fetch histogram data, once all the necessary parameters for api call are ready
-            InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density).then((res)=> {
-                let {data, labels} = res;
-                this.setState({data, labels});
-            });
+            this.InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density)
+            // .then((res)=> {
+            //     let {data, labels} = res;
+            //     this.setState({data, labels});
+            // });
+        }
+    }
+
+    InstrumentsHandler = async (instrumentType, datetime, params, pagesize, pageno, density) => {
+        /**
+         * InstrumentType: We can easily get the instrument type from local state.
+         * datetime: value needs to be fetched. Hard without redux thunk! Think!! actually wont have used redux thunk for this. would directly set the change on the redux state.
+         *           So, it wont be dependent on the GHRC4145 merge
+         * coordType: put it constant for now, later can make it selectable (using dropdown).
+         * dataType: put it constant for now, later can make it selectable (using dropdown).
+         * params: varies according to the instrument type. For certain insturments, need to fetch another set of data. Use that fetched data for a select option.
+         * pagesize: a text field to edit the page size.
+         * pageno: a next button, to fetch next set of paged data.
+         * density: a stepwise slider to set the density value.
+         */
+        if (instrumentType == "FEGS") {
+            // return handleFEGSdata(datetime, pagesize, pageno, density);
+            Resources.body = requestBodyFEGS(datetime, pagesize, pageno, density);
+            this.props.Post(Resources);
+        } else if (instrumentType == "LIP") {
+            return handleLIPdata(datetime, pagesize, pageno, density);
+        } else if (instrumentType == "CRS") {
+            return handleCRSdata(datetime, params, pagesize, pageno, density);
+        } else if (instrumentType == "CPL") {
+            return handleCPLdata(datetime, params, pagesize, pageno, density);
         }
     }
 
@@ -308,11 +312,11 @@ class InstrumentsHistogram extends Component {
                     </div>
                 }
             </div>
-            {(!this.state.error && this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
-            {(!this.state.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
-            {(!this.state.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
-            {(!this.state.error && this.state.params && !this.state.data && !this.state.labels) && <p>"Loading..."</p>}
-            {(this.state.error) && <p>"No instrument data for selected date"</p>}
+            {(!this.props.error && (Object.keys(this.props.data).length > 0) && Object.keys(this.props.labels).length > 0) && <HistogramVizBox labels={this.props.labels} data={this.props.data}/>}
+            {(!this.props.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
+            {(!this.props.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.props.error && this.state.params && !(Object.keys(this.props.data).length > 0) && !(Object.keys(this.props.labels).length > 0)) && <p>"Loading..."</p>}
+            {(this.props.error) && <p>"No instrument data for selected date"</p>}
         </div>
       )
     }
@@ -322,6 +326,7 @@ export default connect((state) => {
     // map redux state to props
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
-    return {selectedDate: selectedLayerDate}
-}, null)(InstrumentsHistogram);
+    let {data, labels} = state.histogramTool
+    return {selectedDate: selectedLayerDate, data, labels }
+}, {Post})(InstrumentsHistogram);
   
