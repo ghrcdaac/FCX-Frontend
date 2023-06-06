@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import { Switch, Route } from 'react-router-dom'
 import { MemoryRouter } from "react-router";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import VizContainer from "./VizContainer";
 import PageNotFound from "./pageNotFound";
@@ -20,10 +22,24 @@ class App extends Component {
           <Route
             exact path={`${basePath}/:id`}
             render={(props) => {
-              return <VizContainer
-                missions={missions}
-                {...props}
-              />
+              return <>
+                <VizContainer
+                  missions={missions}
+                  {...props}
+                />
+                <ToastContainer
+                  position="bottom-left"
+                  autoClose={5000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="light"
+                  />
+              </>
             }}
           />
           <Route

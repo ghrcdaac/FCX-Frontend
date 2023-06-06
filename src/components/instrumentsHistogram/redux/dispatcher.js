@@ -1,6 +1,6 @@
 import APICall from "../../../constants/ApiCall";
 // api key
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
@@ -26,6 +26,7 @@ export const Post = Resources => {
   const {instrument_type} = Resources.body.data.attributes; 
   return async (dispatch, getState) => {
     // dispatch initial action
+    handleInit(null, instrument_type);
     dispatch(initDispatchAction(init, undefined));
     return apiCaller.post(Resources.url, Resources.body)
       .then(res => {
@@ -47,13 +48,13 @@ export const Post = Resources => {
             default:
               return;
         }
-        // handleSuccess(res.status);
+        handleSuccess(res.status);
         // dispatch success action
         dispatch(successDispatchAction(success, extractedData));
         return extractedData;
       })
       .catch(err => {
-        // handleError(400, "Something went wrong. Call Support.");
+        handleError(400, "Something went wrong. Call Support.");
         // dispatch error action
         dispatch(errorDispatchAction(error, err));
         return err;
@@ -74,31 +75,44 @@ const initDispatchAction = (type, payload) => ({type, payload});
 const successDispatchAction = (type, payload) => ({type, payload});
 const errorDispatchAction = (type, payload) => ({type, payload});
 
-// const handleSuccess = (status) => {
-//   if (200 <= status < 300) {
-//     toast.success('Fetching data for Histogram.', {
-//       position: "bottom-left",
-//       autoClose: 5000,
-//       hideProgressBar: false,
-//       closeOnClick: true,
-//       pauseOnHover: true,
-//       draggable: true,
-//       progress: undefined,
-//       theme: "colored",
-//       });
-//   }
-//   //TODO: add cases for 400, 500, 300, 100 status codes.
-// }
+const handleInit = (status, instrument) => {
+  toast.success(`Fetching ${instrument} data for Histogram.`, {
+    position: "bottom-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    });
+}
 
-// const handleError = (status, body) => {
-//   toast.error(body, {
-//     position: "bottom-left",
-//     autoClose: 5000,
-//     hideProgressBar: false,
-//     closeOnClick: true,
-//     pauseOnHover: true,
-//     draggable: true,
-//     progress: undefined,
-//     theme: "colored",
-//     });
-// }
+const handleSuccess = (status) => {
+  if (200 <= status < 300) {
+    toast.success('Fetching Complete.', {
+      position: "bottom-left",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+      });
+  }
+  //TODO: add cases for 400, 500, 300, 100 status codes.
+}
+
+const handleError = (status, body) => {
+  toast.error(body, {
+    position: "bottom-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    });
+}
