@@ -5,6 +5,7 @@ import APICall from "../../../constants/ApiCall";
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
 import { dataExtractorCRS } from "../helper/handleCRSdata";
+import { dataExtractorCPL } from "../helper/handleCPLdata";
 
 const apiCaller = new APICall();
 let HistogramApiKey = "TOl3gUuA7n80coKZAqsAP1b2rZx9SWSb6AQwxaBk"
@@ -40,9 +41,11 @@ export const Post = Resources => {
             case "CRS":
               extractedData = dataExtractorCRS(res);
             break;
-            default:
-                extractedData = dataExtractorFEGS(res);
+            case "CPL":
+              extractedData = dataExtractorCPL(res);
             break;
+            default:
+              return;
         }
         // handleSuccess(res.status);
         // dispatch success action

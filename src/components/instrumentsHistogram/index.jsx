@@ -24,7 +24,7 @@ import {HistogramVizBox} from "./components";
 import {requestBodyFEGS} from "./helper/handleFEGSdata";
 import {requestBodyLIP} from "./helper/handleLIPdata";
 import {requestBodyCRS, fetchCRSparams} from "./helper/handleCRSdata";
-import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
+import {requestBodyCPL, fetchCPLparams} from "./helper/handleCPLdata";
 
 import { Resources, Post, Reset } from "./redux/index";
 
@@ -130,7 +130,8 @@ class InstrumentsHistogram extends Component {
             Resources.body = requestBodyCRS(datetime, params, pagesize, pageno, density);
             this.props.Post(Resources);
         } else if (instrumentType === "CPL") {
-            return handleCPLdata(datetime, params, pagesize, pageno, density);
+            Resources.body = requestBodyCPL(datetime, params, pagesize, pageno, density);
+            this.props.Post(Resources);
         }
     }
 
@@ -316,10 +317,10 @@ class InstrumentsHistogram extends Component {
                 }
             </div>
             {(!this.props.error && (Object.keys(this.props.data).length > 0) && Object.keys(this.props.labels).length > 0) && <HistogramVizBox labels={this.props.labels} data={this.props.data}/>}
-            {(!this.props.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
-            {(!this.props.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.state.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
+            {(!this.state.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
             {(!this.props.error && this.state.params && !(Object.keys(this.props.data).length > 0) && !(Object.keys(this.props.labels).length > 0)) && <p>"Loading..."</p>}
-            {(this.props.error) && <p>"No instrument data for selected date"</p>}
+            {(this.state.error) && <p>"No instrument data for selected date"</p>}
         </div>
       )
     }
