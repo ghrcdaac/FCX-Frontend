@@ -22,7 +22,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import {HistogramVizBox} from "./components";
 import {requestBodyFEGS} from "./helper/handleFEGSdata";
-import handleLIPdata from "./helper/handleLIPdata";
+import {requestBodyLIP} from "./helper/handleLIPdata";
 import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
 import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
 
@@ -119,15 +119,16 @@ class InstrumentsHistogram extends Component {
          * pageno: a next button, to fetch next set of paged data.
          * density: a stepwise slider to set the density value.
          */
-        if (instrumentType == "FEGS") {
+        if (instrumentType === "FEGS") {
             // return handleFEGSdata(datetime, pagesize, pageno, density);
             Resources.body = requestBodyFEGS(datetime, pagesize, pageno, density);
             this.props.Post(Resources);
-        } else if (instrumentType == "LIP") {
-            return handleLIPdata(datetime, pagesize, pageno, density);
-        } else if (instrumentType == "CRS") {
+        } else if (instrumentType === "LIP") {
+            Resources.body = requestBodyLIP(datetime, pagesize, pageno, density);
+            this.props.Post(Resources);
+        } else if (instrumentType === "CRS") {
             return handleCRSdata(datetime, params, pagesize, pageno, density);
-        } else if (instrumentType == "CPL") {
+        } else if (instrumentType === "CPL") {
             return handleCPLdata(datetime, params, pagesize, pageno, density);
         }
     }

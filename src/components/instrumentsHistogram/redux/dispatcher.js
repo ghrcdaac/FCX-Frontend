@@ -3,6 +3,7 @@ import APICall from "../../../constants/ApiCall";
 // import { toast } from 'react-toastify';
 
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
+import { dataExtractorLIP } from "../helper/handleLIPdata";
 
 const apiCaller = new APICall();
 let HistogramApiKey = "TOl3gUuA7n80coKZAqsAP1b2rZx9SWSb6AQwxaBk"
@@ -31,6 +32,9 @@ export const Post = Resources => {
         switch(instrument_type) {
             case "FEGS":
                 extractedData = dataExtractorFEGS(res);
+            break;
+            case "LIP":
+                extractedData = dataExtractorLIP(res);
             break;
             default:
                 extractedData = dataExtractorFEGS(res);
