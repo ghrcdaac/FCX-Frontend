@@ -1,4 +1,4 @@
 import { Resources, histogramTool } from "./reducers";
-import { Post } from "./dispatcher";
+import { Post, Reset } from "./dispatcher";
 
-export {Resources, histogramTool, Post}
+export {Resources, histogramTool, Post, Reset}

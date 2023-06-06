@@ -4,6 +4,7 @@ import APICall from "../../../constants/ApiCall";
 
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
+import { dataExtractorCRS } from "../helper/handleCRSdata";
 
 const apiCaller = new APICall();
 let HistogramApiKey = "TOl3gUuA7n80coKZAqsAP1b2rZx9SWSb6AQwxaBk"
@@ -36,6 +37,9 @@ export const Post = Resources => {
             case "LIP":
                 extractedData = dataExtractorLIP(res);
             break;
+            case "CRS":
+              extractedData = dataExtractorCRS(res);
+            break;
             default:
                 extractedData = dataExtractorFEGS(res);
             break;
@@ -51,6 +55,13 @@ export const Post = Resources => {
         dispatch(errorDispatchAction(error, err));
         return err;
       });
+  };
+};
+
+export const Reset = Resources => {
+  const {init} = Resources.asyncActions; // as actions for all the resource is same
+  return async (dispatch, getState) => {
+    dispatch(initDispatchAction(init, undefined));
   };
 };
 

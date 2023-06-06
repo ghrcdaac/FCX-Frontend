@@ -26,8 +26,8 @@ export const Resources = {
 
 // Initial State Reference for reducers
 const initialState = {
-  data: [],
-  labels: [],
+  data: {},
+  labels: {},
   error: false
 };
 
@@ -38,7 +38,7 @@ export function histogramTool(state = initialState, action = {}) {
   switch (action.type) {
     case init: {
       return {
-        ...state
+        ...initialState
       };
     }
 

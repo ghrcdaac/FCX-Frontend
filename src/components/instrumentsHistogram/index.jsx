@@ -23,10 +23,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 import {HistogramVizBox} from "./components";
 import {requestBodyFEGS} from "./helper/handleFEGSdata";
 import {requestBodyLIP} from "./helper/handleLIPdata";
-import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
+import {requestBodyCRS, fetchCRSparams} from "./helper/handleCRSdata";
 import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
 
-import { Resources, Post } from "./redux/index";
+import { Resources, Post, Reset } from "./redux/index";
 
 ChartJS.register(
 CategoryScale,
@@ -127,7 +127,8 @@ class InstrumentsHistogram extends Component {
             Resources.body = requestBodyLIP(datetime, pagesize, pageno, density);
             this.props.Post(Resources);
         } else if (instrumentType === "CRS") {
-            return handleCRSdata(datetime, params, pagesize, pageno, density);
+            Resources.body = requestBodyCRS(datetime, params, pagesize, pageno, density);
+            this.props.Post(Resources);
         } else if (instrumentType === "CPL") {
             return handleCPLdata(datetime, params, pagesize, pageno, density);
         }
@@ -142,7 +143,7 @@ class InstrumentsHistogram extends Component {
         if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
-                if (selectedInstrument == "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
+                if (selectedInstrument === "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
                     // error handling incase no data for given date
                     if(!data["error"]) {
                         this.setState({paramsList: data["params"]});
@@ -150,7 +151,7 @@ class InstrumentsHistogram extends Component {
                         this.setState({error: true});
                     }
                 });
-                else if (selectedInstrument == "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
+                else if (selectedInstrument === "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
                     // error handling incase no data for given date
                     if(!data["error"]) {
                         this.setState({paramsList: data["params"]});
@@ -170,6 +171,7 @@ class InstrumentsHistogram extends Component {
     handleInstrumentSelectionSaveAndClose = (event) => {
         // after a new instrument is selected for the histogram viz, do the following steps.
         event.stopPropagation();
+        this.props.Reset(Resources);
         this.handleDefaultParamsValue(event.target.innerHTML);
         this.setState({selectedInstrument: event.target.innerHTML,
             anchorEl: null,
@@ -329,5 +331,5 @@ export default connect((state) => {
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
     let {data, labels} = state.histogramTool
     return {selectedDate: selectedLayerDate, data, labels }
-}, {Post})(InstrumentsHistogram);
+}, {Post, Reset})(InstrumentsHistogram);
   
