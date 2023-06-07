@@ -1,9 +1,6 @@
 let coordType = "FlashID";
 let dataType = "peak";
 let params = "None";
-let error = false;
-let data = {};
-let labels = {};
 
 export function requestBodyFEGS(datetime="2017-03-21", pagesize="200", pageno="1", density="1") {
   /**
@@ -35,6 +32,7 @@ export function requestBodyFEGS(datetime="2017-03-21", pagesize="200", pageno="1
 }
 
 export function dataExtractorFEGS(rawData) {
+  let error = false, data = [], labels= [];
   if(rawData && rawData["data"] && rawData["data"]["errors"]) {
     error = true;
   } else {

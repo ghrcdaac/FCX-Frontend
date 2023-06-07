@@ -1,6 +1,8 @@
+import { histogramToolApiUrl } from "../../../config";
+
 // ACTION_TYPE DEFINATOPMS
 export const Resources = {
-    url: "https://6lnw7mfi9f.execute-api.us-east-1.amazonaws.com/development/fcx-histogram-preprocessing",
+    url: histogramToolApiUrl,
     body: {
       "data": {
           "type": "data_pre_process_request",

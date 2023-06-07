@@ -1,6 +1,7 @@
-import APICall from "../../../constants/ApiCall";
-// api key
 import { toast } from 'react-toastify';
+
+import APICall from "../../../constants/ApiCall";
+import { histogramToolApiUrl, histogramToolApikey } from "../../../config";
 
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
@@ -8,20 +9,18 @@ import { dataExtractorCRS, dataExtractorCRSparams } from "../helper/handleCRSdat
 import { dataExtractorCPL, dataExtractorCPLparams } from "../helper/handleCPLdata";
 
 const apiCaller = new APICall();
-let HistogramApiKey = "TOl3gUuA7n80coKZAqsAP1b2rZx9SWSb6AQwxaBk"
-apiCaller.setHeader(HistogramApiKey);
-
-/**
- * API POST CALL, in the "redux-thunk" way.
- * The dispatch is done automatically, when Post call is resolved.
- * i.e. as per the Async actions mentioned in the resource.
- *
- * Usage:
- * Use these functions as a map_reducer_to_props in redux connect first,
- * Then, simply use these functions in the component (accessible though props).
- * */
+apiCaller.setHeader(histogramToolApikey);
 
 export const Post = Resources => {
+  /**
+   * API POST CALL, in the "redux-thunk" way.
+   * The dispatch is done automatically, when Post call is resolved.
+   * i.e. as per the Async actions mentioned in the resource.
+   *
+   * Usage:
+   * Use these functions as a map_reducer_to_props in redux connect first,
+   * Then, simply use these functions in the component (accessible though props).
+  **/
   const {init, success, error, paramLoaded} = Resources.asyncActions; // as actions for all the resource is same
   const {instrument_type, data_type} = Resources.body.data.attributes; 
   return async (dispatch, getState) => {
@@ -31,7 +30,7 @@ export const Post = Resources => {
     } else {
       handleInit(null, instrument_type);
     }
-    return apiCaller.post(Resources.url, Resources.body)
+    return apiCaller.post(histogramToolApiUrl, Resources.body)
       .then(res => {
         if (!data_type) {
           // the API req is for paramList
@@ -43,16 +42,14 @@ export const Post = Resources => {
           }
           return dispatch(paramLoadedDispatchAction(paramLoaded, extractedData));
         }
-        // now preprocess according to type of instrument and then dispatch the success action
+        // Else, now preprocess according to type of instrument and then dispatch the success action
         let extractedData = dataExtractorInstrument(res, instrument_type);
         handleSuccess(res.status);
-        // dispatch success action
         dispatch(successDispatchAction(success, extractedData));
         return extractedData;
       })
       .catch(err => {
         handleError(400, "Something went wrong. Call Support.");
-        // dispatch error action
         dispatch(errorDispatchAction(error, err));
         return err;
       });

@@ -69,11 +69,7 @@ class InstrumentsHistogram extends Component {
             // below depend on the type of instrument selected.
             coordType: "Second", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "ATB_1064", // const thing for a instrument type, for now. Later make it selectable???
-            params: null,
-            data: null,
-            labels: null,
-            paramsList: null,
-            error: false
+            params: null
         };
     }
 
@@ -116,19 +112,15 @@ class InstrumentsHistogram extends Component {
          * density: a stepwise slider to set the density value.
          */
         if (instrumentType === "FEGS") {
-            // return handleFEGSdata(datetime, pagesize, pageno, density);
             Resources.body = requestBodyFEGS(datetime, pagesize, pageno, density);
-            this.props.Post(Resources);
         } else if (instrumentType === "LIP") {
             Resources.body = requestBodyLIP(datetime, pagesize, pageno, density);
-            this.props.Post(Resources);
         } else if (instrumentType === "CRS") {
             Resources.body = requestBodyCRS(datetime, params, pagesize, pageno, density);
-            this.props.Post(Resources);
         } else if (instrumentType === "CPL") {
             Resources.body = requestBodyCPL(datetime, params, pagesize, pageno, density);
-            this.props.Post(Resources);
         }
+        this.props.Post(Resources);
     }
 
     handleInstrumentSelectionClick = (event) => {
@@ -162,11 +154,7 @@ class InstrumentsHistogram extends Component {
         this.props.Reset(Resources);
         this.handleDefaultParamsValue(event.target.innerHTML);
         this.setState({selectedInstrument: event.target.innerHTML,
-            anchorEl: null,
-            data: null,
-            labels: null,
-            paramsList: null,
-            error: false
+            anchorEl: null
         }, function () { return this.fetchDataAndUpdateState() });
     };
 
@@ -317,7 +305,7 @@ export default connect((state) => {
     // map redux state to props
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
-    let {data, labels, paramsList, error} = state.histogramTool
+    let {data, labels, paramsList, error} = state.histogramTool;
     return {selectedDate: selectedLayerDate, data, labels, paramsList, error }
 }, {Post, Reset})(InstrumentsHistogram);
   

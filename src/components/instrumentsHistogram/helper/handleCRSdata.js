@@ -1,8 +1,5 @@
 let coordType = "time";
 let dataType = "ref";
-let error = false;
-let data = {};
-let labels = {};
 
 export function requestBodyCRS(datetime="2017-05-17", params="1011.825", pagesize="200", pageno="1", density="1") {
     /**
@@ -33,6 +30,7 @@ export function requestBodyCRS(datetime="2017-05-17", params="1011.825", pagesiz
 }
 
 export function dataExtractorCRS(rawData) {
+    let error = false, data = [], labels= [];
     if(rawData && rawData["data"] && rawData["data"]["errors"]) {
         error = true;
     } else {
