@@ -21,6 +21,7 @@ export const Resources = {
       init: 'histogram_tool_INIT',
       success: 'histogram_tool_SUCCESS',
       error: 'histogram_tool_ERROR',
+      paramLoaded: 'histogram_tool_param_SUCCESS'
     }
 };
 
@@ -28,12 +29,13 @@ export const Resources = {
 const initialState = {
   data: {},
   labels: {},
-  error: false
+  error: false,
+  paramsList: []
 };
 
 // Reducer
 export function histogramTool(state = initialState, action = {}) {
-  const {init, success, error} = Resources.asyncActions;
+  const {init, success, error, paramLoaded} = Resources.asyncActions;
 
   switch (action.type) {
     case init: {
@@ -49,6 +51,14 @@ export function histogramTool(state = initialState, action = {}) {
         labels: action.payload.labels,
         error: action.payload.error
       };
+    }
+
+    case paramLoaded: {
+      return {
+        ...state,
+        paramsList: action.payload.params,
+        error: action.payload.error
+      }
     }
 
     case error: {

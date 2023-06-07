@@ -23,7 +23,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import {HistogramVizBox} from "./components";
 import {requestBodyFEGS} from "./helper/handleFEGSdata";
 import {requestBodyLIP} from "./helper/handleLIPdata";
-import {requestBodyCRS, fetchCRSparams} from "./helper/handleCRSdata";
+import {requestBodyCRS, requestBodyCRSparams} from "./helper/handleCRSdata";
 import {requestBodyCPL, fetchCPLparams} from "./helper/handleCPLdata";
 
 import { Resources, Post, Reset } from "./redux/index";
@@ -100,10 +100,6 @@ class InstrumentsHistogram extends Component {
         if (selectedInstrument && datetime && params && pageno && pagesize && density && !error) {
             // only fetch histogram data, once all the necessary parameters for api call are ready
             this.InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density)
-            // .then((res)=> {
-            //     let {data, labels} = res;
-            //     this.setState({data, labels});
-            // });
         }
     }
 
@@ -144,15 +140,10 @@ class InstrumentsHistogram extends Component {
         if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
-                if (selectedInstrument === "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
-                    // error handling incase no data for given date
-                    if(!data["error"]) {
-                        this.setState({paramsList: data["params"]});
-                    } else {
-                        this.setState({error: true});
-                    }
-                });
-                else if (selectedInstrument === "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
+                if (selectedInstrument === "CRS") {
+                    Resources.body = requestBodyCRSparams(this.props.selectedDate);
+                    this.props.Post(Resources);
+                } else if (selectedInstrument === "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
                     // error handling incase no data for given date
                     if(!data["error"]) {
                         this.setState({paramsList: data["params"]});
@@ -307,7 +298,7 @@ class InstrumentsHistogram extends Component {
                             variant="outlined"
                             style={{width: "100%"}}
                             >
-                            {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
+                            {this.props.paramsList && this.props.paramsList.length > 0 && this.props.paramsList.map((elem) => (
                                 <MenuItem key={elem} value={String(elem)}>
                                 {elem}
                                 </MenuItem>
@@ -317,8 +308,8 @@ class InstrumentsHistogram extends Component {
                 }
             </div>
             {(!this.props.error && (Object.keys(this.props.data).length > 0) && Object.keys(this.props.labels).length > 0) && <HistogramVizBox labels={this.props.labels} data={this.props.data}/>}
-            {(!this.state.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
-            {(!this.state.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.state.error && !this.state.params && !(this.props.paramsList.length > 0)) && <p>"Loading params..."</p>}
+            {(!this.state.error && (this.props.paramsList.length > 0) && !this.state.params) && <p>"Select params to visualize histogram."</p>}
             {(!this.props.error && this.state.params && !(Object.keys(this.props.data).length > 0) && !(Object.keys(this.props.labels).length > 0)) && <p>"Loading..."</p>}
             {(this.state.error) && <p>"No instrument data for selected date"</p>}
         </div>
@@ -330,7 +321,7 @@ export default connect((state) => {
     // map redux state to props
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
-    let {data, labels} = state.histogramTool
-    return {selectedDate: selectedLayerDate, data, labels }
+    let {data, labels, paramsList} = state.histogramTool
+    return {selectedDate: selectedLayerDate, data, labels, paramsList }
 }, {Post, Reset})(InstrumentsHistogram);
   

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
-import { dataExtractorCRS } from "../helper/handleCRSdata";
+import { dataExtractorCRS, dataExtractorCRSparams } from "../helper/handleCRSdata";
 import { dataExtractorCPL } from "../helper/handleCPLdata";
 
 const apiCaller = new APICall();
@@ -22,32 +22,25 @@ apiCaller.setHeader(HistogramApiKey);
  * */
 
 export const Post = Resources => {
-  const {init, success, error} = Resources.asyncActions; // as actions for all the resource is same
-  const {instrument_type} = Resources.body.data.attributes; 
+  const {init, success, error, paramLoaded} = Resources.asyncActions; // as actions for all the resource is same
+  const {instrument_type, data_type} = Resources.body.data.attributes; 
   return async (dispatch, getState) => {
-    // dispatch initial action
-    handleInit(null, instrument_type);
-    dispatch(initDispatchAction(init, undefined));
+    // starting toast notification
+    if (!data_type) {
+      handleInitParams(null, instrument_type);
+    } else {
+      handleInit(null, instrument_type);
+    }
     return apiCaller.post(Resources.url, Resources.body)
       .then(res => {
-        let extractedData = {};
-        // now preprocess according to type of instrument and then dispatch the success action
-        switch(instrument_type) {
-            case "FEGS":
-                extractedData = dataExtractorFEGS(res);
-            break;
-            case "LIP":
-                extractedData = dataExtractorLIP(res);
-            break;
-            case "CRS":
-              extractedData = dataExtractorCRS(res);
-            break;
-            case "CPL":
-              extractedData = dataExtractorCPL(res);
-            break;
-            default:
-              return;
+        if (!data_type) {
+          // the API req is for paramList
+          let extractedData = dataExtractorParams(res, instrument_type);
+          handleSuccess(res.status);
+          return dispatch(paramLoadedDispatchAction(paramLoaded, extractedData));
         }
+        // now preprocess according to type of instrument and then dispatch the success action
+        let extractedData = dataExtractorInstrument(res, instrument_type);
         handleSuccess(res.status);
         // dispatch success action
         dispatch(successDispatchAction(success, extractedData));
@@ -71,12 +64,57 @@ export const Reset = Resources => {
 
 // @utils
 
+// dispatch actions
 const initDispatchAction = (type, payload) => ({type, payload});
 const successDispatchAction = (type, payload) => ({type, payload});
 const errorDispatchAction = (type, payload) => ({type, payload});
+const paramLoadedDispatchAction = (type, payload) => ({type, payload});
+
+// data_extractor instrument data
+function dataExtractorInstrument(res, instrument_type) {
+  switch(instrument_type) {
+    case "FEGS":
+        return dataExtractorFEGS(res);
+    case "LIP":
+        return dataExtractorLIP(res);
+    case "CRS":
+        return dataExtractorCRS(res);
+    case "CPL":
+        return dataExtractorCPL(res);
+    default:
+        return dataExtractorFEGS(res);
+  }
+}
+
+// data_extractor params
+function dataExtractorParams(res, instrument_type) {
+  switch(instrument_type) {
+    case "CRS":
+        return dataExtractorCRSparams(res);
+    // case "CPL":
+    //     return dataExtractorCPL(res);
+    default:
+        return dataExtractorCRSparams(res);
+  }
+}
+
+// Toast notifications
 
 const handleInit = (status, instrument) => {
   toast.success(`Fetching ${instrument} data for Histogram.`, {
+    position: "bottom-left",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    });
+}
+
+const handleInitParams = (status, instrument) => {
+  toast.success(`Fetching ${instrument} data paramas (z-axis) for Histogram.`, {
     position: "bottom-left",
     autoClose: 5000,
     hideProgressBar: false,
@@ -101,7 +139,6 @@ const handleSuccess = (status) => {
       theme: "colored",
       });
   }
-  //TODO: add cases for 400, 500, 300, 100 status codes.
 }
 
 const handleError = (status, body) => {
