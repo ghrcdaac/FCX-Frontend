@@ -61,7 +61,7 @@ class InstrumentsHistogram extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            anchorEl: null,
+            anchorEl: undefined,
             selectedInstrument: "FEGS",
             pagesize: 500,
             pageno: 1,
@@ -69,7 +69,7 @@ class InstrumentsHistogram extends Component {
             // below depend on the type of instrument selected.
             coordType: "Second", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "ATB_1064", // const thing for a instrument type, for now. Later make it selectable???
-            params: null
+            params: undefined
         };
     }
 
@@ -276,17 +276,18 @@ class InstrumentsHistogram extends Component {
                             id="outlined-select-currency"
                             select
                             label= {`${(this.state.selectedInstrument === "CRS") ? "range" : "Second"} (z-axis)`} // if crs, range. if cpl, Second
-                            value={this.state.params}
+                            value={this.state.params || ""}
                             onChange={this.handleParamsSelection}
                             // helperText="Please select params"
                             variant="outlined"
                             style={{width: "100%"}}
                             >
-                            {this.props.paramsList && this.props.paramsList.length > 0 && this.props.paramsList.map((elem) => (
+                            {(this.props.paramsList && this.props.paramsList.length > 0) ? this.props.paramsList.map((elem) => (
                                 <MenuItem key={elem} value={String(elem)}>
-                                {elem}
+                                    {elem}
                                 </MenuItem>
-                            ))}
+                            )) : (<MenuItem key="1" value="">""</MenuItem>)
+                            }
                         </TextField>
                     </div>
                 }
