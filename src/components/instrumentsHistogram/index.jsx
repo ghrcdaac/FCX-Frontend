@@ -24,7 +24,7 @@ import {HistogramVizBox} from "./components";
 import {requestBodyFEGS} from "./helper/handleFEGSdata";
 import {requestBodyLIP} from "./helper/handleLIPdata";
 import {requestBodyCRS, requestBodyCRSparams} from "./helper/handleCRSdata";
-import {requestBodyCPL, fetchCPLparams} from "./helper/handleCPLdata";
+import {requestBodyCPL, requestBodyCPLparams} from "./helper/handleCPLdata";
 
 import { Resources, Post, Reset } from "./redux/index";
 
@@ -143,14 +143,10 @@ class InstrumentsHistogram extends Component {
                 if (selectedInstrument === "CRS") {
                     Resources.body = requestBodyCRSparams(this.props.selectedDate);
                     this.props.Post(Resources);
-                } else if (selectedInstrument === "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
-                    // error handling incase no data for given date
-                    if(!data["error"]) {
-                        this.setState({paramsList: data["params"]});
-                    } else {
-                        this.setState({error: true});
-                    }
-                });
+                } else if (selectedInstrument === "CPL") {
+                    Resources.body = requestBodyCPLparams(this.props.selectedDate);
+                    this.props.Post(Resources);
+                }
             });
         } else if (["FEGS", "LIP"].includes(selectedInstrument)) {
         // if the selected instrument is FEGS, LIP, set the param to "None" as required by the api call for these instruments (can fetch for histogram viz). 
@@ -308,10 +304,10 @@ class InstrumentsHistogram extends Component {
                 }
             </div>
             {(!this.props.error && (Object.keys(this.props.data).length > 0) && Object.keys(this.props.labels).length > 0) && <HistogramVizBox labels={this.props.labels} data={this.props.data}/>}
-            {(!this.state.error && !this.state.params && !(this.props.paramsList.length > 0)) && <p>"Loading params..."</p>}
-            {(!this.state.error && (this.props.paramsList.length > 0) && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.props.error && !this.state.params && !(this.props.paramsList.length > 0)) && <p>"Loading params..."</p>}
+            {(!this.props.error && (this.props.paramsList.length > 0) && !this.state.params) && <p>"Select params to visualize histogram."</p>}
             {(!this.props.error && this.state.params && !(Object.keys(this.props.data).length > 0) && !(Object.keys(this.props.labels).length > 0)) && <p>"Loading..."</p>}
-            {(this.state.error) && <p>"No instrument data for selected date"</p>}
+            {(this.props.error) && <p>"No instrument data for selected date"</p>}
         </div>
       )
     }
@@ -321,7 +317,7 @@ export default connect((state) => {
     // map redux state to props
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
-    let {data, labels, paramsList} = state.histogramTool
-    return {selectedDate: selectedLayerDate, data, labels, paramsList }
+    let {data, labels, paramsList, error} = state.histogramTool
+    return {selectedDate: selectedLayerDate, data, labels, paramsList, error }
 }, {Post, Reset})(InstrumentsHistogram);
   

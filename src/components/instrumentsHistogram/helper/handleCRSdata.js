@@ -1,5 +1,3 @@
-import APICaller from "./apiCaller.js";
-
 let coordType = "time";
 let dataType = "ref";
 let error = false;
@@ -68,9 +66,6 @@ export function requestBodyCRSparams(datetime="2017-05-17") {
     * @return {object} with keys data and labels
     */
     let coordType = "range";
-    let error = false;
-    let params = [];
-
     let body = {
                 "data": {
                     "type": "data_pre_process_request",

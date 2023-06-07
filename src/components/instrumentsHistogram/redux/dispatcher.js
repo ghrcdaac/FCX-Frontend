@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { dataExtractorFEGS } from "../helper/handleFEGSdata";
 import { dataExtractorLIP } from "../helper/handleLIPdata";
 import { dataExtractorCRS, dataExtractorCRSparams } from "../helper/handleCRSdata";
-import { dataExtractorCPL } from "../helper/handleCPLdata";
+import { dataExtractorCPL, dataExtractorCPLparams } from "../helper/handleCPLdata";
 
 const apiCaller = new APICall();
 let HistogramApiKey = "TOl3gUuA7n80coKZAqsAP1b2rZx9SWSb6AQwxaBk"
@@ -36,7 +36,11 @@ export const Post = Resources => {
         if (!data_type) {
           // the API req is for paramList
           let extractedData = dataExtractorParams(res, instrument_type);
-          handleSuccess(res.status);
+          if (extractedData.error) {
+            handleError(400, "Something went wrong.")
+          } else {
+            handleSuccess(res.status);
+          }
           return dispatch(paramLoadedDispatchAction(paramLoaded, extractedData));
         }
         // now preprocess according to type of instrument and then dispatch the success action
@@ -91,8 +95,8 @@ function dataExtractorParams(res, instrument_type) {
   switch(instrument_type) {
     case "CRS":
         return dataExtractorCRSparams(res);
-    // case "CPL":
-    //     return dataExtractorCPL(res);
+    case "CPL":
+        return dataExtractorCPLparams(res);
     default:
         return dataExtractorCRSparams(res);
   }
@@ -114,7 +118,7 @@ const handleInit = (status, instrument) => {
 }
 
 const handleInitParams = (status, instrument) => {
-  toast.success(`Fetching ${instrument} data paramas (z-axis) for Histogram.`, {
+  toast.success(`Fetching ${instrument} data params (z-axis) for Histogram.`, {
     position: "bottom-left",
     autoClose: 5000,
     hideProgressBar: false,
