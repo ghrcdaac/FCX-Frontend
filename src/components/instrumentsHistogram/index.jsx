@@ -286,7 +286,7 @@ class InstrumentsHistogram extends Component {
                                 <MenuItem key={elem} value={String(elem)}>
                                     {elem}
                                 </MenuItem>
-                            )) : (<MenuItem key="1" value="">""</MenuItem>)
+                            )) : (<MenuItem key="1" value=""></MenuItem>)
                             }
                         </TextField>
                     </div>
