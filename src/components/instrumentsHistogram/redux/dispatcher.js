@@ -104,7 +104,7 @@ function dataExtractorParams(res, instrument_type) {
 const handleInit = (status, instrument) => {
   toast.success(`Fetching ${instrument} data for Histogram.`, {
     position: "bottom-left",
-    autoClose: 5000,
+    autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
@@ -117,7 +117,7 @@ const handleInit = (status, instrument) => {
 const handleInitParams = (status, instrument) => {
   toast.success(`Fetching ${instrument} data params (z-axis) for Histogram.`, {
     position: "bottom-left",
-    autoClose: 5000,
+    autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
@@ -131,7 +131,7 @@ const handleSuccess = (status) => {
   if (200 <= status < 300) {
     toast.success('Fetching Complete.', {
       position: "bottom-left",
-      autoClose: 5000,
+      autoClose: 1500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -145,7 +145,7 @@ const handleSuccess = (status) => {
 const handleError = (status, body) => {
   toast.error(body, {
     position: "bottom-left",
-    autoClose: 5000,
+    autoClose: 2000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
