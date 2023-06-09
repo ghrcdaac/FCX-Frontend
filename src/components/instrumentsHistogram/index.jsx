@@ -52,6 +52,8 @@ const densityMarks = [
     }
   ];
 
+const validDensites = densityMarks.map((elem) => elem.value);
+
 class InstrumentsHistogram extends Component {
     /**
     * A base container class to display various histograms.
@@ -65,7 +67,7 @@ class InstrumentsHistogram extends Component {
             selectedInstrument: "FEGS",
             pagesize: 500,
             pageno: 1,
-            density: 1,
+            density: 0.5,
             // below depend on the type of instrument selected.
             coordType: "Second", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "ATB_1064", // const thing for a instrument type, for now. Later make it selectable???
@@ -206,7 +208,10 @@ class InstrumentsHistogram extends Component {
 
     handleDensity = (event, density) => {
         event.stopPropagation();
-        this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
+        // for a unique density value, only trigger once
+        if ((validDensites.includes(density)) && (density != this.state.density)){
+            this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
+        }
     };
 
     render() {
@@ -244,7 +249,7 @@ class InstrumentsHistogram extends Component {
                         Quantization
                         </Typography>
                         <Slider
-                        defaultValue={0.50}
+                        defaultValue={this.state.density}
                         aria-labelledby="discrete-slider-small-steps"
                         step={null}
                         marks={densityMarks}
@@ -252,7 +257,7 @@ class InstrumentsHistogram extends Component {
                         max={1.0}
                         valueLabelDisplay="auto"
                         onChange={this.handleDensity}
-                        label="Desnsity"
+                        label="Density"
                         />
                     </div>
                     <TextField
