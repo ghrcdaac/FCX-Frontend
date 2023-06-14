@@ -28,6 +28,9 @@ import {requestBodyCPL, requestBodyCPLparams} from "./helper/handleCPLdata";
 
 import { Resources, Post, Reset } from "./redux/index";
 
+import {StepUp} from "./helper/stepUp";
+let su = new StepUp();
+
 ChartJS.register(
 CategoryScale,
 LinearScale,
@@ -284,7 +287,7 @@ class InstrumentsHistogram extends Component {
                             >
                             {(this.props.paramsList && this.props.paramsList.length > 0) ? this.props.paramsList.map((elem) => (
                                 <MenuItem key={elem} value={String(elem)}>
-                                    {elem}
+                                    {su.steppedRep(elem)}
                                 </MenuItem>
                             )) : (<MenuItem key="1" value=""></MenuItem>)
                             }
@@ -307,6 +310,7 @@ export default connect((state) => {
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
     let {data, labels, paramsList, error} = state.histogramTool;
+    paramsList = su.filter(paramsList);
+    // paramlist, show in a increment of 1000
     return {selectedDate: selectedLayerDate, data, labels, paramsList, error }
 }, {Post, Reset})(InstrumentsHistogram);
-  
