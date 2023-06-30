@@ -1,3 +1,4 @@
 import flighttrack from "./flightTrack";
+import dropsonde from "./dropsonde";
 
-export { flighttrack }
+export { flighttrack, dropsonde }

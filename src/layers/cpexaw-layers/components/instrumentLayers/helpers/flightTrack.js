@@ -9,7 +9,7 @@ export default function flighttrack (date, index) {
     */    
     return {
         layerId: `${date}-track${index}-dc8`,
-        shortName: "flight14",
+        shortName: "cpexawflightnavdc8",
         displayName: "Flight Track DC8",
         // czmlLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_${date.replace(/-/g,'')}.czml`,
         czmlLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/nav_dc8/CPEXAW_MetNav_DC8_${date.replace(/-/g,'')}_R0.czml`,

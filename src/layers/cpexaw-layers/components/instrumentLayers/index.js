@@ -1,9 +1,11 @@
-import { flighttrack } from "./helpers";
+import { flighttrack, dropsonde } from "./helpers";
 
 class LayerGenerator {
     constructor() {
-        this.instruments = ["trackDc8"] // add new instrument name here
+        this.instruments = ["trackDc8", "dropsonde"] // add new instrument name here
         this.dc8_dates = ["2021-08-17", "2021-08-20", "2021-08-21", "2021-08-24", "2021-08-26", "2021-08-28", "2021-09-01", "2021-09-04"];
+        this.dropsonde_dates = ["2021-08-17", "2021-08-20", "2021-08-21", "2021-08-22", "2021-08-24", "2021-08-26", "2021-08-28", "2021-08-29", "2021-09-01", "2021-09-04", "2021-09-15"];
+        // this.dropsonde_dates = ["2021-08-06", "2021-08-11", "2021-08-17", "2021-08-20", "2021-08-21", "2021-08-22", "2021-08-24", "2021-08-26", "2021-08-28", "2021-08-29", "2021-09-01", "2021-09-04", "2021-09-15"];
         // add dates when data for new instrument are available
     }
 
@@ -27,6 +29,8 @@ class LayerGenerator {
             case "trackDc8":
                 if (!this.dc8_dates.includes(date)) return null;
                 return flighttrack(date, "dc8", index);
+            case "dropsonde":
+                return dropsonde(date, index);
             default:
                 return null
             // add case for new instrument here
@@ -38,7 +42,7 @@ class LayerGenerator {
         * @return {object} A structured instruments layer.
         */
         // add new instrument dates here, to only get layers for the unique dates.
-        return this.sortedUniqueDates([...this.dc8_dates]).map(date => ({
+        return this.sortedUniqueDates([...this.dc8_dates, ...this.dropsonde_dates]).map(date => ({
             date,
             items: this.instruments.map((instrum, index) => this.getInstrumentsItem(date, instrum, index)).filter(n => n)
         }));

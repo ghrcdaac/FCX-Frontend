@@ -375,6 +375,10 @@ class Viz extends Component {
                     tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
                     // tileset.pointCloudShading.attenuation = true;
                 }
+            } else if (layer.displayName === "DROPSONDE") {
+                // tileset.style.color = getColorExpression();
+                tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
+                tileset.style.pointSize = 5.0;
             } else {
                 tileset.style.pointSize = 1.0;
                 tileset.style.color = getColorExpression();
