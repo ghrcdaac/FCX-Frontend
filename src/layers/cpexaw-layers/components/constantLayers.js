@@ -6,14 +6,19 @@ const campaign = "cpexaw";
 
 const logo = `missions-logos/cpex-aw.png`;
 
-const description = "The GPM Ground Validation field campaign the Olympic Mountains Experiment (OLYMPEX) was held in the Pacific Northwest. The goal of OLYMPEX was to validate rain and snow measurements in midlatitude frontal systems as they move from ocean to coast to mountains.";
+const description = "The Convective Processes Experiment – Aerosols & Winds (CPEX-AW) campaign was a joint effort between the US National Aeronautics and Space Administration (NASA) and the European Space Agency (ESA) with the primary goal of conducting post-launch calibration and validation activities of the Atmospheric Dynamics Mission-Aeolus (ADM-AEOLUS) Earth observation wind Lidar satellite in St. Croix, US Virgin Islands."
 
 // External link to Data over internet
 const dois = [
     {
-      shortName: "goesrpltcrs",
-      longName: "GPM Ground Validation Cloud Radar System (CRS) OLYMPEX V1",
-      doi: "https://cmr.earthdata.nasa.gov/search/concepts/C1979140648-GHRC_DAAC.html",
+      shortName: "cpexawflightnav",
+      longName: "DC-8 Meteorological and Flight Navigation Data CPEX-AW V1",
+      doi: "https://cmr.earthdata.nasa.gov/search/concepts/C2287328798-GHRC_DAAC.html",
+    },
+    {
+      shortName: "cpexawdropsonde",
+      longName: "CPEX-AW Dropsonde Data CPEX-AW V1",
+      doi: "https://cmr.earthdata.nasa.gov/search/concepts/C2299858387-LARC_ASDC.html",
     }
 ]
 
@@ -21,28 +26,24 @@ const dois = [
 // ref. used in Links
 const links = [
     {
-      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/olympex",
+      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/cpex-aw",
       title: "Landing Page",
     },
     {
-      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/olympex/data_access",
-      title: "Data Access",
+      url: "https://asdc.larc.nasa.gov/project/CPEX-AW",
+      title: "Data Access at NASA's Atmospheric Science Data Center",
     },
     {
-      url: "https://ghrc.nsstc.nasa.gov/uso/ds_details/collections/gpmolyxC.html",
+      url: "https://ghrc.nsstc.nasa.gov/uso/ds_details/collections/cpexawC.html",
       title: "Collection DOI",
     },
     {
-      url: "http://olympex.atmos.washington.edu/",
-      title: "University of Washington OLYMPEX site",
-    },
-    {
-      url: "https://ghrc.nsstc.nasa.gov/home/micro-articles/olympic-mountains-experiment-olympex",
-      title: "Micro Article",
-    },
-    {
-      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/OLYMPEX/instruments",
+      url: "https://ghrc.nsstc.nasa.gov/home/field-campaigns/cpex-aw/instruments",
       title: "Instruments",
+    },
+    {
+      url: "https://ghrc.nsstc.nasa.gov/home/about-ghrc/citing-ghrc-daac-data",
+      title: "Citing the Data",
     }
 ]
 
