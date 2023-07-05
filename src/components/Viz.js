@@ -28,7 +28,10 @@ import {
     PointPrimitiveCollection,
     NearFarScalar,
     Color as ColorCesium,
-    Math as cMath
+    Math as cMath,
+    PinBuilder,
+    Color,
+    VerticalOrigin
 } from "cesium"
 
 import { extendCesium3DTileset } from "temporal-3d-tile"
@@ -362,6 +365,27 @@ class Viz extends Component {
     newTileset.readyPromise
         // eslint-disable-next-line no-loop-func
         .then((tileset) => {
+            tileset.initialTilesLoaded.addEventListener(function() {
+                //location
+                let ds = viewer.dataSources.getByName("wall czml")[0];
+                let entity = ds.entities.getById("Flight Track");
+                let positionProperty = entity.position;
+                const position = positionProperty.getValue(viewer.clock.currentTime)
+                // Instead getting position directly from the 3dtile json would be much faster.
+                // If critical information could be added directly to the json header, when the 3d tile is created.
+
+                // add pin
+                const pinBuilder = new PinBuilder();
+                const bluePin = viewer.entities.add({
+                    name: "Blank blue pin",
+                    position: position,
+                    billboard: {
+                      image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                      verticalOrigin: VerticalOrigin.BOTTOM,
+                    },
+                  });
+            });
+
             store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
 
             this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
