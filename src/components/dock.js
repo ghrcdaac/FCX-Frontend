@@ -200,36 +200,10 @@ let createViewer = () => {
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 
-  // geoJson.fieldCampaignImages.forEach((element)=>{
-  //   var image = new Image()
-  //   image.crossOrigin = 'anonymous';
-  //   image.src = element.imageURL
-
-  //   var pinBuilder = new PinBuilder();
-  //   //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
-  //   viewer.entities.add({
-  //     position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
-  //     name:element.id,
-  //     billboard : {
-  //       image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
-  //       width : 32,
-  //       height : 32,
-  //     },
-  //     label : {
-  //       // text: element.id.toString(),
-  //       font : '14pt monospace',
-  //       style: LabelStyle.FILL_AND_OUTLINE,
-  //       outlineWidth : 2,
-  //       verticalOrigin : VerticalOrigin.TOP,
-  //       pixelOffset : new Cartesian2(1, 32)
-  //     }
-  //   });
-  // })
-
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
-        if (defined(selectedEntity.name)) {
+        if (defined(selectedEntity.name) && selectedEntity.name.includes('imageViewer')) {
           console.log('Selected ' + selectedEntity.name);
           const ref = React.createRef();
           ref.current = document.createElement('div');

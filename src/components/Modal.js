@@ -79,8 +79,8 @@ background-image:url(${(props)=>props.background})
 `
 
 const Modal = (props) =>{
-
-    const [index, setIndex] = useState(props.id)
+    let id = props.id.split('-')[1]
+    const [index, setIndex] = useState(id)
     const [modal, setModal] = useState(true); 
 
     const backwardHandler = () =>{

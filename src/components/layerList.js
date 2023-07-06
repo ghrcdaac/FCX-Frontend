@@ -163,7 +163,7 @@ export default function LayerList({ campaign }) {
           //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
           viewer.entities.add({
             position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
-            name:element.id,
+            name: "imageViewer-" + element.id,
             billboard : {
               image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
               width : 32,
@@ -185,6 +185,7 @@ export default function LayerList({ campaign }) {
       }
     }
 
+    // TODO: Instead of pushing image viewer directly to the layerlist, populate the image viewer details to the layers dictonary or layer generator
     dates.push(
       <Accordion key={"panel" + itemIndex} defaultExpanded={expanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" key={"summary-panel" + itemIndex}>
