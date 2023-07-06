@@ -100,8 +100,15 @@ const Modal = (props) =>{
 
     }
 
+    let portal = document.getElementById('portal')
+    if (!portal) {
+        portal = document.createElement('div')
+        portal.setAttribute('id', 'portal')
+        document.body.appendChild(portal)
+    }
+
     return ReactDOM.createPortal(
-        <div>
+        <div style={{position:"fixed", width: "100vw", height: "100vh", zIndex: "2000", display: "flex", justifyContent: "center", alignItems: "center", textAlign: "center", borderRadius: "12px"}}>
             {modal && <ModalBackground>
                 <Button title="Close" onClick={()=>setModal(false)}>
                     &#9587;
@@ -119,7 +126,8 @@ const Modal = (props) =>{
                 <Backward onClick={backwardHandler} title="Previous">&#8249;</Backward>
                 <Forward onClick={forwardHandler} title="Next">&#8250;</Forward>
             </ModalBackground>}        
-        </div>,document.getElementById('portal')
+        </div>,
+        portal
     )
 }
 
