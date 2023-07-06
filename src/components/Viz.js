@@ -49,6 +49,8 @@ import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/ces
 import { addTimeToISODate } from "../layers/utils/layerDates"
 // import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
+import ImageViewer from "./imageViewerModal";
+
 class Viz extends Component {
     
     constructor(props){
@@ -65,6 +67,10 @@ class Viz extends Component {
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
         this.layerChanged = false
+        this.state = {
+            imageViewer: false,
+            imageViewerUrl: null
+        }
     }
 
     renderLayers(selectedLayers, campaign) {
@@ -362,6 +368,10 @@ class Viz extends Component {
 
     let previousTime = JulianDate.clone(viewer.clock.currentTime)
 
+    let setImageViewerState = (imageViewerToggle, imageViewerUrl) => {
+        this.setState({imageViewer: imageViewerToggle, imageViewerUrl})
+    }
+
     newTileset.readyPromise
         // eslint-disable-next-line no-loop-func
         .then((tileset) => {
@@ -395,15 +405,26 @@ class Viz extends Component {
                     // If critical information could be added directly to the json header, when the 3d tile is created.
 
                     // add pin
+                    let date = tileset.properties.epoch.split("T")[0]
+                    let parsedDate = date.replace(/-/g,'');
                     const pinBuilder = new PinBuilder();
                     viewer.entities.add({
-                        name: "Blank blue pin",
+                        name: `cpexawDropsonde-${parsedDate}`,
                         position: position,
                         billboard: {
                           image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
                           verticalOrigin: VerticalOrigin.BOTTOM,
                         },
                       });
+                    // add event handler
+                    viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
+                        if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
+                            console.log('Selected>>>>>>>>>> ' + selectedEntity.name);
+                            let date = selectedEntity.name.split("-")[1];
+                            let url = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/CPEX-AW/instrument-processed-data/dropsonde/skewT/20210806/dropsonde.png";
+                            setImageViewerState(true, url);
+                        }
+                    });
                 }
             } else {
                 tileset.style.pointSize = 1.0;
@@ -637,6 +658,9 @@ class Viz extends Component {
                 </div>
 
                 <Dock campaign={this.props.campaign} />
+                {
+                    this.state.imageViewer && <ImageViewer imageUrl= {this.state.imageViewerUrl}/>
+                }
             </div>
         )
     }
