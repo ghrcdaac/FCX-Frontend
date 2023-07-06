@@ -365,27 +365,6 @@ class Viz extends Component {
     newTileset.readyPromise
         // eslint-disable-next-line no-loop-func
         .then((tileset) => {
-            tileset.initialTilesLoaded.addEventListener(function() {
-                //location
-                let ds = viewer.dataSources.getByName("wall czml")[0];
-                let entity = ds.entities.getById("Flight Track");
-                let positionProperty = entity.position;
-                const position = positionProperty.getValue(viewer.clock.currentTime)
-                // Instead getting position directly from the 3dtile json would be much faster.
-                // If critical information could be added directly to the json header, when the 3d tile is created.
-
-                // add pin
-                const pinBuilder = new PinBuilder();
-                const bluePin = viewer.entities.add({
-                    name: "Blank blue pin",
-                    position: position,
-                    billboard: {
-                      image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
-                      verticalOrigin: VerticalOrigin.BOTTOM,
-                    },
-                  });
-            });
-
             store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
 
             this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
@@ -403,6 +382,29 @@ class Viz extends Component {
                 // tileset.style.color = getColorExpression();
                 tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
                 tileset.style.pointSize = 5.0;
+                // add pin to visualize the skewT
+                //location
+                let ds = viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
+                let entity = ds.entities.getById("Flight Track");
+                if (entity) {
+                    let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
+                    JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
+                    let positionProperty = entity.position;
+                    const position = positionProperty.getValue(timeOfDrop)
+                    // Instead getting position directly from the 3dtile json would be much faster.
+                    // If critical information could be added directly to the json header, when the 3d tile is created.
+
+                    // add pin
+                    const pinBuilder = new PinBuilder();
+                    viewer.entities.add({
+                        name: "Blank blue pin",
+                        position: position,
+                        billboard: {
+                          image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                          verticalOrigin: VerticalOrigin.BOTTOM,
+                        },
+                      });
+                }
             } else {
                 tileset.style.pointSize = 1.0;
                 tileset.style.color = getColorExpression();
