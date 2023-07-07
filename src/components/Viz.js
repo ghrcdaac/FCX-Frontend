@@ -37,7 +37,7 @@ import {
 import { extendCesium3DTileset } from "temporal-3d-tile"
 import { isEmpty } from "lodash"
 
-import { supportEmail } from "../config"
+import { supportEmail, newFieldCampaignsBaseUrl } from "../config"
 import { getColorExpression, getShowExpression, loadData, getTimes, mousePosition } from "./layerFunctions"
 import { checkPath } from "../helpers/path"
 import emitter from "../helpers/event"
@@ -418,7 +418,7 @@ class Viz extends Component {
                         if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
                             console.log('Selected>>>>>>>>>> ' + selectedEntity.name);
                             let date = selectedEntity.name.split("-")[1];
-                            let url = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/CPEX-AW/instrument-processed-data/dropsonde/skewT/20210806/dropsonde.png";
+                            let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
                             this.setImageViewerState(true, url);
                         }
                     });
@@ -465,6 +465,7 @@ class Viz extends Component {
 
 
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
+        // arrow function to bind this wrt the class and not the callers' this
         if (imageViewerUrl) {
             this.setState({showImageViewer, imageViewerUrl})
         } else {
