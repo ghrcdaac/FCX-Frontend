@@ -22,9 +22,10 @@ const useStyles = makeStyles(() => ({
 
 export default function ImageViewer(props) {
   const classes = useStyles();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(props.showImageViewer);
 
   const handleClose = () => {
+    props.setImageViewerState(false);
     setOpen(false);
   };
 

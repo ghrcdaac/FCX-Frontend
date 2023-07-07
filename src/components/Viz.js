@@ -68,7 +68,7 @@ class Viz extends Component {
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
         this.layerChanged = false
         this.state = {
-            imageViewer: false,
+            showImageViewer: false,
             imageViewerUrl: null
         }
     }
@@ -368,9 +368,6 @@ class Viz extends Component {
 
     let previousTime = JulianDate.clone(viewer.clock.currentTime)
 
-    let setImageViewerState = (imageViewerToggle, imageViewerUrl) => {
-        this.setState({imageViewer: imageViewerToggle, imageViewerUrl})
-    }
 
     newTileset.readyPromise
         // eslint-disable-next-line no-loop-func
@@ -417,12 +414,12 @@ class Viz extends Component {
                         },
                       });
                     // add event handler
-                    viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
+                    viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
                         if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
                             console.log('Selected>>>>>>>>>> ' + selectedEntity.name);
                             let date = selectedEntity.name.split("-")[1];
                             let url = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/CPEX-AW/instrument-processed-data/dropsonde/skewT/20210806/dropsonde.png";
-                            setImageViewerState(true, url);
+                            this.setImageViewerState(true, url);
                         }
                     });
                 }
@@ -464,6 +461,15 @@ class Viz extends Component {
             this.errorLayers.push(selectedLayerId)
             // this.activeLayers.push({ layer: layer })
         })
+    }
+
+
+    setImageViewerState = (showImageViewer, imageViewerUrl) => {
+        if (imageViewerUrl) {
+            this.setState({showImageViewer, imageViewerUrl})
+        } else {
+            this.setState({showImageViewer})
+        }
     }
 
     setCameraDefaultInitialPosition(viewer, position) {
@@ -658,9 +664,7 @@ class Viz extends Component {
                 </div>
 
                 <Dock campaign={this.props.campaign} />
-                {
-                    this.state.imageViewer && <ImageViewer imageUrl= {this.state.imageViewerUrl}/>
-                }
+                {this.state.showImageViewer && <ImageViewer imageUrl= {this.state.imageViewerUrl} showImageViewer={this.state.showImageViewer} setImageViewerState={this.setImageViewerState}/>}
             </div>
         )
     }
