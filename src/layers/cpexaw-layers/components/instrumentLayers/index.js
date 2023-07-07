@@ -17,6 +17,20 @@ class LayerGenerator {
         return unique.sort();
     }
 
+    sortedOverlappingDates(date1, date2) {
+         /**
+        * @param {array} dates array of dates.
+        */
+        const overlappingElements = [];
+
+        for (let i = 0; i < date1.length; i++) {
+            if (date2.includes(date1[i])) {
+                overlappingElements.push(date1[i]);
+            }
+        }
+        return overlappingElements.sort();
+    }
+
     getInstrumentsItem(date, instrumentType, index) {
         /**
         * forms a instrument meta for requested instruments in a particular date, i.e. collect the meta of data for various instruments.
@@ -42,7 +56,7 @@ class LayerGenerator {
         * @return {object} A structured instruments layer.
         */
         // add new instrument dates here, to only get layers for the unique dates.
-        return this.sortedUniqueDates([...this.dc8_dates, ...this.dropsonde_dates]).map(date => ({
+        return this.sortedUniqueDates([...this.sortedOverlappingDates(this.dc8_dates, this.dropsonde_dates)]).map(date => ({
             date,
             items: this.instruments.map((instrum, index) => this.getInstrumentsItem(date, instrum, index)).filter(n => n)
         }));
