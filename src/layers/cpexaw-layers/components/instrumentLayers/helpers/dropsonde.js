@@ -13,8 +13,8 @@ export default function dropsonde (date, index) {
       shortName: "cpexawdropsonde",
       addOnTickEventListener: true, // helps to update viz on temporal change.
       displayName: "DROPSONDE",
-      variableName: "temperature",
-      unit: "degree celsius",
+      variableName: "skewT graph",
+      unit: "temperature (degree celsius) vs pressure (mb)",
       tileLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/3dtiles/${date.replace(/-/g,'')}/tileset.json`,
       date,
       type: "instrument",

@@ -416,7 +416,6 @@ class Viz extends Component {
                     // add event handler
                     viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
                         if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
-                            console.log('Selected>>>>>>>>>> ' + selectedEntity.name);
                             let date = selectedEntity.name.split("-")[1];
                             let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
                             this.setImageViewerState(true, url);

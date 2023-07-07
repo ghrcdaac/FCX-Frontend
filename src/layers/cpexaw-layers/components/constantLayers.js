@@ -49,7 +49,7 @@ const links = [
 
 // Used as a reference to various instruments legend pictures.
 const legends = {
-    cpexawdropsonde: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
+    cpexawdropsonde: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/skewT_legend.png`, color: "magenta" },
     olympexcpl: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexhiwrap: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexnexrad: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`, color: "lightred" },
