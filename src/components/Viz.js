@@ -95,21 +95,20 @@ class Viz extends Component {
             store.dispatch(allActions.listActions.markLoaded(e))
             store.dispatch(allActions.listActions.markUnLoaded(e))
         }
-
         /** Remove the layers, that needs to be removed. Prior remove it from cesium viewer (using 'cesiumLayerRef') **/
         for (let i = 0; i < layersToRemove.length; i++) {
             if (layersToRemove[i].layer.displayMechanism === "czml") {
                 viewer.dataSources.remove(layersToRemove[i].cesiumLayerRef)
             } else if (layersToRemove[i].layer.displayMechanism === "3dtile" || layersToRemove[i].layer.displayMechanism === "points") {
-                /** If the removal is for NPOL dataset, remember it contanins set of layers for a single date.
-                 * So, remove all those referenced layers by iterating over all those freq-20-mins layers.
-                 * **/
+                console.log("- ", layersToRemove[i])
                 viewer.scene.primitives.remove(layersToRemove[i].cesiumLayerRef)
                 if (layersToRemove[i].eventCallback) {
                     layersToRemove[i].eventCallback()
                 }
             } else if (layersToRemove[i].layer.displayMechanism === "wmts") {
                 viewer.imageryLayers.remove(layersToRemove[i].cesiumLayerRef)
+            } else if (layersToRemove[i].layer.displayMechanism === "entities") {
+                viewer.entities.remove(layersToRemove[i].cesiumLayerRef);
             }
             store.dispatch(allActions.listActions.markUnLoaded(layersToRemove[i].layer.layerId))
 
@@ -405,7 +404,7 @@ class Viz extends Component {
                     let date = tileset.properties.epoch.split("T")[0]
                     let parsedDate = date.replace(/-/g,'');
                     const pinBuilder = new PinBuilder();
-                    viewer.entities.add({
+                    let pin = viewer.entities.add({
                         name: `cpexawDropsonde-${parsedDate}`,
                         position: position,
                         billboard: {
@@ -413,6 +412,7 @@ class Viz extends Component {
                           verticalOrigin: VerticalOrigin.BOTTOM,
                         },
                       });
+                    this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
                     // add event handler
                     viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
                         if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
