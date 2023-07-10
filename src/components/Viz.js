@@ -390,8 +390,8 @@ class Viz extends Component {
                 tileset.style.pointSize = 5.0;
                 // add pin to visualize the skewT
                 //location
-                let ds = viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
-                let entity = ds.entities.getById("Flight Track");
+                let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
+                let entity = ds && ds.entities.getById("Flight Track");
                 if (entity) {
                     let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
                     JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
