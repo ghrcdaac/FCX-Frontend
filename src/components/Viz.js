@@ -170,190 +170,20 @@ class Viz extends Component {
             store.dispatch(allActions.listActions.markLoading(selectedLayerId))
 
             if (layer.displayMechanism === "czml") {
-                const dataSource = new CzmlDataSource()
-                // eslint-disable-next-line no-loop-func
-                dataSource.load(layer.czmlLocation).then((ds) => {
-                    store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-                    if (layer.type === "track") {
-                        let modelReference = ds.entities.getById("Flight Track");
-                        modelReference.orientation = new CallbackProperty((time, _result) => {
-                            const position = modelReference.position.getValue(time)
-                            if (this.layerChanged) {
-                                // Run it only once in the initial
-                                this.setCameraDefaultInitialPosition(viewer, position);
-                                this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
-                            }
-                            let roll = modelReference.properties.roll.getValue(time);
-                            let pitch = modelReference.properties.pitch.getValue(time);
-                            let heading = modelReference.properties.heading.getValue(time);
-                            const hpr = new HeadingPitchRoll(heading, pitch, roll)
-                            return Transforms.headingPitchRollQuaternion(position, hpr)
-                        }, false)
-
-                        this.trackedEntity = ds.entities.getById("Flight Track")
-                        // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
-                        if (this.trackEntity) {
-                            viewer.trackedEntity = this.trackedEntity
-                            viewer.clock.shouldAnimate = true
-                            viewer.clock.canAnimate = true
-                        }
-                    } else if (layer.type === "imagery") {
-                        if (!this.trackEntity) viewer.zoomTo(ds);
-                    }
-
-                    this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
-                    viewer.dataSources.add(ds)
-                }).otherwise((_error) => {
-                    console.error(_error)
-                    window.alert("Error Loading Data")
-                    this.errorLayers.push(selectedLayerId)
-                })
+                this.handleCZML(layer, selectedLayerId)
             } else if (layer.displayMechanism === "3dtile") {
-                return this.handle3dTiles(layer, selectedLayerId)
+                this.handle3dTiles(layer, selectedLayerId)
             }
             else if (layer.displayMechanism === "points") {
-
-                const intvl = 60;
-                const promiseG = Promise.resolve(loadData(layer.tileLocation));
-                Promise.all([promiseG]).then(([LightningData]) => {
-                    const timingsArray = getTimes(LightningData);
-                    let lastTime =this.viewerTime;
-                    let timesLen = timingsArray.length;
-                    let initialTime = timingsArray[0];
-                    let endTime = timingsArray[timesLen - 1];
-
-                    this.pointsCollection = viewer.scene.primitives.add(new PointPrimitiveCollection());
-                    this.activeLayers.push({ layer: layer, cesiumLayerRef: this.pointsCollection })
-
-                    store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-                    /*  Display lightning on clock ticking */
-
-                    if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
-
-                        const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
-                            let previousTime = JulianDate.clone(viewer.clock.currentTime);
-
-                            const startTime = JulianDate.fromIso8601(layer.date + "T00:00:00Z");
-                            let viewTime = JulianDate.secondsDifference(previousTime, startTime);
-                            let pT60 = lastTime - lastTime % intvl;
-                            let vT60 = viewTime - viewTime % intvl;
-
-                            // remove points at off-interval
-                            if (vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
-                                let indx = timingsArray.indexOf(pT60);
-                                if (indx >= 0) {
-                                    this.pointsCollection.removeAll();
-                                }
-                            }
-
-                            // add points on 60s time interval
-                            if (vT60 >= initialTime & vT60 <= endTime) {
-                                let indx = timingsArray.indexOf(vT60);
-                                if (indx >= 0 & vT60 !== pT60) {
-                                    let nFScalar = new NearFarScalar(1.e2, 2, 8.0e6, 0.5);
-                                    let yellow = new ColorCesium(1.0, 1.0, 0.4, 1);
-                                    let cyan = new ColorCesium(0.68, 1.0, 0.55, .6);  //Cesium.Color.CYAN;
-                                    let orng = ColorCesium.ORANGE.brighten(0.5, new ColorCesium());
-                                    let vec = LightningData[indx];
-                                    let lon = vec.Lon;
-                                    let lat = vec.Lat;
-                                    let rad = vec.Rad;
-                                    let pw = 0.6;
-                                    let fct = 1 / 15;
-                                    let color = yellow;
-                                    if (layer.dispType === 'Activity') {
-                                        pw = 0.6;
-                                        fct = 1 / 4;
-                                        color = orng;
-                                        rad = vec.count;
-                                    }
-                                    if (layer.dispType === 'LIntensity') {
-                                        pw = .5;
-                                        fct = 1 / 100;
-                                        color = cyan;
-                                        rad = vec.Rad;
-                                    }
-
-                                    for (let i = 0; i < lon.length; i += 1) {
-                                        let pixel = Math.pow(rad[i], pw) * fct
-                                        this.pointsCollection.add({
-                                            id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
-                                            show: true,
-                                            position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
-                                            pixelSize: pixel,
-                                            color: color,
-                                            scaleByDistance: nFScalar,
-                                        });
-                                    };
-                                }
-                            }
-                            lastTime = viewTime;
-                        });
-
-                        for (const [, activeLayerItem] of this.activeLayers.entries()) {
-                            if (activeLayerItem.layer.layerId === layer.layerId) {
-                                activeLayerItem.eventCallback = eventCallback
-                                break
-                            }
-                        }
-                    }
-                    /*--- mouse functions  ---*/
-                    mousePosition(viewer);
-
-                }).catch(_error => {
-                    console.error(_error)
-                    window.alert("Error Loading Data")
-                    this.errorLayers.push(selectedLayerId)
-                })
-
+                this.handlePointPrimitive(layer, selectedLayerId)
             }
             else if (layer.displayMechanism === "wmts") {
-
-                const times = layer.times
-                const dates = []
-                for (const time of times) {
-                    const date = new JulianDate()
-                    JulianDate.addSeconds(JulianDate.fromIso8601("2000-01-01T12:00:00Z"), Number(time), date)
-                    dates.push(date)
-                }
-                const timeIntervalCollection = TimeIntervalCollection.fromJulianDateArray({
-                    julianDates: dates,
-                    dataCallback: (_interval, index) => {
-                        return { Time: times[index] }
-                    },
-                })
-
-                /*
-                Useful links
-                https://cesium.com/docs/tutorials/imagery-layers/ 
-                https://sandcastle.cesium.com/?src=Imagery%20Adjustment.html
-                */
-
-                let imageryProvider = new WebMapTileServiceImageryProvider({
-                    url: layer.url,
-                    format: layer.format,
-                    style: layer.style,
-                    times: timeIntervalCollection,
-                    tileMatrixSetID: layer.tileMatrixSetID,
-                    clock: viewer.clock,
-                    layer: layer.layer,
-                })
-                let imageLayer = new ImageryLayer(imageryProvider)
-                viewer.imageryLayers.add(imageLayer)
-                this.activeLayers.push({ layer: layer, cesiumLayerRef: imageLayer })
-
-                imageryProvider.readyPromise.then((status) => {
-                    if (status) {
-                        store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-                    }
-                })
-
-
+                this.handleWMTS(layer, selectedLayerId)
             }
         }
     }
 
-    // first try of breaking the visualization handlers for different visualization types.
+    // visualization handlers for different visualization types.
 
     handle3dTiles(layer, selectedLayerId) {
     //use TimeDynamicPointCloud from Brian's npm package temporal-3d-tile
@@ -459,6 +289,183 @@ class Viz extends Component {
             window.alert("Error Loading Data")
             this.errorLayers.push(selectedLayerId)
             // this.activeLayers.push({ layer: layer })
+        })
+    }
+
+    handleCZML(layer, selectedLayerId) {
+        const dataSource = new CzmlDataSource()
+        // eslint-disable-next-line no-loop-func
+        dataSource.load(layer.czmlLocation).then((ds) => {
+            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+            if (layer.type === "track") {
+                let modelReference = ds.entities.getById("Flight Track");
+                modelReference.orientation = new CallbackProperty((time, _result) => {
+                    const position = modelReference.position.getValue(time)
+                    if (this.layerChanged) {
+                        // Run it only once in the initial
+                        this.setCameraDefaultInitialPosition(viewer, position);
+                        this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
+                    }
+                    let roll = modelReference.properties.roll.getValue(time);
+                    let pitch = modelReference.properties.pitch.getValue(time);
+                    let heading = modelReference.properties.heading.getValue(time);
+                    const hpr = new HeadingPitchRoll(heading, pitch, roll)
+                    return Transforms.headingPitchRollQuaternion(position, hpr)
+                }, false)
+
+                this.trackedEntity = ds.entities.getById("Flight Track")
+                // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
+                if (this.trackEntity) {
+                    viewer.trackedEntity = this.trackedEntity
+                    viewer.clock.shouldAnimate = true
+                    viewer.clock.canAnimate = true
+                }
+            } else if (layer.type === "imagery") {
+                if (!this.trackEntity) viewer.zoomTo(ds);
+            }
+
+            this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
+            viewer.dataSources.add(ds)
+        }).otherwise((_error) => {
+            console.error(_error)
+            window.alert("Error Loading Data")
+            this.errorLayers.push(selectedLayerId)
+        })
+    }
+
+    handlePointPrimitive(layer, selectedLayerId) {
+        const intvl = 60;
+        const promiseG = Promise.resolve(loadData(layer.tileLocation));
+        Promise.all([promiseG]).then(([LightningData]) => {
+            const timingsArray = getTimes(LightningData);
+            let lastTime =this.viewerTime;
+            let timesLen = timingsArray.length;
+            let initialTime = timingsArray[0];
+            let endTime = timingsArray[timesLen - 1];
+
+            this.pointsCollection = viewer.scene.primitives.add(new PointPrimitiveCollection());
+            this.activeLayers.push({ layer: layer, cesiumLayerRef: this.pointsCollection })
+
+            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+            /*  Display lightning on clock ticking */
+
+            if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
+
+                const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
+                    let previousTime = JulianDate.clone(viewer.clock.currentTime);
+
+                    const startTime = JulianDate.fromIso8601(layer.date + "T00:00:00Z");
+                    let viewTime = JulianDate.secondsDifference(previousTime, startTime);
+                    let pT60 = lastTime - lastTime % intvl;
+                    let vT60 = viewTime - viewTime % intvl;
+
+                    // remove points at off-interval
+                    if (vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
+                        let indx = timingsArray.indexOf(pT60);
+                        if (indx >= 0) {
+                            this.pointsCollection.removeAll();
+                        }
+                    }
+
+                    // add points on 60s time interval
+                    if (vT60 >= initialTime & vT60 <= endTime) {
+                        let indx = timingsArray.indexOf(vT60);
+                        if (indx >= 0 & vT60 !== pT60) {
+                            let nFScalar = new NearFarScalar(1.e2, 2, 8.0e6, 0.5);
+                            let yellow = new ColorCesium(1.0, 1.0, 0.4, 1);
+                            let cyan = new ColorCesium(0.68, 1.0, 0.55, .6);  //Cesium.Color.CYAN;
+                            let orng = ColorCesium.ORANGE.brighten(0.5, new ColorCesium());
+                            let vec = LightningData[indx];
+                            let lon = vec.Lon;
+                            let lat = vec.Lat;
+                            let rad = vec.Rad;
+                            let pw = 0.6;
+                            let fct = 1 / 15;
+                            let color = yellow;
+                            if (layer.dispType === 'Activity') {
+                                pw = 0.6;
+                                fct = 1 / 4;
+                                color = orng;
+                                rad = vec.count;
+                            }
+                            if (layer.dispType === 'LIntensity') {
+                                pw = .5;
+                                fct = 1 / 100;
+                                color = cyan;
+                                rad = vec.Rad;
+                            }
+
+                            for (let i = 0; i < lon.length; i += 1) {
+                                let pixel = Math.pow(rad[i], pw) * fct
+                                this.pointsCollection.add({
+                                    id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
+                                    show: true,
+                                    position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
+                                    pixelSize: pixel,
+                                    color: color,
+                                    scaleByDistance: nFScalar,
+                                });
+                            };
+                        }
+                    }
+                    lastTime = viewTime;
+                });
+
+                for (const [, activeLayerItem] of this.activeLayers.entries()) {
+                    if (activeLayerItem.layer.layerId === layer.layerId) {
+                        activeLayerItem.eventCallback = eventCallback
+                        break
+                    }
+                }
+            }
+            /*--- mouse functions  ---*/
+            mousePosition(viewer);
+
+        }).catch(_error => {
+            console.error(_error)
+            window.alert("Error Loading Data")
+            this.errorLayers.push(selectedLayerId)
+        })
+    }
+
+    handleWMTS(layer, selectedLayerId) {
+        const times = layer.times
+        const dates = []
+        for (const time of times) {
+            const date = new JulianDate()
+            JulianDate.addSeconds(JulianDate.fromIso8601("2000-01-01T12:00:00Z"), Number(time), date)
+            dates.push(date)
+        }
+        const timeIntervalCollection = TimeIntervalCollection.fromJulianDateArray({
+            julianDates: dates,
+            dataCallback: (_interval, index) => {
+                return { Time: times[index] }
+            },
+        })
+
+        /*
+        Useful links
+        https://cesium.com/docs/tutorials/imagery-layers/
+        https://sandcastle.cesium.com/?src=Imagery%20Adjustment.html
+        */
+
+        let imageryProvider = new WebMapTileServiceImageryProvider({
+            url: layer.url,
+            format: layer.format,
+            style: layer.style,
+            times: timeIntervalCollection,
+            tileMatrixSetID: layer.tileMatrixSetID,
+            clock: viewer.clock,
+            layer: layer.layer,
+        })
+        let imageLayer = new ImageryLayer(imageryProvider)
+        viewer.imageryLayers.add(imageLayer)
+        this.activeLayers.push({ layer: layer, cesiumLayerRef: imageLayer })
+
+        imageryProvider.readyPromise.then((status) => {
+            if (status) {
+                store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+            }
         })
     }
 
