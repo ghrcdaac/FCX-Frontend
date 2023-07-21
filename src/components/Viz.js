@@ -325,6 +325,7 @@ class Viz extends Component {
                     viewer.clock.canAnimate = true
                 }
             } else if (layer.type === "imagery") {
+                // TODO: clock:: now based off new priority based timeline, modify the below code.
                 if (!this.trackEntity) viewer.zoomTo(ds);
             }
 
@@ -485,9 +486,6 @@ class Viz extends Component {
          * @param  {Array} activeLayers  array of active layer objects. Active layer objects are entity or primitive type cesium objects.
          * @return {String}              priority datetime.
          */
-        for (const [idx, activeLayer] of activeLayers.entries()) {
-            console.log("------->", activeLayer.layer.displayName)
-        }
         let priorityEnum = {
             '3dtile': 0,
             'czml': 1,
@@ -503,22 +501,19 @@ class Viz extends Component {
             if (order1 === undefined) return -1;
             if (order2 === undefined) return 1;
             if (order1 === order2) {
-                // now based off the start time, sort it.
+                // TODO: now based off the start time, sort it.
                 // i.e. the one with the later start time, will be pushed to the front.
                 // As it is the interection of the both layers. (wrt time)
                 // and contains data of both the layers.
             }
             return order1 - order2;
         });
-        const startTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
-        console.log("selected start time>>>>", startTime)
-        // 3d tiles has higher priority
-            // CRS, CPL, HIWRAP, NEXRAD
-        // CZML has lower priority
-            // viz using czml are:
-            // flight nav, GML, etc
-        // select the most prioritized layer
+        // for (const [idx, activeLayer] of activeLayers.entries()) {
+        //     console.log("------->", activeLayer.layer.displayName)
+        // }
         // get date from that layer
+        const startDateTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
+        console.log("selected start time>>>>", startDateTime)
         // zoom to that date. i.e. updateTime
         }
 

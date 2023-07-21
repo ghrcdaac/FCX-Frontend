@@ -1,3 +1,5 @@
+import {JulianDate} from "cesium";
+
 export function getStartDateTimeBasedOffDisplayMechanism(layerObject){
   const {layer} = layerObject;
   switch (layer.displayMechanism) {
@@ -30,7 +32,11 @@ function startDateTime3dtile(layerObject){
 }
 
 function startDateTimeCZML(layer){
-
+    const {cesiumLayerRef: dataSource} = layer;
+    let clock = dataSource.clock.getValue();
+    let julianStartTime = clock.startTime;
+    let isoStartTime = JulianDate.toIso8601(julianStartTime);
+    return isoStartTime;
 }
 
 function startDateTimePoints(layer){
