@@ -50,6 +50,7 @@ import { addTimeToISODate } from "../layers/utils/layerDates"
 // import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 import ImageViewer from "./imageViewerModal";
+import { getStartDateTimeBasedOffDisplayMechanism } from "../helpers/getLayerDate";
 
 class Viz extends Component {
     
@@ -140,12 +141,14 @@ class Viz extends Component {
 
                 if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
                     // if desired camera position availabe in layer meta, use that.
+                    // clock:: current time set
                     this.restoreCamera(campaign.defaultCamera[layerDate])
                 }
             } else {
                 this.layerChanged = false;
             }
 
+            // clock:: set start and end time if json available in layer meta
             if ( viewerStart && viewerEnd ) {
                 // if desired zoom time availabe in layer meta, use that.
                 viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
@@ -181,6 +184,7 @@ class Viz extends Component {
                 this.handleWMTS(layer, selectedLayerId)
             }
         }
+        setTimeout(this.prioritizedTimelineZoom, 5000, this.activeLayers)
     }
 
     // visualization handlers for different visualization types.
@@ -469,6 +473,57 @@ class Viz extends Component {
         })
     }
 
+    prioritizedTimelineZoom(activeLayers) {
+        /**
+         * This function prioritizes the timeline zooming.
+         * ie. gets the datetime for the cesium viewer, to set and zoom into.
+         * Details:
+         * Because every layers is a representation of temporal and spatial data, all of them have time information.
+         * Instead of setting the cesium viewer to the arbitrary layer time,
+         * We can prioritize the cesium clock-time to the most important layer.
+         * and have every other layer to be in sync with that.
+         * @param  {Array} activeLayers  array of active layer objects. Active layer objects are entity or primitive type cesium objects.
+         * @return {String}              priority datetime.
+         */
+        for (const [idx, activeLayer] of activeLayers.entries()) {
+            console.log("------->", activeLayer.layer.displayName)
+        }
+        let priorityEnum = {
+            '3dtile': 0,
+            'czml': 1,
+            'points': 2,
+            'entities': 3,
+            'wmts': 4
+        }
+        activeLayers.sort((el1, el2) => {
+            // if return -ve, pushed to back
+            // if returned +ve, pushed to front
+            let order1 = priorityEnum[el1.layer.displayMechanism]
+            let order2 = priorityEnum[el2.layer.displayMechanism]
+            if (order1 === undefined) return -1;
+            if (order2 === undefined) return 1;
+            if (order1 === order2) {
+                // now based off the start time, sort it.
+                // i.e. the one with the later start time, will be pushed to the front.
+                // As it is the interection of the both layers. (wrt time)
+                // and contains data of both the layers.
+            }
+            return order1 - order2;
+        });
+        const startTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
+        // 3d tiles has higher priority
+            // CRS, CPL, HIWRAP, NEXRAD
+        // CZML has lower priority
+            // viz using czml are:
+            // flight nav, GML, etc
+        // select the most prioritized layer
+        // get date from that layer
+        // zoom to that date. i.e. updateTime
+        }
+
+    updateTime(time) {
+        viewer.clock.currentTime = time;
+    }
 
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
         // arrow function to bind this wrt the class and not the callers' this
@@ -601,6 +656,7 @@ class Viz extends Component {
                     this.activeLayers = []
                     if (this.lastSelectedLayers.length !== 0) {
                         this.renderLayers(this.lastSelectedLayers, campaign)
+                        // clock:: current time set
                         this.restoreCamera(this.savedSamera)
                         //TODO: viewer's current time is not getting restored
                     }
