@@ -508,17 +508,15 @@ class Viz extends Component {
             }
             return order1 - order2;
         });
-        // for (const [idx, activeLayer] of activeLayers.entries()) {
-        //     console.log("------->", activeLayer.layer.displayName)
-        // }
         // get date from that layer
         const startDateTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
-        console.log("selected start time>>>>", startDateTime)
         // zoom to that date. i.e. updateTime
-        }
+        viewer.clock.currentTime = JulianDate.fromIso8601(startDateTime);
+    }
 
-    updateTime(time) {
-        viewer.clock.currentTime = time;
+    updateViewerCurrentTime = (time) => {
+        // TODO: once viewers' current time is focused to desired location, then focus the camera on that.
+        viewer.clock.currentTime = JulianDate.fromIso8601(time);
     }
 
     setImageViewerState = (showImageViewer, imageViewerUrl) => {

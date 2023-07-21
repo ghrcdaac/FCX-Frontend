@@ -11,7 +11,8 @@ export function getStartDateTimeBasedOffDisplayMechanism(layerObject){
           return startDateTimeCZML(layerObject);
       case 'points':
           // get the start time of the points
-          return startDateTimePoints(layerObject);
+            // return startDateTimePoints(layerObject);
+            return undefined;
       case 'entities':
           // no time, return undefined, handle it in the caller
           return undefined;
