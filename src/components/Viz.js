@@ -491,7 +491,7 @@ class Viz extends Component {
         const camera = viewer.camera;
         camera.lookAtTransform(
             transform,
-            new Cartesian3(20000.0, 20000.0, 20000.0)
+            new Cartesian3(20000.0, -20000.0, 20000.0)
         );
         viewer.trackedEntity = null;
         return;
