@@ -474,7 +474,7 @@ class Viz extends Component {
         })
     }
 
-    prioritizedTimelineZoom(activeLayers) {
+    prioritizedTimelineZoom = (activeLayers) => {
         /**
          * This function prioritizes the timeline zooming.
          * ie. gets the datetime for the cesium viewer, to set and zoom into.
@@ -510,8 +510,9 @@ class Viz extends Component {
         });
         // get date from that layer
         const startDateTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
+        // TODO: Also if the layers have their date time hardcoded, use that instead. i.e. the first priority.
         // zoom to that date. i.e. updateTime
-        viewer.clock.currentTime = JulianDate.fromIso8601(startDateTime);
+        this.updateViewerCurrentTime(startDateTime);
     }
 
     updateViewerCurrentTime = (time) => {
