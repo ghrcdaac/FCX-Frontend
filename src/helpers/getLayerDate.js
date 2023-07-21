@@ -25,9 +25,8 @@ export function getStartDateTimeBasedOffDisplayMechanism(layerObject){
 // helpers:
 
 function startDateTime3dtile(layerObject){
-  console.log("HERE I AM, THIS IS ME")
   const {cesiumLayerRef: tileset} = layerObject;
-  console.log(tileset)
+  return tileset.properties.epoch;
 }
 
 function startDateTimeCZML(layer){

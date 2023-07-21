@@ -231,7 +231,7 @@ class Viz extends Component {
                     JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
                     let positionProperty = entity.position;
                     const position = positionProperty.getValue(timeOfDrop)
-                    // Instead getting position directly from the 3dtile json would be much faster.
+                    // Instead, getting position directly from the 3dtile json would be much faster.
                     // If critical information could be added directly to the json header, when the 3d tile is created.
 
                     // add pin
@@ -511,6 +511,7 @@ class Viz extends Component {
             return order1 - order2;
         });
         const startTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
+        console.log("selected start time>>>>", startTime)
         // 3d tiles has higher priority
             // CRS, CPL, HIWRAP, NEXRAD
         // CZML has lower priority
