@@ -173,7 +173,7 @@ class Viz extends Component {
         setTimeout( ()=> {
             const activeLayer = this.extractPrioritizedLayer(this.activeLayers);
             this.prioritizedTimelineZoom(activeLayer);
-        }, 5000)
+        }, 6000)
     }
 
     // visualization handlers for different visualization types START
@@ -477,6 +477,9 @@ class Viz extends Component {
          * @param  {Array} activeLayers  array of active layer objects. Active layer objects are entity or primitive type cesium objects.
          * @return {Object}              Highest Prioritized active layer.
          */
+        if (activeLayers.length === 1) {
+            return activeLayers[0];
+        }
         let priorityEnum = {
             '3dtile': 0,
             'czml': 1,
