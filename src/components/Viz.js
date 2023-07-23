@@ -137,9 +137,6 @@ class Viz extends Component {
                     store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
                 }, 1000)
 
-                // remove: handled in prioritizedTimelineZoom
-                // if (viewerStart) viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
-
                 // TODO: move: i.e. set the camera after all the layers are loaded and are active
                 if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
                     // if desired camera position availabe in layer meta, use that.
@@ -148,18 +145,6 @@ class Viz extends Component {
             } else {
                 this.layerChanged = false;
             }
-
-            // remove: handled in prioritizedTimelineZoom
-            // if ( viewerStart && viewerEnd ) {
-            //     // if desired zoom time availabe in layer meta, use that.
-            //     viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
-            //     viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
-            //     viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
-            //     viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
-            // } else {
-            //     // automatically set the clock using the czml data.
-            //     viewer.automaticallyTrackDataSourceClocks = true;
-            // }
 
             let found = false
             for (const [, activeLayerItem] of this.activeLayers.entries()) {
