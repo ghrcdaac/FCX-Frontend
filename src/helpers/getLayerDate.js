@@ -1,5 +1,15 @@
 import {JulianDate} from "cesium";
 
+export function extractLayerDate(layerObject){
+    /**
+     * For a active layer, returns the date when the instrument data was collected.
+     * @param {Object} layerObject a layer that is loaded and active.
+     * @returns {String} a string representation of date of that layer.
+     */
+    const {layer} = layerObject;
+    return layer.date
+}
+
 export function extractLayerStartDatetime(layerObject){
   /**
    * For a active layer, returns the start date time of that layer.

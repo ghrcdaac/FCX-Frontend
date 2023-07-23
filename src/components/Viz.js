@@ -50,7 +50,7 @@ import { addTimeToISODate } from "../layers/utils/layerDates"
 // import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 import ImageViewer from "./imageViewerModal";
-import { extractLayerStartDatetime } from "../helpers/getLayerDate";
+import { extractLayerStartDatetime, extractLayerDate } from "../helpers/getLayerDate";
 
 class Viz extends Component {
     
@@ -519,20 +519,21 @@ class Viz extends Component {
 
     prioritizedTimelineZoom = (layer) => {
         // get start datetime from that layer
-        const startDateTime = extractLayerStartDatetime(layer);
-        // TODO: do similar for end as well.
-        if (startDateTime) {
+        const layerStartDateTime = extractLayerStartDatetime(layer);
+        const date = extractLayerDate(layer);
+        const campaignStartDateTime = `${date}T00:00:00Z`;
+        const campaignEndDateTime = `${date}T23:59:59Z`;
+        if (layerStartDateTime) {
             viewer.automaticallyTrackDataSourceClocks = false;
-            this.updateViewerCurrentTime(startDateTime);
+            viewer.clock.currentTime = JulianDate.fromIso8601(layerStartDateTime);
         } else {
             // automatically set the clock using the loaded data.
             viewer.automaticallyTrackDataSourceClocks = true;
         }
-    }
-
-    updateViewerCurrentTime = (time) => {
-        // TODO: once viewers' current time is focused to desired location, then focus the camera on that.
-        viewer.clock.currentTime = JulianDate.fromIso8601(time);
+        // always do the following
+        viewer.clock.startTime = JulianDate.fromIso8601(campaignStartDateTime);
+        viewer.clock.stopTime = JulianDate.fromIso8601(campaignEndDateTime);
+        viewer.timeline.zoomTo(JulianDate.fromIso8601(campaignStartDateTime), JulianDate.fromIso8601(campaignEndDateTime));
     }
 
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
