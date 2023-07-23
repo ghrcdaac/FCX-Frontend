@@ -50,7 +50,7 @@ import { addTimeToISODate } from "../layers/utils/layerDates"
 // import { printCameraAnglesInterval } from '../helpers/cesiumHelper'
 
 import ImageViewer from "./imageViewerModal";
-import { getStartDateTimeBasedOffDisplayMechanism } from "../helpers/getLayerDate";
+import { extractLayerStartDatetime } from "../helpers/getLayerDate";
 
 class Viz extends Component {
     
@@ -184,7 +184,10 @@ class Viz extends Component {
                 this.handleWMTS(layer, selectedLayerId)
             }
         }
-        setTimeout(this.prioritizedTimelineZoom, 5000, this.activeLayers)
+        setTimeout( ()=> {
+            const activeLayer = this.extractPrioritizedLayer(this.activeLayers);
+            this.prioritizedTimelineZoom(activeLayer);
+        }, 5000)
     }
 
     // visualization handlers for different visualization types.
@@ -474,7 +477,7 @@ class Viz extends Component {
         })
     }
 
-    prioritizedTimelineZoom = (activeLayers) => {
+    extractPrioritizedLayer = (activeLayers) => {
         /**
          * This function prioritizes the timeline zooming.
          * ie. gets the datetime for the cesium viewer, to set and zoom into.
@@ -484,7 +487,7 @@ class Viz extends Component {
          * We can prioritize the cesium clock-time to the most important layer.
          * and have every other layer to be in sync with that.
          * @param  {Array} activeLayers  array of active layer objects. Active layer objects are entity or primitive type cesium objects.
-         * @return {String}              priority datetime.
+         * @return {Object}              Highest Prioritized active layer.
          */
         let priorityEnum = {
             '3dtile': 0,
@@ -508,8 +511,12 @@ class Viz extends Component {
             }
             return order1 - order2;
         });
+        return activeLayers[0];
+    }
+
+    prioritizedTimelineZoom = (layer) => {
         // get date from that layer
-        const startDateTime = getStartDateTimeBasedOffDisplayMechanism(activeLayers[0]);
+        const startDateTime = extractLayerStartDatetime(layer);
         // TODO: Also if the layers have their date time hardcoded, use that instead. i.e. the first priority.
         // zoom to that date. i.e. updateTime
         this.updateViewerCurrentTime(startDateTime);

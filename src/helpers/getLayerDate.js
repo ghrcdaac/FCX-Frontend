@@ -1,6 +1,6 @@
 import {JulianDate} from "cesium";
 
-export function getStartDateTimeBasedOffDisplayMechanism(layerObject){
+export function extractLayerStartDatetime(layerObject){
   /**
    * For a active layer, returns the start date time of that layer.
    * Also applies special cases.
