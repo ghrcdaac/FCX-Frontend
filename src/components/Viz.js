@@ -137,28 +137,29 @@ class Viz extends Component {
                     store.dispatch(allActions.listActions.removeLayersByDate(viewerDate))
                 }, 1000)
 
-                if (viewerStart) viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
+                // remove: handled in prioritizedTimelineZoom
+                // if (viewerStart) viewer.clock.currentTime = JulianDate.fromIso8601(viewerStart)
 
+                // TODO: move: i.e. set the camera after all the layers are loaded and are active
                 if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
                     // if desired camera position availabe in layer meta, use that.
-                    // clock:: current time set
                     this.restoreCamera(campaign.defaultCamera[layerDate])
                 }
             } else {
                 this.layerChanged = false;
             }
 
-            // clock:: set start and end time if json available in layer meta
-            if ( viewerStart && viewerEnd ) {
-                // if desired zoom time availabe in layer meta, use that.
-                viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
-                viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
-                viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
-                viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
-            } else {
-                // automatically set the clock using the czml data.
-                viewer.automaticallyTrackDataSourceClocks = true;
-            }
+            // remove: handled in prioritizedTimelineZoom
+            // if ( viewerStart && viewerEnd ) {
+            //     // if desired zoom time availabe in layer meta, use that.
+            //     viewer.automaticallyTrackDataSourceClocks = false; // TODO: not working currently check
+            //     viewer.clock.startTime = JulianDate.fromIso8601(viewerStart)
+            //     viewer.clock.stopTime = JulianDate.fromIso8601(viewerEnd)
+            //     viewer.timeline.zoomTo(JulianDate.fromIso8601(viewerStart), JulianDate.fromIso8601(viewerEnd))
+            // } else {
+            //     // automatically set the clock using the czml data.
+            //     viewer.automaticallyTrackDataSourceClocks = true;
+            // }
 
             let found = false
             for (const [, activeLayerItem] of this.activeLayers.entries()) {
@@ -190,7 +191,7 @@ class Viz extends Component {
         }, 5000)
     }
 
-    // visualization handlers for different visualization types.
+    // visualization handlers for different visualization types START
 
     handle3dTiles(layer, selectedLayerId) {
     //use TimeDynamicPointCloud from Brian's npm package temporal-3d-tile
@@ -477,6 +478,8 @@ class Viz extends Component {
         })
     }
 
+    // visualization handlers for different visualization types END
+
     extractPrioritizedLayer = (activeLayers) => {
         /**
          * This function prioritizes the timeline zooming.
@@ -515,11 +518,16 @@ class Viz extends Component {
     }
 
     prioritizedTimelineZoom = (layer) => {
-        // get date from that layer
+        // get start datetime from that layer
         const startDateTime = extractLayerStartDatetime(layer);
-        // TODO: Also if the layers have their date time hardcoded, use that instead. i.e. the first priority.
-        // zoom to that date. i.e. updateTime
-        this.updateViewerCurrentTime(startDateTime);
+        // TODO: do similar for end as well.
+        if (startDateTime) {
+            viewer.automaticallyTrackDataSourceClocks = false;
+            this.updateViewerCurrentTime(startDateTime);
+        } else {
+            // automatically set the clock using the loaded data.
+            viewer.automaticallyTrackDataSourceClocks = true;
+        }
     }
 
     updateViewerCurrentTime = (time) => {
