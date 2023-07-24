@@ -77,6 +77,8 @@ class Viz extends Component {
     renderLayers(selectedLayers, campaign) {
         /** Filter layers to remove; from active layers if its not in selected layer **/
         const layersToRemove = []
+        let layersRenderPromises = [];
+
         for (const [, activeLayerItem] of this.activeLayers.entries()) {
             // if layer is not found in current list of selected layers, remove it
             let found = false
@@ -130,6 +132,8 @@ class Viz extends Component {
             if (layerDate !== viewerDate) {
                 // i.e. when layers is getting changed (currentLayerDate vs OldLayerDate)
                 this.layerChanged = true; // FOR CAMERA INITIAL POSITION
+                // reset the layer render promise list
+                layersRenderPromises.length = 0;
                 // remove layers with other dates
                 setTimeout(() => {
                     if(!checkPath()) return;
@@ -158,25 +162,31 @@ class Viz extends Component {
             store.dispatch(allActions.listActions.markLoading(selectedLayerId))
 
             if (layer.displayMechanism === "czml") {
-                this.handleCZML(layer, selectedLayerId)
+                let czmlPromise = this.handleCZML(layer, selectedLayerId);
+                layersRenderPromises.push(czmlPromise);
             } else if (layer.displayMechanism === "3dtile") {
-                this.handle3dTiles(layer, selectedLayerId)
+                let tilePromise = this.handle3dTiles(layer, selectedLayerId);
+                layersRenderPromises.push(tilePromise);
             }
             else if (layer.displayMechanism === "points") {
-                this.handlePointPrimitive(layer, selectedLayerId)
+                let pointPrimitivePromise = this.handlePointPrimitive(layer, selectedLayerId);
+                layersRenderPromises.push(pointPrimitivePromise);
             }
             else if (layer.displayMechanism === "wmts") {
-                this.handleWMTS(layer, selectedLayerId)
+                let wmtsPromise = this.handleWMTS(layer, selectedLayerId);
+                layersRenderPromises.push(wmtsPromise);
             }
         }
-        setTimeout( ()=> {
+
+        // After all the active layers resolves, then do the following
+        Promise.all(layersRenderPromises).then((values) => {
             const pactiveLayer = this.extractPrioritizedLayer(this.activeLayers);
             this.prioritizedTimelineZoom(pactiveLayer, campaign);
             if (this.layerChanged) {
                 // after all the layers are loaded and are active, check the need for camera position and set accordingly
                 this.prioritizedCameraPosition(pactiveLayer, this.activeLayers, campaign);
             }
-        }, 6000)
+        }).catch(error => console.error(error));
     }
 
     // visualization handlers for different visualization types START
@@ -193,233 +203,243 @@ class Viz extends Component {
 
     let previousTime = JulianDate.clone(viewer.clock.currentTime)
 
+    return new Promise((resolve, reject) => {
+        newTileset.readyPromise
+            // eslint-disable-next-line no-loop-func
+            .then((tileset) => {
+                store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
 
-    newTileset.readyPromise
-        // eslint-disable-next-line no-loop-func
-        .then((tileset) => {
-            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+                this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
+                tileset.style = new Cesium3DTileStyle()
+                if (layer.displayName === "Cloud Radar System") {
+                    tileset.style.pointSize = 2.0;
+                    tileset.style.color = getColorExpression();
+                } else if (layer.displayName === "Cloud Physics LiDAR") {
+                    tileset.style.pointSize = 4.0;
+                    if (layer.fieldCampaignName === "Olympex") {
+                        tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
+                        // tileset.pointCloudShading.attenuation = true;
+                    }
+                } else if (layer.displayName === "DROPSONDE") {
+                    // tileset.style.color = getColorExpression();
+                    tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
+                    tileset.style.pointSize = 5.0;
+                    // add pin to visualize the skewT
+                    //location
+                    let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
+                    let entity = ds && ds.entities.getById("Flight Track");
+                    if (entity) {
+                        let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
+                        JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
+                        let positionProperty = entity.position;
+                        const position = positionProperty.getValue(timeOfDrop)
+                        // Instead, getting position directly from the 3dtile json would be much faster.
+                        // If critical information could be added directly to the json header, when the 3d tile is created.
 
-            this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
-            tileset.style = new Cesium3DTileStyle()
-            if (layer.displayName === "Cloud Radar System") {
-                tileset.style.pointSize = 2.0;
-                tileset.style.color = getColorExpression();
-            } else if (layer.displayName === "Cloud Physics LiDAR") {
-                tileset.style.pointSize = 4.0;
-                if (layer.fieldCampaignName === "Olympex") {
-                    tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
-                    // tileset.pointCloudShading.attenuation = true;
+                        // add pin
+                        let date = tileset.properties.epoch.split("T")[0]
+                        let parsedDate = date.replace(/-/g,'');
+                        const pinBuilder = new PinBuilder();
+                        let pin = viewer.entities.add({
+                            name: `cpexawDropsonde-${parsedDate}`,
+                            position: position,
+                            billboard: {
+                            image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                            verticalOrigin: VerticalOrigin.BOTTOM,
+                            },
+                        });
+                        this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
+                        // add event handler
+                        viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
+                            if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
+                                let date = selectedEntity.name.split("-")[1];
+                                let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
+                                this.setImageViewerState(true, url);
+                            }
+                        });
+                    }
+                } else {
+                    tileset.style.pointSize = 1.0;
+                    tileset.style.color = getColorExpression();
                 }
-            } else if (layer.displayName === "DROPSONDE") {
-                // tileset.style.color = getColorExpression();
-                tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
-                tileset.style.pointSize = 5.0;
-                // add pin to visualize the skewT
-                //location
-                let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
-                let entity = ds && ds.entities.getById("Flight Track");
-                if (entity) {
-                    let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
-                    JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
-                    let positionProperty = entity.position;
-                    const position = positionProperty.getValue(timeOfDrop)
-                    // Instead, getting position directly from the 3dtile json would be much faster.
-                    // If critical information could be added directly to the json header, when the 3d tile is created.
-
-                    // add pin
-                    let date = tileset.properties.epoch.split("T")[0]
-                    let parsedDate = date.replace(/-/g,'');
-                    const pinBuilder = new PinBuilder();
-                    let pin = viewer.entities.add({
-                        name: `cpexawDropsonde-${parsedDate}`,
-                        position: position,
-                        billboard: {
-                          image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
-                          verticalOrigin: VerticalOrigin.BOTTOM,
-                        },
-                      });
-                    this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
-                    // add event handler
-                    viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
-                        if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
-                            let date = selectedEntity.name.split("-")[1];
-                            let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
-                            this.setImageViewerState(true, url);
-                        }
-                    });
-                }
-            } else {
-                tileset.style.pointSize = 1.0;
-                tileset.style.color = getColorExpression();
-            }
-            this.viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), this.epoch)
-            tileset.style.show = getShowExpression(this.viewerTime, this.linger)
-            tileset.makeStyleDirty()
-
-            emitter.on("lingerTimeChange", (value) => {
-                this.linger = value
+                this.viewerTime = JulianDate.secondsDifference(JulianDate.clone(viewer.clock.currentTime), this.epoch)
                 tileset.style.show = getShowExpression(this.viewerTime, this.linger)
                 tileset.makeStyleDirty()
-            })
 
-            if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
-                const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
-                    if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
-                        previousTime = JulianDate.clone(viewer.clock.currentTime)
-                        this.viewerTime = JulianDate.secondsDifference(previousTime, this.epoch)
-                        tileset.style.show = getShowExpression(this.viewerTime, this.linger)
-                        tileset.makeStyleDirty()
-                    }
+                emitter.on("lingerTimeChange", (value) => {
+                    this.linger = value
+                    tileset.style.show = getShowExpression(this.viewerTime, this.linger)
+                    tileset.makeStyleDirty()
                 })
 
-                for (const [, activeLayerItem] of this.activeLayers.entries()) {
-                    if (activeLayerItem.layer.layerId === layer.layerId) {
-                        activeLayerItem.eventCallback = eventCallback
-                        break
+                if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
+                    const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
+                        if (!JulianDate.equalsEpsilon(previousTime, viewer.clock.currentTime, 1)) {
+                            previousTime = JulianDate.clone(viewer.clock.currentTime)
+                            this.viewerTime = JulianDate.secondsDifference(previousTime, this.epoch)
+                            tileset.style.show = getShowExpression(this.viewerTime, this.linger)
+                            tileset.makeStyleDirty()
+                        }
+                    })
+
+                    for (const [, activeLayerItem] of this.activeLayers.entries()) {
+                        if (activeLayerItem.layer.layerId === layer.layerId) {
+                            activeLayerItem.eventCallback = eventCallback
+                            break
+                        }
                     }
                 }
-            }
-        })
-        .otherwise((_error) => {
-        console.error(_error)
-            window.alert("Error Loading Data")
-            this.errorLayers.push(selectedLayerId)
-            // this.activeLayers.push({ layer: layer })
-        })
+                resolve(tileset);
+            })
+            .otherwise((_error) => {
+                console.error(_error)
+                window.alert("Error Loading Data")
+                this.errorLayers.push(selectedLayerId)
+                // this.activeLayers.push({ layer: layer })
+                reject(_error);
+            })
+        });
     }
 
     handleCZML(layer, selectedLayerId) {
         const dataSource = new CzmlDataSource()
         // eslint-disable-next-line no-loop-func
-        dataSource.load(layer.czmlLocation).then((ds) => {
-            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-            if (layer.type === "track") {
-                let modelReference = ds.entities.getById("Flight Track");
-                modelReference.orientation = new CallbackProperty((time, _result) => {
-                    const position = modelReference.position.getValue(time)
-                    if (this.layerChanged) {
-                        // Run it only once in the initial
-                        this.setCameraDefaultInitialPosition(viewer, position);
-                        this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
-                    }
-                    // needed for flight nav roll pitch and head correction.
-                    let roll = modelReference.properties.roll.getValue(time);
-                    let pitch = modelReference.properties.pitch.getValue(time);
-                    let heading = modelReference.properties.heading.getValue(time);
-                    const hpr = new HeadingPitchRoll(heading, pitch, roll)
-                    return Transforms.headingPitchRollQuaternion(position, hpr)
-                }, false)
+        return new Promise((resolve, reject) => {
+            dataSource.load(layer.czmlLocation).then((ds) => {
+                store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+                if (layer.type === "track") {
+                    let modelReference = ds.entities.getById("Flight Track");
+                    modelReference.orientation = new CallbackProperty((time, _result) => {
+                        const position = modelReference.position.getValue(time)
+                        if (this.layerChanged) {
+                            // Run it only once in the initial
+                            this.setCameraDefaultInitialPosition(viewer, position);
+                            this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
+                        }
+                        // needed for flight nav roll pitch and head correction.
+                        let roll = modelReference.properties.roll.getValue(time);
+                        let pitch = modelReference.properties.pitch.getValue(time);
+                        let heading = modelReference.properties.heading.getValue(time);
+                        const hpr = new HeadingPitchRoll(heading, pitch, roll)
+                        return Transforms.headingPitchRollQuaternion(position, hpr)
+                    }, false)
 
-                this.trackedEntity = ds.entities.getById("Flight Track")
-                // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
-                if (this.trackEntity) {
-                    viewer.trackedEntity = this.trackedEntity
-                    viewer.clock.shouldAnimate = true
-                    viewer.clock.canAnimate = true
+                    this.trackedEntity = ds.entities.getById("Flight Track")
+                    // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
+                    if (this.trackEntity) {
+                        viewer.trackedEntity = this.trackedEntity
+                        viewer.clock.shouldAnimate = true
+                        viewer.clock.canAnimate = true
+                    }
                 }
-            }
-            this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
-            viewer.dataSources.add(ds)
-        }).otherwise((_error) => {
-            console.error(_error)
-            window.alert("Error Loading Data")
-            this.errorLayers.push(selectedLayerId)
-        })
+                this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
+                viewer.dataSources.add(ds)
+                resolve(ds);
+            }).otherwise((_error) => {
+                console.error(_error)
+                window.alert("Error Loading Data")
+                this.errorLayers.push(selectedLayerId)
+                reject(_error);
+            })
+        });
     }
 
     handlePointPrimitive(layer, selectedLayerId) {
         const intvl = 60;
         const promiseG = Promise.resolve(loadData(layer.tileLocation));
-        Promise.all([promiseG]).then(([LightningData]) => {
-            const timingsArray = getTimes(LightningData);
-            let lastTime =this.viewerTime;
-            let timesLen = timingsArray.length;
-            let initialTime = timingsArray[0];
-            let endTime = timingsArray[timesLen - 1];
+        return new Promise((resolve, reject) => {
+            Promise.all([promiseG]).then(([LightningData]) => {
+                const timingsArray = getTimes(LightningData);
+                let lastTime =this.viewerTime;
+                let timesLen = timingsArray.length;
+                let initialTime = timingsArray[0];
+                let endTime = timingsArray[timesLen - 1];
 
-            this.pointsCollection = viewer.scene.primitives.add(new PointPrimitiveCollection());
-            this.activeLayers.push({ layer: layer, cesiumLayerRef: this.pointsCollection })
+                this.pointsCollection = viewer.scene.primitives.add(new PointPrimitiveCollection());
+                this.activeLayers.push({ layer: layer, cesiumLayerRef: this.pointsCollection })
 
-            store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-            /*  Display lightning on clock ticking */
+                store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+                /*  Display lightning on clock ticking */
 
-            if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
+                if (layer.addOnTickEventListener && layer.addOnTickEventListener === true) {
 
-                const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
-                    let previousTime = JulianDate.clone(viewer.clock.currentTime);
+                    const eventCallback = viewer.clock.onTick.addEventListener((_e) => {
+                        let previousTime = JulianDate.clone(viewer.clock.currentTime);
 
-                    const startTime = JulianDate.fromIso8601(layer.date + "T00:00:00Z");
-                    let viewTime = JulianDate.secondsDifference(previousTime, startTime);
-                    let pT60 = lastTime - lastTime % intvl;
-                    let vT60 = viewTime - viewTime % intvl;
+                        const startTime = JulianDate.fromIso8601(layer.date + "T00:00:00Z");
+                        let viewTime = JulianDate.secondsDifference(previousTime, startTime);
+                        let pT60 = lastTime - lastTime % intvl;
+                        let vT60 = viewTime - viewTime % intvl;
 
-                    // remove points at off-interval
-                    if (vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
-                        let indx = timingsArray.indexOf(pT60);
-                        if (indx >= 0) {
-                            this.pointsCollection.removeAll();
-                        }
-                    }
-
-                    // add points on 60s time interval
-                    if (vT60 >= initialTime & vT60 <= endTime) {
-                        let indx = timingsArray.indexOf(vT60);
-                        if (indx >= 0 & vT60 !== pT60) {
-                            let nFScalar = new NearFarScalar(1.e2, 2, 8.0e6, 0.5);
-                            let yellow = new ColorCesium(1.0, 1.0, 0.4, 1);
-                            let cyan = new ColorCesium(0.68, 1.0, 0.55, .6);  //Cesium.Color.CYAN;
-                            let orng = ColorCesium.ORANGE.brighten(0.5, new ColorCesium());
-                            let vec = LightningData[indx];
-                            let lon = vec.Lon;
-                            let lat = vec.Lat;
-                            let rad = vec.Rad;
-                            let pw = 0.6;
-                            let fct = 1 / 15;
-                            let color = yellow;
-                            if (layer.dispType === 'Activity') {
-                                pw = 0.6;
-                                fct = 1 / 4;
-                                color = orng;
-                                rad = vec.count;
+                        // remove points at off-interval
+                        if (vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
+                            let indx = timingsArray.indexOf(pT60);
+                            if (indx >= 0) {
+                                this.pointsCollection.removeAll();
                             }
-                            if (layer.dispType === 'LIntensity') {
-                                pw = .5;
-                                fct = 1 / 100;
-                                color = cyan;
-                                rad = vec.Rad;
-                            }
-
-                            for (let i = 0; i < lon.length; i += 1) {
-                                let pixel = Math.pow(rad[i], pw) * fct
-                                this.pointsCollection.add({
-                                    id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
-                                    show: true,
-                                    position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
-                                    pixelSize: pixel,
-                                    color: color,
-                                    scaleByDistance: nFScalar,
-                                });
-                            };
                         }
-                    }
-                    lastTime = viewTime;
-                });
 
-                for (const [, activeLayerItem] of this.activeLayers.entries()) {
-                    if (activeLayerItem.layer.layerId === layer.layerId) {
-                        activeLayerItem.eventCallback = eventCallback
-                        break
+                        // add points on 60s time interval
+                        if (vT60 >= initialTime & vT60 <= endTime) {
+                            let indx = timingsArray.indexOf(vT60);
+                            if (indx >= 0 & vT60 !== pT60) {
+                                let nFScalar = new NearFarScalar(1.e2, 2, 8.0e6, 0.5);
+                                let yellow = new ColorCesium(1.0, 1.0, 0.4, 1);
+                                let cyan = new ColorCesium(0.68, 1.0, 0.55, .6);  //Cesium.Color.CYAN;
+                                let orng = ColorCesium.ORANGE.brighten(0.5, new ColorCesium());
+                                let vec = LightningData[indx];
+                                let lon = vec.Lon;
+                                let lat = vec.Lat;
+                                let rad = vec.Rad;
+                                let pw = 0.6;
+                                let fct = 1 / 15;
+                                let color = yellow;
+                                if (layer.dispType === 'Activity') {
+                                    pw = 0.6;
+                                    fct = 1 / 4;
+                                    color = orng;
+                                    rad = vec.count;
+                                }
+                                if (layer.dispType === 'LIntensity') {
+                                    pw = .5;
+                                    fct = 1 / 100;
+                                    color = cyan;
+                                    rad = vec.Rad;
+                                }
+
+                                for (let i = 0; i < lon.length; i += 1) {
+                                    let pixel = Math.pow(rad[i], pw) * fct
+                                    this.pointsCollection.add({
+                                        id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
+                                        show: true,
+                                        position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
+                                        pixelSize: pixel,
+                                        color: color,
+                                        scaleByDistance: nFScalar,
+                                    });
+                                };
+                            }
+                        }
+                        lastTime = viewTime;
+                    });
+
+                    for (const [, activeLayerItem] of this.activeLayers.entries()) {
+                        if (activeLayerItem.layer.layerId === layer.layerId) {
+                            activeLayerItem.eventCallback = eventCallback
+                            break
+                        }
                     }
                 }
-            }
-            /*--- mouse functions  ---*/
-            mousePosition(viewer);
-
-        }).catch(_error => {
-            console.error(_error)
-            window.alert("Error Loading Data")
-            this.errorLayers.push(selectedLayerId)
-        })
+                /*--- mouse functions  ---*/
+                mousePosition(viewer);
+                resolve(LightningData);
+            }).catch(_error => {
+                console.error(_error)
+                window.alert("Error Loading Data")
+                this.errorLayers.push(selectedLayerId)
+                reject(_error);
+            })
+        });
     }
 
     handleWMTS(layer, selectedLayerId) {
@@ -455,12 +475,14 @@ class Viz extends Component {
         let imageLayer = new ImageryLayer(imageryProvider)
         viewer.imageryLayers.add(imageLayer)
         this.activeLayers.push({ layer: layer, cesiumLayerRef: imageLayer })
-
-        imageryProvider.readyPromise.then((status) => {
-            if (status) {
-                store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
-            }
-        })
+        return new Promise((resolve, reject) => {
+            imageryProvider.readyPromise.then((status) => {
+                if (status) {
+                    store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+                    resolve(status);
+                }
+            })
+        });
     }
 
     // visualization handlers for different visualization types END
