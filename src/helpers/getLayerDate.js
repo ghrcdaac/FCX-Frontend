@@ -10,19 +10,20 @@ export function extractLayerDate(layerObject){
     return layer.date
 }
 
-export function extractLayerStartDatetime(layerObject){
+export function extractLayerStartDatetime(layerObject, campaign){
   /**
    * For a active layer, returns the start date time of that layer.
    * Also applies special cases.
    * @param {Object} layerObject a layer that is loaded and active.
+   * @param {Object} campaign a campaign meta object containing all the current campaign info.
    * @returns {String} a string representation of datetime of that layer.
    */
   const {layer} = layerObject;
 
   /** Special cases start */
-  if (layer.fieldCampaignName === "GOES-R PLT" && layer.date === "2017-05-17") {
-    // The main GOES-R campaign, which visualizes all the instrument initially.
-    return "2017-05-17T05:45:40Z"
+  if (campaign.defaultCamera && campaign.defaultCamera[layer.date] && campaign.defaultCamera[layer.date].currentTime) {
+    // when the campaign meta has a default camera time.
+    return JulianDate.toIso8601(campaign.defaultCamera[layer.date].currentTime)
   }
   if (layer.start) {
     // when start time of the instrument is coded in the layer info. (say, GOES-R, IMPACTS)

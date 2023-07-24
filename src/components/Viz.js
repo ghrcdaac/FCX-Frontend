@@ -172,7 +172,7 @@ class Viz extends Component {
         }
         setTimeout( ()=> {
             const activeLayer = this.extractPrioritizedLayer(this.activeLayers);
-            this.prioritizedTimelineZoom(activeLayer);
+            this.prioritizedTimelineZoom(activeLayer, campaign);
         }, 6000)
     }
 
@@ -505,9 +505,9 @@ class Viz extends Component {
         return activeLayers[0];
     }
 
-    prioritizedTimelineZoom = (layer) => {
+    prioritizedTimelineZoom = (layer, campaign) => {
         // get start datetime from that layer
-        const layerStartDateTime = extractLayerStartDatetime(layer);
+        const layerStartDateTime = extractLayerStartDatetime(layer, campaign);
         const date = extractLayerDate(layer);
         const campaignStartDateTime = `${date}T00:00:00Z`;
         const campaignEndDateTime = `${date}T23:59:59Z`;
