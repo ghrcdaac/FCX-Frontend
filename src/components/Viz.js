@@ -170,11 +170,11 @@ class Viz extends Component {
             }
         }
         setTimeout( ()=> {
-            const activeLayer = this.extractPrioritizedLayer(this.activeLayers);
-            this.prioritizedTimelineZoom(activeLayer, campaign);
+            const pactiveLayer = this.extractPrioritizedLayer(this.activeLayers);
+            this.prioritizedTimelineZoom(pactiveLayer, campaign);
             if (this.layerChanged) {
                 // after all the layers are loaded and are active, check the need for camera position and set accordingly
-                this.prioritizedCameraPosition(this.activeLayers, campaign);
+                this.prioritizedCameraPosition(pactiveLayer, this.activeLayers, campaign);
             }
         }, 6000)
     }
@@ -317,11 +317,7 @@ class Viz extends Component {
                     viewer.clock.shouldAnimate = true
                     viewer.clock.canAnimate = true
                 }
-            } else if (layer.type === "imagery") {
-                // TODO: clock:: now based off new priority based timeline, modify the below code.
-                if (!this.trackEntity) viewer.zoomTo(ds);
             }
-
             this.activeLayers.push({ layer: layer, cesiumLayerRef: ds })
             viewer.dataSources.add(ds)
         }).otherwise((_error) => {
@@ -499,10 +495,11 @@ class Viz extends Component {
             if (order1 === undefined) return -1;
             if (order2 === undefined) return 1;
             if (order1 === order2) {
-                // TODO: now based off the start time, sort it.
+                // Possible Enhancement: now based off the start time, sort it.
                 // i.e. the one with the later start time, will be pushed to the front.
                 // As it is the interection of the both layers. (wrt time)
                 // and contains data of both the layers.
+                // For now, order is untouched if priority is same.
             }
             return order1 - order2;
         });
@@ -528,48 +525,50 @@ class Viz extends Component {
         viewer.timeline.zoomTo(JulianDate.fromIso8601(campaignStartDateTime), JulianDate.fromIso8601(campaignEndDateTime));
     }
 
-    prioritizedCameraPosition = (activeLayers, campaign) => {
+    prioritizedCameraPosition = (prioritizedActiveLayer, activeLayers, campaign) => {
         // if the campaign meta has a hardcoded inline camera position for a given date, use that
         let layerDate = moment(activeLayers[0].layer.date).format("YYYY-MM-DD")
         if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
             // if desired camera position availabe in layer meta, use that.
-            this.restoreCamera(campaign.defaultCamera[layerDate])
-        } else {
-            // else set the camera position using the flight track czml position.
-            for (const [idx, layerObject] of activeLayers.entries()) {
-                const {layer} = layerObject;
-                // if the layer has default camera hardcoded inline, use it
-                // based on airflight location, place the camera.
-                // If layer display type czml, then use its position to set the camera default position.
-                if (layer.displayMechanism === "czml" && layer.type === "track") {
-                    const {cesiumLayerRef: dataSource} = layerObject;
-                    let modelReference = dataSource.entities.getById("Flight Track");
-                    modelReference.orientation = new CallbackProperty((time, _result) => {
-                        const position = modelReference.position.getValue(time)
-                        if (this.layerChanged) {
-                            // Run it only once in the initial
-                            this.setCameraDefaultInitialPosition(viewer, position);
-                            this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
-                        }
-                        // needed for flight nav roll pitch and head correction.
-                        let roll = modelReference.properties.roll.getValue(time);
-                        let pitch = modelReference.properties.pitch.getValue(time);
-                        let heading = modelReference.properties.heading.getValue(time);
-                        const hpr = new HeadingPitchRoll(heading, pitch, roll)
-                        return Transforms.headingPitchRollQuaternion(position, hpr)
-                    }, false)
-
-                    this.trackedEntity = dataSource.entities.getById("Flight Track")
-                    // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
-                    if (this.trackEntity) {
-                        viewer.trackedEntity = this.trackedEntity
-                        viewer.clock.shouldAnimate = true
-                        viewer.clock.canAnimate = true
+            this.restoreCamera(campaign.defaultCamera[layerDate]);
+            return;
+        }
+        if (prioritizedActiveLayer.layer.displayMechanism === "czml" && prioritizedActiveLayer.layer.type === "imagery") {
+            const {cesiumLayerRef: dataSource} = prioritizedActiveLayer;
+            viewer.zoomTo(dataSource);
+            return;
+        }
+        // else set the camera position using the flight track czml position, if flight track available.
+        for (const [idx, layerObject] of activeLayers.entries()) {
+            const {layer} = layerObject;
+            // based on airflight location, place the camera.
+            // If layer display type czml, then use its position to set the camera default position.
+            if (layer.displayMechanism === "czml" && layer.type === "track") {
+                const {cesiumLayerRef: dataSource} = layerObject;
+                let modelReference = dataSource.entities.getById("Flight Track");
+                modelReference.orientation = new CallbackProperty((time, _result) => {
+                    const position = modelReference.position.getValue(time)
+                    if (this.layerChanged) {
+                        // Run it only once in the initial
+                        this.setCameraDefaultInitialPosition(viewer, position);
+                        this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
                     }
+                    // needed for flight nav roll pitch and head correction.
+                    let roll = modelReference.properties.roll.getValue(time);
+                    let pitch = modelReference.properties.pitch.getValue(time);
+                    let heading = modelReference.properties.heading.getValue(time);
+                    const hpr = new HeadingPitchRoll(heading, pitch, roll)
+                    return Transforms.headingPitchRollQuaternion(position, hpr)
+                }, false)
+
+                this.trackedEntity = dataSource.entities.getById("Flight Track")
+                if (this.trackEntity) {
+                    viewer.trackedEntity = this.trackedEntity
+                    viewer.clock.shouldAnimate = true
+                    viewer.clock.canAnimate = true
                 }
             }
         }
-
     }
 
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
