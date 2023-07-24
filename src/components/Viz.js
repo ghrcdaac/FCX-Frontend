@@ -524,6 +524,46 @@ class Viz extends Component {
         viewer.timeline.zoomTo(JulianDate.fromIso8601(campaignStartDateTime), JulianDate.fromIso8601(campaignEndDateTime));
     }
 
+    prioritizedCameraPosition = (activeLayers, campaign) => {
+        // if the campaign has a hardcoded inline camera position for a given date, use that
+        let layerDate = moment(activeLayers[0].layer.date).format("YYYY-MM-DD")
+        if (campaign.defaultCamera && campaign.defaultCamera[layerDate] && campaign.defaultCamera[layerDate].position) {
+            // if desired camera position availabe in layer meta, use that.
+            this.restoreCamera(campaign.defaultCamera[layerDate])
+        } else {
+            // else set the camera position using the flight track czml position.
+            for (const [idx, layerObject] of activeLayers.entries()) {
+                const {layer} = layerObject;
+                // if the layer has default camera hardcoded inline, use it
+                // based on airflight location, place the camera.
+                // If layer display type czml, then use its position to set the camera default position.
+                if (layer.displayMechanism === "czml") {
+                    const {cesiumLayerRef: dataSource} = layerObject;
+                    if (layer.type === "track") {
+                        let modelReference = dataSource.entities.getById("Flight Track");
+                        modelReference.orientation = new CallbackProperty((time, _result) => {
+                            if (this.layerChanged) {
+                                // Run it only once in the initial
+                                const position = modelReference.position.getValue(time)
+                                this.setCameraDefaultInitialPosition(viewer, position);
+                                this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
+                            }
+                        }, false)
+
+                        this.trackedEntity = dataSource.entities.getById("Flight Track")
+                        // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
+                        if (this.trackEntity) {
+                            viewer.trackedEntity = this.trackedEntity
+                            viewer.clock.shouldAnimate = true
+                            viewer.clock.canAnimate = true
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
         // arrow function to bind this wrt the class and not the callers' this
         if (imageViewerUrl) {
