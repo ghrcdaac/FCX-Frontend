@@ -302,6 +302,7 @@ class Viz extends Component {
                         this.setCameraDefaultInitialPosition(viewer, position);
                         this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
                     }
+                    // needed for flight nav roll pitch and head correction.
                     let roll = modelReference.properties.roll.getValue(time);
                     let pitch = modelReference.properties.pitch.getValue(time);
                     let heading = modelReference.properties.heading.getValue(time);
@@ -544,12 +545,18 @@ class Viz extends Component {
                     const {cesiumLayerRef: dataSource} = layerObject;
                     let modelReference = dataSource.entities.getById("Flight Track");
                     modelReference.orientation = new CallbackProperty((time, _result) => {
+                        const position = modelReference.position.getValue(time)
                         if (this.layerChanged) {
                             // Run it only once in the initial
-                            const position = modelReference.position.getValue(time)
                             this.setCameraDefaultInitialPosition(viewer, position);
                             this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
                         }
+                        // needed for flight nav roll pitch and head correction.
+                        let roll = modelReference.properties.roll.getValue(time);
+                        let pitch = modelReference.properties.pitch.getValue(time);
+                        let heading = modelReference.properties.heading.getValue(time);
+                        const hpr = new HeadingPitchRoll(heading, pitch, roll)
+                        return Transforms.headingPitchRollQuaternion(position, hpr)
                     }, false)
 
                     this.trackedEntity = dataSource.entities.getById("Flight Track")
