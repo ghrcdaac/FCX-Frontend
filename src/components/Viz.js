@@ -125,9 +125,6 @@ class Viz extends Component {
             const layerDate = moment(layer.date).format("YYYY-MM-DD") //todo change to moment.utc?
             const cesiumDate = JulianDate.toDate(viewer.clock.currentTime)
             const viewerDate = moment.utc(cesiumDate).format("YYYY-MM-DD")
-            
-            const viewerStart = layer.start && addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
-            const viewerEnd = layer.end && addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
 
             if (layerDate !== viewerDate) {
                 // i.e. when layers is getting changed (currentLayerDate vs OldLayerDate)
