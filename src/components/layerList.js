@@ -62,7 +62,7 @@ export default function LayerList({ campaign }) {
           <div style={{width:'25%', marginBottom:'50px'}}>
           <Switch
               edge="end"
-              onChange={changeHandler}
+              onChange={lightningImageViewerChangeHandler}
             />
           </div>
         </div>
@@ -72,6 +72,7 @@ export default function LayerList({ campaign }) {
     }
 
     for (const [layerIndex, layerValue] of layerItems.items.entries()) {
+      // icons and information gathering for layer card; needed for layerlist sidebar and layer legend
       let icon = <BsLayers />
 
       let legendImage
@@ -141,6 +142,7 @@ export default function LayerList({ campaign }) {
         layerVariableAvailability = <span style={{ fontSize: 12 }}>{layerAvailability}</span>
       }
 
+      // with the gathered information, populate and push the layer card to the layers array.
       layers.push(
         <Card key={"primary-card-" + layerIndex} variant="outlined">
           <ListItem key={"primary-item-" + layerIndex}>
@@ -177,7 +179,6 @@ export default function LayerList({ campaign }) {
       expanded = true
     }
 
-    // TODO: Instead of pushing image viewer directly to the layerlist, populate the image viewer details to the layers dictonary or layer generator
     dates.push(
       <Accordion key={"panel" + itemIndex} defaultExpanded={expanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" key={"summary-panel" + itemIndex}>
@@ -201,7 +202,7 @@ export default function LayerList({ campaign }) {
   return dates
 }
 
-const changeHandler = (e) =>{
+const lightningImageViewerChangeHandler = (e) =>{
   imageToggle = !imageToggle;
   if(imageToggle){
     geoJson.fieldCampaignImages.forEach((element)=>{
