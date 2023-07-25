@@ -25,9 +25,7 @@ import {BsCardImage} from 'react-icons/bs'
 
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 import { Dock, viewer } from "./dock"
-import Modal from "./Modal"
-import Marker from './Marker'
-import geoJson from './chicago-parks2.json'
+import geoJson from '../data/chicago-parks2.json'
 
 const useStyles = makeStyles((theme) => ({
   root: {

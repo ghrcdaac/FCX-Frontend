@@ -19,8 +19,6 @@ import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
 
 import Modal from "./Modal"
-import Marker from './Marker'
-import geoJson from './chicago-parks2.json'
 
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
