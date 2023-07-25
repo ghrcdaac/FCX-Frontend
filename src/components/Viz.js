@@ -488,6 +488,9 @@ class Viz extends Component {
 
     // visualization handlers for different visualization types END
 
+
+    // Priority based cesium clock, timeline zoom and camera position handler START
+
     extractPrioritizedLayer = (activeLayers) => {
         /**
          * This function prioritizes the timeline zooming.
@@ -594,6 +597,11 @@ class Viz extends Component {
         }
     }
 
+    // Priority based cesium clock, timeline zoom and camera position handler END
+
+
+    // Utils START
+
     setImageViewerState = (showImageViewer, imageViewerUrl) => {
         // arrow function to bind this wrt the class and not the callers' this
         if (imageViewerUrl) {
@@ -661,7 +669,9 @@ class Viz extends Component {
             heading: heading + cMath.toRadians(modelCorrectionOffsets.heading)
         }
     }
-    
+
+    // Utils END
+
     componentDidMount() {
         /** Fetch the campaign **/
         const campaign = (() => this.props.campaign)()
