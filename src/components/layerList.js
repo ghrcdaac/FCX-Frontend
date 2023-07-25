@@ -46,28 +46,30 @@ export default function LayerList({ campaign }) {
     const layerItems = itemValue
 
     const layers = []
+
     // special imageviewer layer for 2017-05-17 GOES-R field campaign
     if (campaign.title === 'GOES-R PLT Field Campaign' && layerItems.date === '2017-05-17') {
       layers.push((
-        <Card key={"primary-card-Image_viewer_2017-05-17"} variant="outlined">
-        <div style={{display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', height:'100px', width:'100%'}}>
-        <div style={{height:'100%',display:'flex', width:'90%',justifyContent:'center', alignItems:'center', textAlign:'center'}}>
-          <div style={{width:'75%'}}>
-            <div style={{display:'flex', marginTop:'1rem', marginLeft:'20px'}}>
-              <div style={{marginTop:'1rem', marginRight:'30px'}}><BsCardImage /></div>
-              <div style={{fontSize:'20px', marginTop:'10px'}}>Image Viewer</div>
-            </div>
-            <h6>Toggle to enable/disable Markers</h6>
-          </div>
-          <div style={{width:'25%', marginBottom:'50px'}}>
-          <Switch
-              edge="end"
-              onChange={lightningImageViewerChangeHandler}
-            />
-          </div>
-        </div>
-      </div>
-      </Card>)
+          <Card key={"primary-card-Image_viewer_2017-05-17"} variant="outlined">
+              <ListItem key={"primary-item-Image_viewer_2017-05-17"}>
+                <ListItemIcon><BsCardImage /></ListItemIcon>
+                <ListItemText id={`primary-list-label-Image_viewer_2017-05-17`} primary="Image Viewer" />
+                <ListItemSecondaryAction>
+                  <Switch
+                    edge="end"
+                    onChange={lightningImageViewerChangeHandler}
+                  />
+                </ListItemSecondaryAction>
+              </ListItem>
+              <ListItem key={"secondary-item-variable-Image_viewer_2017-05-17"}>
+                <ListItemText id={`secondary-list-label-Image_viewer_2017-05-17`} primary={
+                  <span style={{ fontSize: 12 }}>
+                    Toggle to enable/disable Markers
+                  </span>
+                }></ListItemText>
+              </ListItem>
+            </Card>
+        )
       )
     }
 
