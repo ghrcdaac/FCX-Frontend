@@ -208,7 +208,11 @@ class Viz extends Component {
 
                 this.epoch = JulianDate.fromIso8601(tileset.properties.epoch)
                 tileset.style = new Cesium3DTileStyle()
-                if (layer.displayName === "Cloud Radar System") {
+                if (layer.fieldCampaignName === "IMPACTS") {
+                    tileset.style.pointSize = 4.0;
+                    // no need for color expression, as the color is already in the 3d tile json.
+                    // if the color expression is added, it will not find value for clamp inside color expression, and hence throw error.
+                } else if (layer.displayName === "Cloud Radar System") {
                     tileset.style.pointSize = 2.0;
                     tileset.style.color = getColorExpression();
                 } else if (layer.displayName === "Cloud Physics LiDAR") {
