@@ -12,7 +12,7 @@ export default function flighttrack (date, index) {
         layerId: `${date}-track-hs3-${index}-global_hawk`,
         shortName: "flightGlobalHawk",
         displayName: "Flight Track Global Hawk",
-        czmlLocation: `${newFieldCampaignsBaseUrl}/Hs3/instrument-processed-data/nav/hs3_navgh_N871NA_IWG1_${date.replace(/-/g,'')}.czml`,
+        czmlLocation: `${newFieldCampaignsBaseUrl}/Hs3/instrument-processed-data/nav/hs3_navgh_IWG1_${date.replace(/-/g,'')}.czml`,
         date,
         type: "track",
         platform: "air",
