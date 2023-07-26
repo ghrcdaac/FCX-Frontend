@@ -227,38 +227,40 @@ class Viz extends Component {
                     tileset.style.pointSize = 5.0;
                     // add pin to visualize the skewT
                     //location
-                    let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
-                    let entity = ds && ds.entities.getById("Flight Track");
-                    if (entity) {
-                        let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
-                        JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
-                        let positionProperty = entity.position;
-                        const position = positionProperty.getValue(timeOfDrop)
-                        // Instead, getting position directly from the 3dtile json would be much faster.
-                        // If critical information could be added directly to the json header, when the 3d tile is created.
+                    setTimeout(() => {
+                        let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
+                        let entity = ds && ds.entities.getById("Flight Track");
+                        if (entity) {
+                            let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
+                            JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
+                            let positionProperty = entity.position;
+                            const position = positionProperty.getValue(timeOfDrop)
+                            // Instead, getting position directly from the 3dtile json would be much faster.
+                            // If critical information could be added directly to the json header, when the 3d tile is created.
 
-                        // add pin
-                        let date = tileset.properties.epoch.split("T")[0]
-                        let parsedDate = date.replace(/-/g,'');
-                        const pinBuilder = new PinBuilder();
-                        let pin = viewer.entities.add({
-                            name: `cpexawDropsonde-${parsedDate}`,
-                            position: position,
-                            billboard: {
-                            image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
-                            verticalOrigin: VerticalOrigin.BOTTOM,
-                            },
-                        });
-                        this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
-                        // add event handler
-                        viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
-                            if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
-                                let date = selectedEntity.name.split("-")[1];
-                                let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
-                                this.setImageViewerState(true, url);
-                            }
-                        });
-                    }
+                            // add pin
+                            let date = tileset.properties.epoch.split("T")[0]
+                            let parsedDate = date.replace(/-/g,'');
+                            const pinBuilder = new PinBuilder();
+                            let pin = viewer.entities.add({
+                                name: `cpexawDropsonde-${parsedDate}`,
+                                position: position,
+                                billboard: {
+                                image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                                verticalOrigin: VerticalOrigin.BOTTOM,
+                                },
+                            });
+                            this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
+                            // add event handler
+                            viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
+                                if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
+                                    let date = selectedEntity.name.split("-")[1];
+                                    let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
+                                    this.setImageViewerState(true, url);
+                                }
+                            });
+                        }
+                    }, 1000);
                 } else {
                     tileset.style.pointSize = 1.0;
                     tileset.style.color = getColorExpression();
