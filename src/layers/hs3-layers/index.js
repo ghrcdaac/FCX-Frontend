@@ -1,6 +1,6 @@
 import { campaign, logo, description, dois, links, legends, defaultCamera, instrumentLayers } from "./components";
 
-const olympex_campaign = {
+const hs3_campaign = {
     title: `${campaign} Field Campaign`,
     logo: logo,
     description: description,
@@ -11,4 +11,4 @@ const olympex_campaign = {
     layers: instrumentLayers
 }
 
-export default olympex_campaign
+export default hs3_campaign
