@@ -314,11 +314,6 @@ class Viz extends Component {
                     let modelReference = ds.entities.getById("Flight Track");
                     modelReference.orientation = new CallbackProperty((time, _result) => {
                         const position = modelReference.position.getValue(time)
-                        if (this.layerChanged) {
-                            // Run it only once in the initial
-                            this.setCameraDefaultInitialPosition(viewer, position);
-                            this.layerChanged = false; // As the default camera posn is changed, and only want to happen it in the initial
-                        }
                         // needed for flight nav roll pitch and head correction.
                         let roll = modelReference.properties.roll.getValue(time);
                         let pitch = modelReference.properties.pitch.getValue(time);
@@ -326,10 +321,9 @@ class Viz extends Component {
                         const hpr = new HeadingPitchRoll(heading, pitch, roll)
                         return Transforms.headingPitchRollQuaternion(position, hpr)
                     }, false)
-
-                    this.trackedEntity = ds.entities.getById("Flight Track")
-                    // this.trackedEntity.viewFrom = new Cartesian3(-30000, -70000, 50000)
+                    this.trackedEntity = dataSource.entities.getById("Flight Track") // entity to be tracked.
                     if (this.trackEntity) {
+                        // if track airplane is checked, then keep tracking the airplane.
                         viewer.trackedEntity = this.trackedEntity
                         viewer.clock.shouldAnimate = true
                         viewer.clock.canAnimate = true
@@ -590,13 +584,6 @@ class Viz extends Component {
                 const hpr = new HeadingPitchRoll(heading, pitch, roll)
                 return Transforms.headingPitchRollQuaternion(position, hpr)
             }, false)
-
-            this.trackedEntity = dataSource.entities.getById("Flight Track")
-            if (this.trackEntity) {
-                viewer.trackedEntity = this.trackedEntity
-                viewer.clock.shouldAnimate = true
-                viewer.clock.canAnimate = true
-            }
             return
         }
         // else zoom to the prioritized layer
@@ -626,7 +613,7 @@ class Viz extends Component {
         }
     }
 
-    setCameraDefaultInitialPosition(viewer, position) {
+    setCameraDefaultInitialPosition = (viewer, position) => {
     /**
     * Sets the camera to the initial position of the flight aircraft entity and sets the reference frame to view it from orthographic view.
     * Immediately untracks the aircraft entity. This leave the reference frame to desired position while allowing the mouse movement.
@@ -640,6 +627,7 @@ class Viz extends Component {
             transform,
             new Cartesian3(20000.0, -20000.0, 20000.0)
         );
+        viewer.trackedEntity = this.trackEntity; //just making tracked entity null, will not work. Need to set it to some other entity first.
         viewer.trackedEntity = null;
         return;
     }
