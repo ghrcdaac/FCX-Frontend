@@ -1,25 +1,16 @@
-import APICaller from "./apiCaller.js";
+let coordType = "Second";
+let dataType = "ATB_1064";
 
-export async function fetchCPLData(datetime="2017-04-27", params="0", pagesize="200", pageno="1", density="1") {
-/** 
-* CPL data handler
-* @summary Takes the necessary common data from the input fields and fills some of the instrument specific fields, needed for the CPL data fetch.
-* @param {string} datetime - The date time of the data collected by CPL instrument
-* @param {number} pagesize- The data elements per page.
-* @param {number} pageno - The page from which data is to be fetched.
-* @param {number} density - The amount of data that is sampled out of the page. 100%, 50% or 25%
-* @return {object} with keys data and labels
-*/
-    let coordType = "Second";
-    let dataType = "ATB_1064";
-    let error = false;
-    let data = {}
-    let labels = {}
-
-    const apiCaller = new APICaller();
-    apiCaller.setHeader('tUS7oors8qawUhT7c8QBn5OXLzH7TPgs6pmiuK2t');
-
-    let url = "https://kz1ey7qvul.execute-api.us-east-1.amazonaws.com/default/sanjog-histogram-preprocessing-fcx-v1";
+export function requestBodyCPL(datetime="2017-04-27", params="0", pagesize="200", pageno="1", density="1") {
+    /**
+    * CPL data handler
+    * @summary Takes the necessary common data from the input fields and fills some of the instrument specific fields, needed for the CPL data fetch.
+    * @param {string} datetime - The date time of the data collected by CPL instrument
+    * @param {number} pagesize- The data elements per page.
+    * @param {number} pageno - The page from which data is to be fetched.
+    * @param {number} density - The amount of data that is sampled out of the page. 100%, 50% or 25%
+    * @return {object} with keys data and labels
+    */
     let body = {
                 "data": {
                     "type": "data_pre_process_request",
@@ -35,8 +26,11 @@ export async function fetchCPLData(datetime="2017-04-27", params="0", pagesize="
                         }
                     }
                 }
-            
-    let rawData = await apiCaller.post(url, body);
+    return body;
+}
+
+export function dataExtractorCPL(rawData) {
+    let error = false, data = [], labels= [];
     if(rawData && rawData["data"] && rawData["data"]["errors"]) {
         error = true;
     } else {
@@ -62,49 +56,48 @@ export async function fetchCPLData(datetime="2017-04-27", params="0", pagesize="
     }
 }
 
-export async function fetchCPLparams(datetime="2017-04-27") {
+export function requestBodyCPLparams(datetime="2017-04-27") {
     /** 
     * CPL param handler
     * @summary fetches coord value, needed for the CPL data fetch.
     * @param {string} datetime - The date time of the data collected by CPL instruments
     * @return {object} with keys data and labels
     */
-        let coordType = "Second";
-        let error = false;
-        let params = [];
-
-        const apiCaller = new APICaller();
-        apiCaller.setHeader('tUS7oors8qawUhT7c8QBn5OXLzH7TPgs6pmiuK2t');
-    
-        let url = "https://kz1ey7qvul.execute-api.us-east-1.amazonaws.com/default/sanjog-histogram-preprocessing-fcx-v1";
-        let body = {
-                    "data": {
-                        "type": "data_pre_process_request",
-                        "attributes": {
-                                "instrument_type" : "CPL",
-                                "datetime" : datetime,
-                                "coord_type" : coordType,
-                                "data_type" : "",
-                                "params" : "None",
-                                "pageno" : "None",
-                                "pagesize" : "None",
-                                "density": "None",
-                            }
+    let coordType = "Second";
+    let body = {
+                "data": {
+                    "type": "data_pre_process_request",
+                    "attributes": {
+                            "instrument_type" : "CPL",
+                            "datetime" : datetime,
+                            "coord_type" : coordType,
+                            "data_type" : "",
+                            "params" : "None",
+                            "pageno" : "None",
+                            "pagesize" : "None",
+                            "density": "None",
                         }
                     }
-        let rawData = await apiCaller.post(url, body);
-        if(rawData.data.errors) {
-            error = true;
-        } else {
-            let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
-            params = preprocessedData["coordinate_value"];
-        }
-        return {
-            params: params.filter(onlyUnique),
-            error
-        }
+                }
+    return body;
+}
+
+export function dataExtractorCPLparams(rawData) {
+    let error = false, params = [];
+    if(rawData.data.errors) {
+        error = true;
+    } else {
+        let preprocessedData = JSON.parse(rawData["data"]["data"]["attributes"]["data"])
+        params = preprocessedData["coordinate_value"];
     }
+    return {
+        params: params.filter(onlyUnique),
+        error
+    }
+}
+
+// utils
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
-    }
+}
