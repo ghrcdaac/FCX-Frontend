@@ -17,6 +17,7 @@ import Settings from "./settings"
 import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
+import InstrumentsHistogram from "./instrumentsHistogram";
 
 import Modal from "./Modal"
 
@@ -89,95 +90,110 @@ let getCampaignTab = (campaign) => {
   }
 }
 
-let box = (campaign) => ({
-  dockbox: {
-    mode: "horizontal",
+let box = (campaign) => {
+  const box = {
+    dockbox: {
+      mode: "horizontal",
 
-    children: [
-      {
-        mode: "vertical",
+      children: [
+        {
+          mode: "vertical",
 
-        children: [
-          {
-            tabs: [
-              {...getCampaignTab(campaign), id: "tabCampaign" },
-              {
-                title: (
-                  <div>
-                    <FiInfo /> Links{" "}
-                  </div>
-                ),
-                id: "tabCampaignLinks",
-                content: <CampaignInfoLinks campaign={campaign} />,
-              },
-            ],
-          },
-          {
-            size: 550,
-            tabs: [
-              {
-                title: (
-                  <div>
-                    <FiLayers /> Display{" "}
-                  </div>
-                ),
-                id: "tabDisplay",
-                content: <LayerList campaign={campaign} />,
-              },
-              {
-                title: (
-                  <div>
-                    <FiLink2 /> Data{" "}
-                  </div>
-                ),
-                id: "tabData",
-                content: <DOIList campaign={campaign}/>,
-              },
-              {
-                title: (
-                  <div>
-                    <FiSettings /> Settings{" "}
-                  </div>
-                ),
-                id: "tabSettings",
-                content: <Settings />,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        size: 1000,
-        panelLock: true,
-        tabs: [
-          {
-            title: (
-              <div>
-                <FiGlobe /> Data Viewer{" "}
-              </div>
-            ),
-            id: "tabCesium",
-            content: (
-              <div>
-                <span className="gpuName">Detected GPU: {getGPUInfo().gpuName}</span>
-                <div id="cesiumContainer"></div>
-              </div>
-            ),
-          },
-          {
-            title: (
-              <div>
-                <MdTimeline /> Timeline{" "}
-              </div>
-            ),
-            id: "tabTimeline",
-            content: <FcxTimeline campaign={campaign} />,
-          },
-        ],
-      },
-    ],
-  },
-})
+          children: [
+            {
+              tabs: [
+                {...getCampaignTab(campaign), id: "tabCampaign" },
+                {
+                  title: (
+                    <div>
+                      <FiInfo /> Links{" "}
+                    </div>
+                  ),
+                  id: "tabCampaignLinks",
+                  content: <CampaignInfoLinks campaign={campaign} />,
+                },
+              ],
+            },
+            {
+              size: 550,
+              tabs: [
+                {
+                  title: (
+                    <div>
+                      <FiLayers /> Display{" "}
+                    </div>
+                  ),
+                  id: "tabDisplay",
+                  content: <LayerList campaign={campaign} />,
+                },
+                {
+                  title: (
+                    <div>
+                      <FiLink2 /> Data{" "}
+                    </div>
+                  ),
+                  id: "tabData",
+                  content: <DOIList campaign={campaign}/>,
+                },
+                {
+                  title: (
+                    <div>
+                      <FiSettings /> Settings{" "}
+                    </div>
+                  ),
+                  id: "tabSettings",
+                  content: <Settings />,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          size: 1000,
+          panelLock: true,
+          tabs: [
+            {
+              title: (
+                <div>
+                  <FiGlobe /> Data Viewer{" "}
+                </div>
+              ),
+              id: "tabCesium",
+              content: (
+                <div>
+                  <span className="gpuName">Detected GPU: {getGPUInfo().gpuName}</span>
+                  <div id="cesiumContainer"></div>
+                </div>
+              ),
+            },
+            {
+              title: (
+                <div>
+                  <MdTimeline /> Timeline{" "}
+                </div>
+              ),
+              id: "tabTimeline",
+              content: <FcxTimeline campaign={campaign} />,
+            }
+          ],
+        },
+      ],
+    },
+  }
+  // Histogram data available only for GOES-R field campaign for now.
+  if (campaign.title && campaign.title.includes("GOES-R")) {
+    box.dockbox.children[1].tabs.push({
+      title: (
+        <div>
+          <FiLayers /> Histogram{" "}
+        </div>
+      ),
+      id: "histogram",
+      content: <InstrumentsHistogram/>,
+    });
+  }
+  return box;
+}
 
 let createViewer = () => {
   if (!checkPath()) return
