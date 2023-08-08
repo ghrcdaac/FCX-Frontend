@@ -60,7 +60,7 @@ class LayerGenerator {
         * @return {object} A structured instruments layer.
         */
         // add new instrument dates here, to only get layers for the unique dates.
-        return this.sortedUniqueDates([...this.sortedOverlappingDates(this.globalHawk_dates, this.cpl_dates), ...this.sortedOverlappingDates(this.globalHawk_dates, this.hiwrap_dates)]).map(date => ({
+        return this.sortedUniqueDates([...this.hiwrap_dates, ...this.cpl_dates]).map(date => ({
             date,
             items: this.instruments.map((instrum, index) => this.getInstrumentsItem(date, instrum, index)).filter(n => n)
         }));

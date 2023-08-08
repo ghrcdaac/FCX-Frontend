@@ -217,7 +217,7 @@ class Viz extends Component {
                     tileset.style.color = getColorExpression();
                 } else if (layer.displayName === "Cloud Physics LiDAR") {
                     tileset.style.pointSize = 4.0;
-                    if (layer.fieldCampaignName === "Olympex") {
+                    if (layer.fieldCampaignName === "Olympex" || layer.fieldCampaignName === "HS3") {
                         tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
                         // tileset.pointCloudShading.attenuation = true;
                     }
