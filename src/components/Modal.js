@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom'
 //import ReactPlayer from 'react-player';
 //import geoJson from '../components/common/mb-map-explore/chicago-parks2.json';
 // import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import geoJson from './chicago-parks2.json'
+import geoJson from '../data/chicago-parks2.json'
 import ReactPlayer from 'react-player';
 
 const ModalBackground = styled.div`
