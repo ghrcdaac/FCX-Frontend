@@ -3,7 +3,7 @@
   TODO: In future make this customizable as more field campaign data is prepared to be shown using FCX
  */
 
-  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl } from "../config"
+  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl } from "../../config"
 
   const layers_2017_05_17 = [
     {
