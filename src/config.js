@@ -18,7 +18,10 @@ const mapboxUrl = "https://api.mapbox.com/styles/v1/" + mapboxUsername + "/" + m
 const cesiumDefaultAccessToken = process.env.REACT_APP_BAMBOO_CESIUM_DEFAULT_TOKEN 
 const supportEmail = process.env.REACT_APP_BAMBOO_GHRC_SUPPORT_EMAIL || "support-ghrc@earthdata.nasa.gov"
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl }
+const histogramToolApiUrl = process.env.REACT_APP_HISTOGRAM_TOOL_API
+const histogramToolApikey = process.env.REACT_APP_HISTOGRAM_TOOL_API_KEY
+
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, histogramToolApiUrl, histogramToolApikey }
 
 /*
   dataBaseUrl -  (S3) URL root address where the data resides

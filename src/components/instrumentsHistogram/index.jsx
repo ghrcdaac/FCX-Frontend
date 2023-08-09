@@ -21,10 +21,15 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import {HistogramVizBox} from "./components";
-import handleFEGSdata from "./helper/handleFEGSdata";
-import handleLIPdata from "./helper/handleLIPdata";
-import {fetchCRSData as handleCRSdata, fetchCRSparams} from "./helper/handleCRSdata";
-import {fetchCPLData as handleCPLdata, fetchCPLparams} from "./helper/handleCPLdata";
+import {requestBodyFEGS} from "./helper/handleFEGSdata";
+import {requestBodyLIP} from "./helper/handleLIPdata";
+import {requestBodyCRS, requestBodyCRSparams} from "./helper/handleCRSdata";
+import {requestBodyCPL, requestBodyCPLparams} from "./helper/handleCPLdata";
+
+import { Resources, Post, Reset } from "./redux/index";
+
+import {StepUp} from "./helper/stepUp";
+let su = new StepUp();
 
 ChartJS.register(
 CategoryScale,
@@ -34,30 +39,6 @@ Title,
 Tooltip,
 Legend
 );
-
-async function InstrumentsHandler(instrumentType, datetime, params, pagesize, pageno, density) {
-    /**
-     * InstrumentType: We can easily get the instrument type from local state.
-     * datetime: value needs to be fetched. Hard without redux thunk! Think!! actually wont have used redux thunk for this. would directly set the change on the redux state.
-     *           So, it wont be dependent on the GHRC4145 merge
-     * coordType: put it constant for now, later can make it selectable (using dropdown).
-     * dataType: put it constant for now, later can make it selectable (using dropdown).
-     * params: varies according to the instrument type. For certain insturments, need to fetch another set of data. Use that fetched data for a select option.
-     * pagesize: a text field to edit the page size.
-     * pageno: a next button, to fetch next set of paged data.
-     * density: a stepwise slider to set the density value.
-     */
-    if (instrumentType == "FEGS") {
-        return handleFEGSdata(datetime, pagesize, pageno, density);
-    } else if (instrumentType == "LIP") {
-        return handleLIPdata(datetime, pagesize, pageno, density);
-    } else if (instrumentType == "CRS") {
-        return handleCRSdata(datetime, params, pagesize, pageno, density);
-    } else if (instrumentType == "CPL") {
-        return handleCPLdata(datetime, params, pagesize, pageno, density);
-    }
-    return handleFEGSdata(datetime, pagesize, pageno, density);
-}
 
 const densityMarks = [
     {
@@ -74,6 +55,8 @@ const densityMarks = [
     }
   ];
 
+const validDensites = densityMarks.map((elem) => elem.value);
+
 class InstrumentsHistogram extends Component {
     /**
     * A base container class to display various histograms.
@@ -83,19 +66,15 @@ class InstrumentsHistogram extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            anchorEl: null,
+            anchorEl: undefined,
             selectedInstrument: "FEGS",
             pagesize: 500,
             pageno: 1,
-            density: 1,
+            density: 0.5,
             // below depend on the type of instrument selected.
             coordType: "Second", // const thing for a instrument type, for now. Later make it selectable???
             dataType: "ATB_1064", // const thing for a instrument type, for now. Later make it selectable???
-            params: null,
-            data: null,
-            labels: null,
-            paramsList: null,
-            error: false
+            params: undefined
         };
     }
 
@@ -121,11 +100,32 @@ class InstrumentsHistogram extends Component {
         let datetime = this.props.selectedDate;
         if (selectedInstrument && datetime && params && pageno && pagesize && density && !error) {
             // only fetch histogram data, once all the necessary parameters for api call are ready
-            InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density).then((res)=> {
-                let {data, labels} = res;
-                this.setState({data, labels});
-            });
+            this.InstrumentsHandler(selectedInstrument, datetime, params, pagesize, pageno, density)
         }
+    }
+
+    InstrumentsHandler = async (instrumentType, datetime, params, pagesize, pageno, density) => {
+        /**
+         * InstrumentType: We can easily get the instrument type from local state.
+         * datetime: value needs to be fetched. Hard without redux thunk! Think!! actually wont have used redux thunk for this. would directly set the change on the redux state.
+         *           So, it wont be dependent on the GHRC4145 merge
+         * coordType: put it constant for now, later can make it selectable (using dropdown).
+         * dataType: put it constant for now, later can make it selectable (using dropdown).
+         * params: varies according to the instrument type. For certain insturments, need to fetch another set of data. Use that fetched data for a select option.
+         * pagesize: a text field to edit the page size.
+         * pageno: a next button, to fetch next set of paged data.
+         * density: a stepwise slider to set the density value.
+         */
+        if (instrumentType === "FEGS") {
+            Resources.body = requestBodyFEGS(datetime, pagesize, pageno, density);
+        } else if (instrumentType === "LIP") {
+            Resources.body = requestBodyLIP(datetime, pagesize, pageno, density);
+        } else if (instrumentType === "CRS") {
+            Resources.body = requestBodyCRS(datetime, params, pagesize, pageno, density);
+        } else if (instrumentType === "CPL") {
+            Resources.body = requestBodyCPL(datetime, params, pagesize, pageno, density);
+        }
+        this.props.Post(Resources);
     }
 
     handleInstrumentSelectionClick = (event) => {
@@ -137,22 +137,13 @@ class InstrumentsHistogram extends Component {
         if (["CRS", "CPL"].includes(selectedInstrument)) {
             // if the selected instrument is CRS or CPL, fetch the paramslist and set params to null (do not fetch the histogram data yet!!).
             this.setState({params: null}, function() {
-                if (selectedInstrument == "CRS") fetchCRSparams(this.props.selectedDate).then((data) => {
-                    // error handling incase no data for given date
-                    if(!data["error"]) {
-                        this.setState({paramsList: data["params"]});
-                    } else {
-                        this.setState({error: true});
-                    }
-                });
-                else if (selectedInstrument == "CPL") fetchCPLparams(this.props.selectedDate).then((data) => {
-                    // error handling incase no data for given date
-                    if(!data["error"]) {
-                        this.setState({paramsList: data["params"]});
-                    } else {
-                        this.setState({error: true});
-                    }
-                });
+                if (selectedInstrument === "CRS") {
+                    Resources.body = requestBodyCRSparams(this.props.selectedDate);
+                    this.props.Post(Resources);
+                } else if (selectedInstrument === "CPL") {
+                    Resources.body = requestBodyCPLparams(this.props.selectedDate);
+                    this.props.Post(Resources);
+                }
             });
         } else if (["FEGS", "LIP"].includes(selectedInstrument)) {
         // if the selected instrument is FEGS, LIP, set the param to "None" as required by the api call for these instruments (can fetch for histogram viz). 
@@ -165,13 +156,10 @@ class InstrumentsHistogram extends Component {
     handleInstrumentSelectionSaveAndClose = (event) => {
         // after a new instrument is selected for the histogram viz, do the following steps.
         event.stopPropagation();
+        this.props.Reset(Resources);
         this.handleDefaultParamsValue(event.target.innerHTML);
         this.setState({selectedInstrument: event.target.innerHTML,
-            anchorEl: null,
-            data: null,
-            labels: null,
-            paramsList: null,
-            error: false
+            anchorEl: null
         }, function () { return this.fetchDataAndUpdateState() });
     };
 
@@ -223,7 +211,10 @@ class InstrumentsHistogram extends Component {
 
     handleDensity = (event, density) => {
         event.stopPropagation();
-        this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
+        // for a unique density value, only trigger once
+        if ((validDensites.includes(density)) && (density != this.state.density)){
+            this.setState({ density }, function () { return this.fetchDataAndUpdateState() });
+        }
     };
 
     render() {
@@ -261,7 +252,7 @@ class InstrumentsHistogram extends Component {
                         Quantization
                         </Typography>
                         <Slider
-                        defaultValue={0.50}
+                        defaultValue={this.state.density}
                         aria-labelledby="discrete-slider-small-steps"
                         step={null}
                         marks={densityMarks}
@@ -269,7 +260,7 @@ class InstrumentsHistogram extends Component {
                         max={1.0}
                         valueLabelDisplay="auto"
                         onChange={this.handleDensity}
-                        label="Desnsity"
+                        label="Density"
                         />
                     </div>
                     <TextField
@@ -293,26 +284,27 @@ class InstrumentsHistogram extends Component {
                             id="outlined-select-currency"
                             select
                             label= {`${(this.state.selectedInstrument === "CRS") ? "range" : "Second"} (z-axis)`} // if crs, range. if cpl, Second
-                            value={this.state.params}
+                            value={this.state.params || ""}
                             onChange={this.handleParamsSelection}
                             // helperText="Please select params"
                             variant="outlined"
                             style={{width: "100%"}}
                             >
-                            {this.state.paramsList && this.state.paramsList.length > 0 && this.state.paramsList.map((elem) => (
+                            {(this.props.paramsList && this.props.paramsList.length > 0) ? this.props.paramsList.map((elem) => (
                                 <MenuItem key={elem} value={String(elem)}>
-                                {elem}
+                                    {su.steppedRep(elem)}
                                 </MenuItem>
-                            ))}
+                            )) : (<MenuItem key="1" value=""></MenuItem>)
+                            }
                         </TextField>
                     </div>
                 }
             </div>
-            {(!this.state.error && this.state.data && this.state.labels) && <HistogramVizBox labels={this.state.labels} data={this.state.data}/>}
-            {(!this.state.error && !this.state.params && !this.state.paramsList) && <p>"Loading params..."</p>}
-            {(!this.state.error && this.state.paramsList && !this.state.params) && <p>"Select params to visualize histogram."</p>}
-            {(!this.state.error && this.state.params && !this.state.data && !this.state.labels) && <p>"Loading..."</p>}
-            {(this.state.error) && <p>"No instrument data for selected date"</p>}
+            {(!this.props.error && (Object.keys(this.props.data).length > 0) && Object.keys(this.props.labels).length > 0) && <HistogramVizBox labels={this.props.labels} data={this.props.data}/>}
+            {(!this.props.error && !this.state.params && !(this.props.paramsList.length > 0)) && <p>"Loading params..."</p>}
+            {(!this.props.error && (this.props.paramsList.length > 0) && !this.state.params) && <p>"Select params to visualize histogram."</p>}
+            {(!this.props.error && this.state.params && !(Object.keys(this.props.data).length > 0) && !(Object.keys(this.props.labels).length > 0)) && <p>"Loading..."</p>}
+            {(this.props.error) && <p>"No instrument data for selected date"</p>}
         </div>
       )
     }
@@ -322,6 +314,8 @@ export default connect((state) => {
     // map redux state to props
     let selectedLayer = state.selectedLayers[0];
     let selectedLayerDate = selectedLayer && selectedLayer.slice(0, 10);
-    return {selectedDate: selectedLayerDate}
-}, null)(InstrumentsHistogram);
-  
+    let {data, labels, paramsList, error} = state.histogramTool;
+    paramsList = su.filter(paramsList);
+    // paramlist, show in a increment of 1000
+    return {selectedDate: selectedLayerDate, data, labels, paramsList, error }
+}, {Post, Reset})(InstrumentsHistogram);

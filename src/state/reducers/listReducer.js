@@ -1,3 +1,5 @@
+import { histogramTool } from "../../components/instrumentsHistogram/redux"
+
 const selectedLayers = (state = ["a"], action) => {
   if (action.type === "ADD_DEFAULT_SELECTED_LAYERS"){
     return [...action.defaultSelectedLayers]
@@ -46,4 +48,4 @@ const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
   return state
 }
 
-export { selectedLayers, layerStatus }
+export default { selectedLayers, layerStatus, histogramTool }
