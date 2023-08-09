@@ -70,7 +70,7 @@ class LayerGenerator {
         * @return {object} A structured instruments layer.
         */
         // add new instrument dates here, to only get layers for the unique dates.
-        return this.sortedUniqueDates([...this.dc8_dates, ...this.er2_dates, ...this.crs_dates, ...this.cpl_dates, ...this.hiwrap_dates,
+        return this.sortedUniqueDates([...this.crs_dates, ...this.cpl_dates, ...this.hiwrap_dates,
                                         ...this.nexradKATX_dates, ...this.nexradKRTX_dates, ...this.nexradKLGX_dates, ...this.npol_dates]).map(date => ({
             date,
             items: this.instruments.map((instrum, index) => this.getInstrumentsItem(date, instrum, index)).filter(n => n)

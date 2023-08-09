@@ -21,7 +21,7 @@ const supportEmail = process.env.REACT_APP_BAMBOO_GHRC_SUPPORT_EMAIL || "support
 const histogramToolApiUrl = process.env.REACT_APP_HISTOGRAM_TOOL_API
 const histogramToolApikey = process.env.REACT_APP_HISTOGRAM_TOOL_API_KEY
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, histogramToolApiUrl, histogramToolApikey }
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl, histogramToolApiUrl, histogramToolApikey }
 
 /*
   dataBaseUrl -  (S3) URL root address where the data resides
