@@ -11,7 +11,7 @@ const initialState = {
   }
 }
 
-const appReducer = combineReducers({...reducers})
+const appReducer = combineReducers({...reducers});
 
 const rootReducer = (state, action) => {
   if (action.type === "RESET_STORE"){

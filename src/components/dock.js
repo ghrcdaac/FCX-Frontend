@@ -9,6 +9,8 @@ import { createDefaultImageryProviderViewModels } from "cesium"
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
+import SubsettingTool from "./subsettingTool";
+import {SubsetsList} from "./subsettingTool/components";
 import LayerList from "./layerList"
 import emitter from "../helpers/event"
 import DOIList from "./doiList"
@@ -26,6 +28,7 @@ import "../css/dock.css"
 // import { url } from "inspector";
 
 let viewer
+let viewerObj = { viewer: null } // to be able to pass by reference to other components.
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -91,7 +94,8 @@ let getCampaignTab = (campaign) => {
 }
 
 let box = (campaign) => {
-  const box = {
+  const box = ({
+  // const box = {
     dockbox: {
       mode: "horizontal",
 
@@ -178,10 +182,12 @@ let box = (campaign) => {
           ],
         },
       ],
-    },
-  }
-  // Histogram data available only for GOES-R field campaign for now.
+    }
+  });
+
+  // Subsetting tool and Histogram tool (data) only available only for GOES-R field campaign for now.
   if (campaign.title && campaign.title.includes("GOES-R")) {
+    // for histogram
     box.dockbox.children[1].tabs.push({
       title: (
         <div>
@@ -191,6 +197,41 @@ let box = (campaign) => {
       id: "histogram",
       content: <InstrumentsHistogram/>,
     });
+    
+    // for subsetting tool
+    // add tabs for subsets
+    box.dockbox.children[1].tabs.push({
+      title: (
+        <div>
+          <FiLayers /> Subsets{" "}
+        </div>
+      ),
+      id: "subsets",
+      content: <SubsetsList/>,
+    });
+    // add floatbox for subsetting tool
+    box.floatbox = {
+      mode: 'float',
+      children: [
+        {
+          tabs: [
+              {
+                title: (
+                  <div>
+                    <FiLayers /> Subsetting Tool{" "}
+                  </div>
+                ),
+                id: "subsettingTool",
+                closable: true,
+                content: <SubsettingTool style={{width: "100%", height: "100%"}} cesiumViewer={viewerObj}/>,
+                group: "subsettingtool"
+              },
+          ],
+          // x: (1920-400-40), y: (983-200), w: 400, h: 240 // based off component with .dock-layout class. making it movable, takes over css for bottom right
+          w: 400, h: 240 // always on bottom right, with .dock-panel.dock-style-subsettingtool css. linked using xxx-group
+        }
+      ]
+    }
   }
   return box;
 }
@@ -214,6 +255,7 @@ let createViewer = () => {
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 
+  viewerObj.viewer = viewer;
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
