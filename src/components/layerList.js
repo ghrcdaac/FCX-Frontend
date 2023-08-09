@@ -25,9 +25,7 @@ import {BsCardImage} from 'react-icons/bs'
 
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 import { Dock, viewer } from "./dock"
-import Modal from "./Modal"
-import Marker from './Marker'
-import geoJson from './chicago-parks2.json'
+import geoJson from '../data/chicago-parks2.json'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,7 +46,35 @@ export default function LayerList({ campaign }) {
     const layerItems = itemValue
 
     const layers = []
+
+    // special imageviewer layer for 2017-05-17 GOES-R field campaign
+    if (campaign.title === 'GOES-R PLT Field Campaign' && layerItems.date === '2017-05-17') {
+      layers.push((
+          <Card key={"primary-card-Image_viewer_2017-05-17"} variant="outlined">
+              <ListItem key={"primary-item-Image_viewer_2017-05-17"}>
+                <ListItemIcon><BsCardImage /></ListItemIcon>
+                <ListItemText id={`primary-list-label-Image_viewer_2017-05-17`} primary="Image Viewer" />
+                <ListItemSecondaryAction>
+                  <Switch
+                    edge="end"
+                    onChange={lightningImageViewerChangeHandler}
+                  />
+                </ListItemSecondaryAction>
+              </ListItem>
+              <ListItem key={"secondary-item-variable-Image_viewer_2017-05-17"}>
+                <ListItemText id={`secondary-list-label-Image_viewer_2017-05-17`} primary={
+                  <span style={{ fontSize: 12 }}>
+                    Toggle to enable/disable Markers
+                  </span>
+                }></ListItemText>
+              </ListItem>
+            </Card>
+        )
+      )
+    }
+
     for (const [layerIndex, layerValue] of layerItems.items.entries()) {
+      // icons and information gathering for layer card; needed for layerlist sidebar and layer legend
       let icon = <BsLayers />
 
       let legendImage
@@ -118,6 +144,7 @@ export default function LayerList({ campaign }) {
         layerVariableAvailability = <span style={{ fontSize: 12 }}>{layerAvailability}</span>
       }
 
+      // with the gathered information, populate and push the layer card to the layers array.
       layers.push(
         <Card key={"primary-card-" + layerIndex} variant="outlined">
           <ListItem key={"primary-item-" + layerIndex}>
@@ -154,37 +181,6 @@ export default function LayerList({ campaign }) {
       expanded = true
     }
 
-    const changeHandler = (e) =>{
-      imageToggle = !imageToggle;
-      if(imageToggle){
-        geoJson.fieldCampaignImages.forEach((element)=>{
-      
-          var pinBuilder = new PinBuilder();
-          //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
-          viewer.entities.add({
-            position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
-            name:element.id,
-            billboard : {
-              image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
-              width : 32,
-              height : 32,
-            },
-            label : {
-              // text: element.id.toString(),
-              font : '14pt monospace',
-              style: LabelStyle.FILL_AND_OUTLINE,
-              outlineWidth : 2,
-              verticalOrigin : VerticalOrigin.TOP,
-              pixelOffset : new Cartesian2(1, 32)
-            }
-          });
-        })
-        console.log(viewer.entities)
-      }else{
-        viewer.entities.removeAll();
-      }
-    }
-
     dates.push(
       <Accordion key={"panel" + itemIndex} defaultExpanded={expanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" key={"summary-panel" + itemIndex}>
@@ -196,23 +192,6 @@ export default function LayerList({ campaign }) {
             </Box>
           </div>
         </AccordionSummary>
-        {layerItems.date === '2017-05-17' && <div style={{display:'flex', justifyContent:'center', alignItems:'center', textAlign:'center', height:'100px', width:'100%'}}>
-          <div style={{height:'100%',display:'flex', width:'90%',justifyContent:'center', alignItems:'center', textAlign:'center', border:'1px solid #dfdede', borderRadius:'5px'}}>
-            <div style={{width:'75%'}}>
-              <div style={{display:'flex', marginTop:'1rem', marginLeft:'20px'}}>
-                <div style={{marginTop:'1rem', marginRight:'30px'}}><BsCardImage /></div>
-                <div style={{fontSize:'20px', marginTop:'10px'}}>Image Viewer</div>
-              </div>
-              <h6>Toggle to enable/disable Markers</h6>
-            </div>
-            <div style={{width:'25%', marginBottom:'50px'}}>
-            <Switch
-                edge="end"
-                onChange={changeHandler}
-              />
-            </div>
-          </div>
-        </div>}
         <AccordionDetails key={"details-panel" + itemIndex}>
           <List key={itemIndex} className={classes.root}>
             {layers}
@@ -223,4 +202,34 @@ export default function LayerList({ campaign }) {
   }
 
   return dates
+}
+
+const lightningImageViewerChangeHandler = (e) =>{
+  imageToggle = !imageToggle;
+  if(imageToggle){
+    geoJson.fieldCampaignImages.forEach((element)=>{
+      var pinBuilder = new PinBuilder();
+      //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
+      viewer.entities.add({
+        position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
+        name: "imageViewer-" + element.id,
+        billboard : {
+          image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
+          width : 32,
+          height : 32,
+        },
+        label : {
+          // text: element.id.toString(),
+          font : '14pt monospace',
+          style: LabelStyle.FILL_AND_OUTLINE,
+          outlineWidth : 2,
+          verticalOrigin : VerticalOrigin.TOP,
+          pixelOffset : new Cartesian2(1, 32)
+        }
+      });
+    })
+    console.log(viewer.entities)
+  }else{
+    viewer.entities.removeAll();
+  }
 }

@@ -19,17 +19,16 @@ import Settings from "./settings"
 import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
+import InstrumentsHistogram from "./instrumentsHistogram";
 
 import Modal from "./Modal"
-import Marker from './Marker'
-import geoJson from './chicago-parks2.json'
 
 import "rc-dock/dist/rc-dock.css"
 import "../css/dock.css"
 // import { url } from "inspector";
 
 let viewer
-let viewerObj = { viewer: null } // to be able to pass by reference to other components.
+let viewerObj = { viewer } // to be able to pass by reference to other components.
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -96,6 +95,7 @@ let getCampaignTab = (campaign) => {
 
 let box = (campaign) => {
   const box = ({
+  // const box = {
     dockbox: {
       mode: "horizontal",
 
@@ -185,8 +185,20 @@ let box = (campaign) => {
     }
   });
 
-  // Subsetting tool only available only for GOES-R field campaign for now.
+  // Subsetting tool and Histogram tool (data) only available only for GOES-R field campaign for now.
   if (campaign.title && campaign.title.includes("GOES-R")) {
+    // for histogram
+    box.dockbox.children[1].tabs.push({
+      title: (
+        <div>
+          <FiLayers /> Histogram{" "}
+        </div>
+      ),
+      id: "histogram",
+      content: <InstrumentsHistogram/>,
+    });
+    
+    // for subsetting tool
     // add tabs for subsets
     box.dockbox.children[1].tabs.push({
       title: (
@@ -243,38 +255,10 @@ let createViewer = () => {
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 
-  viewerObj.viewer = viewer;
-
-  // geoJson.fieldCampaignImages.forEach((element)=>{
-  //   var image = new Image()
-  //   image.crossOrigin = 'anonymous';
-  //   image.src = element.imageURL
-
-  //   var pinBuilder = new PinBuilder();
-  //   //pinBuilder.fromMakiIconId("hospital", Color.RED, 48),
-  //   viewer.entities.add({
-  //     position : Cartesian3.fromDegrees(element.coordinates[0], element.coordinates[1]),
-  //     name:element.id,
-  //     billboard : {
-  //       image : pinBuilder.fromMakiIconId('star', Color.GREEN, 48),
-  //       width : 32,
-  //       height : 32,
-  //     },
-  //     label : {
-  //       // text: element.id.toString(),
-  //       font : '14pt monospace',
-  //       style: LabelStyle.FILL_AND_OUTLINE,
-  //       outlineWidth : 2,
-  //       verticalOrigin : VerticalOrigin.TOP,
-  //       pixelOffset : new Cartesian2(1, 32)
-  //     }
-  //   });
-  // })
-
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
-        if (defined(selectedEntity.name)) {
+        if (defined(selectedEntity.name) && selectedEntity.name.includes('imageViewer')) {
           console.log('Selected ' + selectedEntity.name);
           const ref = React.createRef();
           ref.current = document.createElement('div');
