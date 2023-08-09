@@ -28,7 +28,7 @@ import "../css/dock.css"
 // import { url } from "inspector";
 
 let viewer
-let viewerObj = { viewer } // to be able to pass by reference to other components.
+let viewerObj = { viewer: null } // to be able to pass by reference to other components.
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -255,6 +255,7 @@ let createViewer = () => {
     selectedImageryProviderViewModel: getProviderViewModels()[1],
   })
 
+  viewerObj.viewer = viewer;
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
