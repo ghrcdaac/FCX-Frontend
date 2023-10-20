@@ -38,7 +38,7 @@ export const Get = Resources => {
         return deserializedData;
       })
       .catch(err => {
-        handleError(err.status, "Something went wrong. Call Support.");
+        handleError(err.status, "Something went wrong. Contact Support.");
         dispatch(errorDispatchAction(error, err));
         return err;
       });
@@ -58,7 +58,7 @@ export const Post = Resources => {
         return deserializedData;
       })
       .catch(err => {
-        handleError(400, "Something went wrong. Call Support.");
+        handleError(400, "Something went wrong. Contact Support.");
         dispatch(errorDispatchAction(error, err));
         return err;
       });
