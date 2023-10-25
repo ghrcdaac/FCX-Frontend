@@ -89,7 +89,7 @@ function _SubsetCard(props) {
   return (
     <Card className={classes.root} style={{maxWidth: "initial"}}>
       <CardHeader
-        title={`Subset ${subsetIndex}`}
+        title={`Subset ${subsetIndex+1}`}
         // subheader="Date time"
       >
       </CardHeader>
