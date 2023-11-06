@@ -3,6 +3,7 @@ import impacts_campaign from './impacts-layers'
 import olympex_layers from './olympex-layers'
 import cpexaw_layers from './cpexaw-layers'
 import hs3_layers from './hs3-layers'
+import tcsp_layers from './tcsp-layers'
 
 
 const campaigns = {
@@ -10,7 +11,8 @@ const campaigns = {
   "impacts": impacts_campaign,
   "olympex": olympex_layers,
   "cpexaw": cpexaw_layers,
-  "hs3": hs3_layers
+  "hs3": hs3_layers,
+  "tcsp": tcsp_layers
 }
 
 const getCampaignInfo = (mission) => {
@@ -33,6 +35,8 @@ const getDatesMap = () => {
 }
 
 const getDefaultLayers = (campaign) => campaigns[campaign].layers[0].items.map(item => {
+  console.log(campaigns[campaign])
+  console.log(campaigns[campaign].layers[0])
   return item.layerId
 })
 
