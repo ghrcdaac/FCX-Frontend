@@ -10,7 +10,7 @@ export default function flighttrack (date, index) {
     */
     return {
         layerId: `${date}-track${index}-er2`,
-        shortName: "flight14",
+        shortName: "track",
         displayName: "Flight Track",
         czmlLocation: `${newFieldCampaignsBaseUrl}/tcsp/instrument-processed-data/ER2_Flight_Nav/tcsp_naver2_${date.replace(/-/g,'')}.czml`,
         date,

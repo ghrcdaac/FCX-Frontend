@@ -8,7 +8,7 @@ import { basePath } from '../../constants/enum'
 const MissionsCards = ({ missions }) => {
 
   const history = useHistory()
-  const sortedMissions = sortMissionsByKey(missions, "")
+  const sortedMissions = sortMissionsByKey(missions, "priority")
 
   return (
     <div className="mission-card-group">

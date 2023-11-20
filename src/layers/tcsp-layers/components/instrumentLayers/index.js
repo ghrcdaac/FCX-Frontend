@@ -1,10 +1,11 @@
-import { flighttrack, lip } from "./helpers";
+import { flighttrack, lip, crs } from "./helpers";
 
 class LayerGenerator {
     constructor() {
-        this.instruments = ["lip", "flighttrack"]; // add new instrument name here
-        this.lip_dates = ["2005-07-06"];
-        this.flighttrack_dates = ["2005-07-27", "2005-07-06", "2005-07-16"];
+        this.instruments = ["lip", "flighttrack", "crs"]; // add new instrument name here
+        this.crs_dates = ["2005-07-05", "2005-07-15", "2005-07-16", "2005-07-23", "2005-07-24", "2005-07-25", "2005-07-27"];
+        this.lip_dates = ["2005-07-05", "2005-07-17", "2005-07-09", "2005-07-27", "2005-07-06", "2005-07-16", "2005-07-15", "2005-07-24", "2005-07-23", "2005-07-25"];
+        this.flighttrack_dates = ["2005-07-05", "2005-07-17", "2005-07-09", "2005-07-27", "2005-07-06", "2005-07-16", "2005-07-15", "2005-07-24", "2005-07-23", "2005-07-25"];
         // add dates when data for new instrument are available
     }
 
@@ -45,9 +46,9 @@ class LayerGenerator {
             case "lip":
                 if(!this.lip_dates.includes(date)) return null;
                 return lip(date, index);
-            // case "hiwrap":
-            //     if(!this.hiwrap_dates.includes(date)) return null;
-            //     return hiwrap(date, index);
+            case "crs":
+                if(!this.crs_dates.includes(date)) return null;
+                return crs(date, index);
             default:
                 return null
             // add case for new instrument here
@@ -59,7 +60,7 @@ class LayerGenerator {
         * @return {object} A structured instruments layer.
         */
         // add new instrument dates here, to only get layers for the unique dates.
-        return this.sortedUniqueDates([...this.flighttrack_dates,...this.lip_dates]).map(date => ({
+        return this.sortedUniqueDates([...this.flighttrack_dates,...this.lip_dates,...this.crs_dates]).map(date => ({
             date,
             items: this.instruments.map((instrum, index) => this.getInstrumentsItem(date, instrum, index)).filter(n => n)
         }));
