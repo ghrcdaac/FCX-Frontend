@@ -35,8 +35,6 @@ const getDatesMap = () => {
 }
 
 const getDefaultLayers = (campaign) => campaigns[campaign].layers[0].items.map(item => {
-  console.log(campaigns[campaign])
-  console.log(campaigns[campaign].layers[0])
   return item.layerId
 })
 
