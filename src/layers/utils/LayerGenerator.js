@@ -81,6 +81,19 @@ class LayerGenerator{
     }
   }
 
+  getNPOL = ({ date }) => {
+    return {
+      addOnTickEventListener: true,
+      displayName: "NASA S-Band Dual Polarimetric Doppler Radar (NPOL)",
+      variableName: "ZZ Radar Reflectivity in RHI-A mode",
+      unit: "dBZ",
+      type: "tiles",
+      platform: "ground",
+      displayMechanism: "czml",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/${this.fieldCampaignName.toLowerCase()}/${date}/npol/knit.czml`,
+    }
+  }
+
   mapInstrumentToGenerator = (instrument) => {
     const mapping = {
       'crs': this.getCRS,
@@ -92,6 +105,7 @@ class LayerGenerator{
       'hiwrap': this.getHIWRAP,
       'flightTrack-er2': this.getFlightTrack, 
       'flightTrack-p3': this.getFlightTrack, 
+      'npol': this.getNPOL
     }
     
     return mapping[instrument]

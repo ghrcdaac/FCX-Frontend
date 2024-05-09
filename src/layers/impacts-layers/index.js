@@ -13,6 +13,7 @@ import {
   dois,
   campaign,
   description,
+  npol_rhi,
 } from "./data"
 import LayerGenerator from '../utils/LayerGenerator'
 
@@ -61,6 +62,12 @@ generator.addLayer({
   platform: 'air',
   flight: 'P3'
 }, flight_p3b)
+
+generator.addLayer({
+  instrument: 'npol',
+  platform: 'ground',
+  type: 'tiles'
+}, npol_rhi)
 
 const layers = generator.generateLayers()
 

@@ -221,47 +221,14 @@ class Viz extends Component {
                         tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
                         // tileset.pointCloudShading.attenuation = true;
                     }
-                } else if (layer.displayName === "DROPSONDE") {
-                    // tileset.style.color = getColorExpression();
-                    tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
-                    tileset.style.pointSize = 5.0;
-                    // add pin to visualize the skewT
-                    //location
-                    setTimeout(() => {
-                        let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
-                        let entity = ds && ds.entities.getById("Flight Track");
-                        if (entity) {
-                            let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
-                            JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
-                            let positionProperty = entity.position;
-                            const position = positionProperty.getValue(timeOfDrop)
-                            // Instead, getting position directly from the 3dtile json would be much faster.
-                            // If critical information could be added directly to the json header, when the 3d tile is created.
-
-                            // add pin
-                            let date = tileset.properties.epoch.split("T")[0]
-                            let parsedDate = date.replace(/-/g,'');
-                            const pinBuilder = new PinBuilder();
-                            let pin = viewer.entities.add({
-                                name: `cpexawDropsonde-${parsedDate}`,
-                                position: position,
-                                billboard: {
-                                image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
-                                verticalOrigin: VerticalOrigin.BOTTOM,
-                                },
-                            });
-                            this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
-                            // add event handler
-                            viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
-                                if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
-                                    let date = selectedEntity.name.split("-")[1];
-                                    let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
-                                    this.setImageViewerState(true, url);
-                                }
-                            });
-                        }
-                    }, 1000);
-                } else {
+                } else if(layer.fieldCampaignName === "CPEX-AW") {
+                    if (layer.displayName === "DROPSONDE") {
+                        this.addPinAndViewer(layer, tileset, viewer, "cpexawDropsonde", "DROPSONDE");
+                    } 
+                    if (layer.displayName === "RADIOSONDE") {
+                        this.addPinAndViewer(layer, tileset, viewer, "cpexawRadiosonde", "RADIOSONDE");
+                    }
+                 } else {
                     tileset.style.pointSize = 1.0;
                     tileset.style.color = getColorExpression();
                 }
@@ -671,6 +638,45 @@ class Viz extends Component {
             pitch: pitch + cMath.toRadians(modelCorrectionOffsets.pitch),
             heading: heading + cMath.toRadians(modelCorrectionOffsets.heading)
         }
+    }
+
+    addPinAndViewer(layer, tileset, viewer, pinNamePrefix, instrumentType) {
+        tileset.style.color = instrumentType === "DROPSONDE" ? 'mix(color("red"), color("red"), -1*${value})' : getColorExpression();
+        tileset.style.pointSize = instrumentType === "DROPSONDE" ? 5.0 : 8.0;
+    
+        setTimeout(() => {
+            let ds = viewer && viewer.dataSources.getByName("wall czml")[0];
+            let entity = ds && ds.entities.getById("Flight Track");
+            if (entity) {
+                let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
+                JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
+                const positionProperty = entity.position;
+                const position = positionProperty.getValue(timeOfDrop);
+    
+                let date = tileset.properties.epoch.split("T")[0];
+                let parsedDate = date.replace(/-/g, '');
+    
+                const pinBuilder = new PinBuilder();
+                let pin = viewer.entities.add({
+                    name: `${pinNamePrefix}-${parsedDate}`,
+                    position: instrumentType === "DROPSONDE" ? position : Cartesian3.fromDegrees(-64.831763, 17.762488),
+                    billboard: {
+                        image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                        verticalOrigin: VerticalOrigin.BOTTOM,
+                    },
+                });
+    
+                this.activeLayers.push({ layer: { ...layer, displayMechanism: "entities" }, cesiumLayerRef: pin });
+    
+                viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
+                    if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes(pinNamePrefix)) {
+                        let date = selectedEntity.name.split("-")[1];
+                        let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/${instrumentType.toLowerCase()}/skewT/${date}/${instrumentType.toLowerCase()}.png`;
+                        this.setImageViewerState(true, url);
+                    }
+                });
+            }
+        }, 1000);
     }
 
     // Utils END

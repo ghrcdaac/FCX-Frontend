@@ -78,6 +78,12 @@ const exrad_er2 = [
   "2020-02-27 07:21:29	2020-02-27 15:17:57",
 ]
 
+const npol_rhi = [
+  "2020-02-25 00:00:44 2020-02-25 20:16:34 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-25/npol/knit.czml",
+  "2020-02-21 00:02:47 2020-02-21 08:56:42 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-21/npol/knit.czml",
+  "2020-02-20 17:01:07 2020-02-20 23:57:10 https://ghrc-fcx-viz-output.s3.us-west-2.amazonaws.com/fieldcampaign/impacts/2020-02-20/npol/knit.czml"
+]
+
 const defaultCamera = {
   "2020-02-27": {
     "position": {
@@ -369,6 +375,10 @@ const legends = {
   exrad: {
     url: `legends/impacts/exrad_legend.png`,
     color: "magenta",
+  },
+  npol: {
+    url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`,
+    color: "lightred",
   }
 }
 
@@ -401,7 +411,11 @@ const dois = [
     shortName: "impactslip",
     longName: "IMPACTS Lightning Instrument Package (LIP)",
     doi: "http://dx.doi.org/10.5067/IMPACTS/LIP/DATA101"
-  },
+  }, {
+    shortName: "impactsnpol",
+    longName: "IMPACTS NASA S-Band Dual Polarimetric (NPOL) Doppler Radar",
+    doi: "https://cmr.earthdata.nasa.gov/search/concepts/C1995867554-GHRC_DAAC.html"
+  }
 ]
 
 const campaign = "IMPACTS"
@@ -416,6 +430,7 @@ export {
   hiwrap_er2,
   flight_er2,
   flight_p3b,
+  npol_rhi,
   defaultCamera,
   legends,
   links,
