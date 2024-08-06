@@ -15,10 +15,11 @@ export default function dropsonde (date, index) {
       displayName: "DROPSONDE",
       variableName: "skewT graph",
       unit: "temperature (degree celsius) vs pressure (mb)",
-      tileLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/3dtiles/${date.replace(/-/g,'')}/tileset.json`,
+      // tileLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/3dtiles/${date.replace(/-/g,'')}/tileset.json`,
+      czmlLocation: `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/czml/ds_with_pin_20210820.czml`,
       date,
-      type: "instrument",
+      type: "instrument-sonde",
       platform: "air",
-      displayMechanism: "3dtile"
+      displayMechanism: "czml"
     };
 }

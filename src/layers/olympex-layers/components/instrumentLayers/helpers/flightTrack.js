@@ -8,6 +8,19 @@ export default function flighttrack (date, aircraft, index) {
     * @param {index} number (Optional) - Index of the instrument in the list of instruments that are visualization wanted
     * @return {Object} structured flight meta item.
     */
+
+    let startTime = null;
+    let endTime = null;
+
+    if (date === "2015-11-10") {
+        if (aircraft === "er2") {
+            startTime = "2015-11-10T16:04:34Z"
+            endTime = "2015-11-10T19:37:46Z"
+        } else if (aircraft === "dc8") {
+            startTime = "2015-11-10T17:29:10Z"
+            endTime = "2015-11-10T21:38:03Z"
+        }
+    }
     
     if (aircraft == "er2") {
         return {
@@ -15,6 +28,8 @@ export default function flighttrack (date, aircraft, index) {
             shortName: "flight14",
             displayName: "Flight Track ER2",
             czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/nav_er2/olympex_naver2_IWG1_${date.replace(/-/g,'')}.czml`,
+            start: startTime,
+            end: endTime,
             date,
             type: "track",
             platform: "air",
@@ -26,7 +41,10 @@ export default function flighttrack (date, aircraft, index) {
             shortName: "flight14",
             displayName: "Flight Track DC8",
             czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_${date.replace(/-/g,'')}.czml`,
+            // czmlLocation: "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/Olympex/instrument-processed-data/nav_dc8/olympex_navdc8_IWG1_20151110_new.czml",
             date,
+            start: startTime,
+            end: endTime,
             type: "track",
             platform: "air",
             displayMechanism: "czml",

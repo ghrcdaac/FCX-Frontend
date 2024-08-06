@@ -3,7 +3,7 @@
   TODO: In future make this customizable as more field campaign data is prepared to be shown using FCX
  */
 
-  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl } from "../../config"
+  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, newFieldCampaignsBaseUrl } from "../../config"
 
   const layers_2017_05_17 = [
     {
@@ -1321,10 +1321,13 @@
       displayName: "GLM Points",
       variableName: "Lightning Events",
       unit: "dBZ",
-      tileLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-20/glm_points/GLMpoints.json`,
-      date: "2017-04-20",
-      start: "2017-04-20T00:00:00Z",
-      end: "2017-04-20T23:59:59Z",
+      // tileLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-20/glm_points/GLMpoints.json`,
+      // tileLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/apu/apu09/output_file1.json`,
+      // tileLocation: `https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/Olympex/instrument-processed-data/apu/output_file2.json`,
+      tileLocation: 'https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/tmp/reflectivity_data1.json',
+      date: "2016-01-15",
+      start: "2016-01-15T00:00:00Z",
+      end: "2016-01-15T00:59:59Z",
       type: "instrument",
       platform: "satellite",
       dispType: 'Intensity',
@@ -1605,7 +1608,8 @@
       shortName: "goesrpltnalma",
       displayName: "North Alabama Lightning Mapping Array (LMA)",
       variableName: "Lightning Events",
-      czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-18/lma/NALMA_tiles.czml`,
+      // czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-18/lma/NALMA_tiles.czml`,
+      czmlLocation: "https://test-bucket0911.s3.amazonaws.com/nalma/NALMA_tiles.czml",
       date: "2017-04-18",
       start: "2017-04-18:00:00Z",
       end: "2017-04-18T23:59:59Z",
@@ -1698,6 +1702,33 @@
       platform: "air",
       displayMechanism: "czml",
     },
+    {
+      layerId: "2017-04-13-lma",
+      shortName: "goesrpltnalma",
+      displayName: "North Alabama Lightning Mapping Array (LMA)",
+      variableName: "Lightning Events",
+      // czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-22/lma/NALMA_tiles.czml`,
+      czmlLocation: "https://test-bucket0911.s3.amazonaws.com/NALMA/2017-04-11/NALMA_tiles.czml",
+      date: "2017-04-13",
+      start: "2017-04-13:00:00Z",
+      end: "2017-04-13T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
+      displayMechanism: "czml",
+    },
+    {
+      layerId: "2017-04-13-lma-stations",
+      shortName: "lma_stations",
+      displayName: "North Alabama LMA Stations",
+      variableName: "Station Location",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/LMA_asset/NALMA_stations.czml`,
+      date: "2017-04-13",
+      start: "2017-04-13T00:00:00Z",
+      end: "2017-04-13T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
+      displayMechanism: "czml",
+    }
   ]
   
   const layers_2017_04_11 = [
@@ -1726,6 +1757,33 @@
       date: "2017-04-11",
       type: "track",
       platform: "air",
+      displayMechanism: "czml",
+    },
+    {
+      layerId: "2017-04-11-lma",
+      shortName: "goesrpltnalma",
+      displayName: "North Alabama Lightning Mapping Array (LMA)",
+      variableName: "Lightning Events",
+      // czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-22/lma/NALMA_tiles.czml`,
+      czmlLocation: "https://test-bucket0911.s3.amazonaws.com/NALMA/2017-04-11/NALMA_tiles.czml",
+      date: "2017-04-11",
+      start: "2017-04-11T00:00:00Z",
+      end: "2017-04-11T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
+      displayMechanism: "czml",
+    },
+    {
+      layerId: "2017-04-11-lma-stations",
+      shortName: "lma_stations",
+      displayName: "North Alabama LMA Stations",
+      variableName: "Station Location",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/LMA_asset/NALMA_stations.czml`,
+      date: "2017-04-11",
+      start: "2017-04-11T00:00:00Z",
+      end: "2017-04-11T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
       displayMechanism: "czml",
     },
   ]

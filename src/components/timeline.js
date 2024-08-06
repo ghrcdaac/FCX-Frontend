@@ -16,7 +16,6 @@ const { TIMELINE_MODES } = Timeline
 
 function FcxTimeline({ campaign }) {
   const state = useSelector((state) => state)
-
   let layerDate
   let startDate
   let endDate
@@ -43,8 +42,9 @@ function FcxTimeline({ campaign }) {
 
     if (!layerDate || layerDate !== layer.date) {
       let layerDate = layer.date
-      const viewerStart = layer.start ? addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER) : moment(startJSDate).format()
-      const viewerEnd = layer.end ? addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER) : moment(endJSDate).format()
+      // fix for olympex timeline issue
+      const viewerStart = layer.start ? addTimeToISODate(layer.start, 0) : moment(startJSDate).format()
+      const viewerEnd = layer.end ? addTimeToISODate(layer.end, 0) : moment(endJSDate).format()
       startDate = moment.utc(viewerStart)
       endDate = moment.utc(viewerEnd)
     }

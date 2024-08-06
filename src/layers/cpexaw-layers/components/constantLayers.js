@@ -19,6 +19,11 @@ const dois = [
       shortName: "cpexawdropsonde",
       longName: "CPEX-AW Dropsonde Data CPEX-AW V1",
       doi: "https://cmr.earthdata.nasa.gov/search/concepts/C2299858387-LARC_ASDC.html",
+    },
+    {
+      shortName: "cpexawradiosonde",
+      longName: "St. Croix Radiosondes CPEX-AW V1",
+      doi: "https://cmr.earthdata.nasa.gov/search/concepts/C2418992215-GHRC_DAAC.html",
     }
 ]
 
@@ -50,6 +55,7 @@ const links = [
 // Used as a reference to various instruments legend pictures.
 const legends = {
     cpexawdropsonde: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/skewT_legend.png`, color: "magenta" },
+    cpexawradiosonde: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/skewT_legend.png`, color: "magenta" },
     olympexcpl: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexhiwrap: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/crs_legend.png`, color: "magenta" },
     olympexnexrad: { url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`, color: "lightred" },

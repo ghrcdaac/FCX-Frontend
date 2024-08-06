@@ -7,6 +7,14 @@ export default function cpl (date, index) {
     * @param {index} number (Optional) - Index of the instrument in the list of instruments that are visualization wanted
     * @return {Object} structured CRS meta item.
     */
+
+    let startTime = null;
+    let endTime = null;
+
+    if (date === "2015-11-10") {
+        startTime = "2015-11-10T17:19:02Z"
+        endTime = "2015-11-10T18:34:00Z"
+    }
     return {
         layerId: `${date}-${index}-cpl`,
         addOnTickEventListener: true,
@@ -18,6 +26,8 @@ export default function cpl (date, index) {
         unit: "km⁻¹ sr⁻¹",
         tileLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/cpl/${date.replace(/-/g,'')}/tileset.json`,
         date,
+        start: startTime,
+        end: endTime,
         type: "instrument",
         platform: "air",
         displayMechanism: "3dtile"

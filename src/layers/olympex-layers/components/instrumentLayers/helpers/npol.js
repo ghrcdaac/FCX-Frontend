@@ -18,6 +18,8 @@ export default function npol (date, index) {
         unit: "dBZ",
         czmlLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/npol/${date.replace(/-/g,'')}/knit.czml`,
         date,
+        start: "2015-11-12T13:02:11Z",
+        end: "2015-11-12T23:58:19Z",
         type: "tiles",
         platform: "ground",
         displayMechanism: "czml"
