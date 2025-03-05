@@ -49,7 +49,7 @@ export const Post = Resources => {
         return extractedData;
       })
       .catch(err => {
-        handleError(400, "Something went wrong. Call Support.");
+        handleError(400, "Something went wrong.");
         dispatch(errorDispatchAction(error, err));
         return err;
       });

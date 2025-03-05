@@ -55,19 +55,21 @@ const getProviderViewModels = () =>{
     })
   )
 
-  providerViewModels.push(
-    new ProviderViewModel({
-      name: "Mapbox Streets Dark",
-      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
-      category: "Mapbox",
-      tooltip: "Mapbox Streets Dark",
-      creationFunction: function () {
-        return new UrlTemplateImageryProvider({
-          url: mapboxUrl,
-        })
-      },
-    })
-  )
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Mapbox Streets Dark",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
+  //     category: "Mapbox",
+  //     tooltip: "Mapbox Streets Dark",
+  //     creationFunction: function () {
+  //       return new UrlTemplateImageryProvider({
+  //         url: mapboxUrl,
+  //       })
+  //     },
+  //   })
+  // )
+  
+
   return providerViewModels
 }
 
@@ -252,10 +254,11 @@ let createViewer = () => {
     shadows: false,
     infoBox: false,
     imageryProviderViewModels: getProviderViewModels(),
-    selectedImageryProviderViewModel: getProviderViewModels()[1],
+    selectedImageryProviderViewModel: getProviderViewModels()[0],
   })
 
   viewerObj.viewer = viewer;
+
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
@@ -276,6 +279,7 @@ let createViewer = () => {
     }
   });
 }
+
 
 let checkViewer = () => {
   setTimeout(() => {
