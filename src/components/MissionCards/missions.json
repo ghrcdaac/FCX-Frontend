@@ -206,8 +206,8 @@
       "image": "tcsp.png",
       "path": "/tcsp",
       "id": "tcsp",
-      "priority": 100,
-      "status": "Inactive"
+      "priority": 5,
+      "status": "Active"
     },
     {
       "name": "Investigation of Microphysics and Precipitation for Atlantic Coast-Threatening Snowstorms (IMPACTS)",
