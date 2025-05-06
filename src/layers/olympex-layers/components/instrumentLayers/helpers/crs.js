@@ -1,6 +1,6 @@
 import { newFieldCampaignsBaseUrl } from "../../../../../config"
 
-export default function crs (date, index) {
+export default function crs (date, index, startTime, endTime) {
     /** 
     * returns structured CRS meta item.
     * @param {date} string - YYYY-MM-DD format. Date of the campaign when the flight took off that collected crs data.
@@ -17,6 +17,8 @@ export default function crs (date, index) {
         unit: "dBZ",
         tileLocation: `${newFieldCampaignsBaseUrl}/Olympex/instrument-processed-data/crs/${date.replace(/-/g,'')}/tileset.json`,
         date,
+        start: startTime,
+        end: endTime,
         type: "instrument",
         platform: "air",
         displayMechanism: "3dtile"

@@ -154,7 +154,7 @@ export default function LayerList({ campaign }) {
             <ListItemSecondaryAction>
               <Switch
                 edge="end"
-                onChange={() => dispatch(allActions.listActions.handleToggle(layerValue.layerId))}
+                onChange={(_, checked) => toggleHandler(state, checked, dispatch, layerValue)}
                 checked={state.selectedLayers.indexOf(layerValue.layerId) !== -1}
                 inputProps={{
                   "aria-labelledby": `switch-list-label-${layerValue.layerId}`,
@@ -202,6 +202,22 @@ export default function LayerList({ campaign }) {
   }
 
   return dates
+}
+
+// Dropsonde should be visible only when flight track is visible
+const toggleHandler = (state, checked, dispatch, layerValue) => {
+  if (layerValue.shortName === "cpexawflightnavdc8" && checked == false) {
+    if (state.selectedLayers.indexOf(`${layerValue.date}-1-dropsonde`) !== -1) {
+      dispatch(allActions.listActions.handleToggle(`${layerValue.date}-1-dropsonde`));
+    }
+  }
+
+  if (layerValue.shortName === "cpexawdropsonde" && checked == true) {
+    if (state.selectedLayers.indexOf("2021-08-20-trackdc8-dc8") === -1) { // TODO: change this date
+      dispatch(allActions.listActions.handleToggle("2021-08-20-trackdc8-dc8"));
+    }
+  }
+  dispatch(allActions.listActions.handleToggle(layerValue.layerId));
 }
 
 const lightningImageViewerChangeHandler = (e) =>{

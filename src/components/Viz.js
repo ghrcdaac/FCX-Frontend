@@ -31,7 +31,9 @@ import {
     Math as cMath,
     PinBuilder,
     Color,
-    VerticalOrigin
+    VerticalOrigin,
+    Cartographic,
+    BillboardGraphics
 } from "cesium"
 
 import { extendCesium3DTileset } from "temporal-3d-tile"
@@ -52,6 +54,8 @@ import { addTimeToISODate } from "../layers/utils/layerDates"
 import ImageViewer from "./imageViewerModal";
 import { extractLayerStartDatetime, extractLayerDate } from "../helpers/getLayerDate";
 
+import {handleOlympexApu, handleOlympexMrr, handleOlympexD3rKa, handleOlympexD3rKu, handleOlympexNpol, handleOlympexNexrad} from './modelFunctions';
+
 class Viz extends Component {
     
     constructor(props){
@@ -62,9 +66,11 @@ class Viz extends Component {
         this.activeLayers = []
         this.errorLayers = []
         this.lastSelectedLayers = []
+        this.selectedFlightLayers = []
         this.savedSamera = null
-        this.trackEntity = false
-        this.trackedEntity = null
+        // this.trackEntity = false
+        // this.trackedEntity = null
+        this.trackedEntity = []
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
         this.layerChanged = false
@@ -102,10 +108,30 @@ class Viz extends Component {
         for (let i = 0; i < layersToRemove.length; i++) {
             if (layersToRemove[i].layer.displayMechanism === "czml") {
                 viewer.dataSources.remove(layersToRemove[i].cesiumLayerRef)
+                if (layersToRemove[i].layer.shortName === "olympexd3rKa") {
+                    viewer.entities.removeById("D3RKa")
+                }
+                if (layersToRemove[i].layer.shortName === "olympexd3rKu") {
+                    viewer.entities.removeById("D3RKu")
+                }
+                if (layersToRemove[i].layer.shortName === "olympexnpol") {
+                    viewer.entities.removeById("NPOL")
+                }
+                if (layersToRemove[i].layer.shortName === "olympexnexrad") {
+                    viewer.entities.removeById(`NEXRAD-${layersToRemove[i].layer.displayName.split(' ')[0]}`)
+                }
+
             } else if (layersToRemove[i].layer.displayMechanism === "3dtile" || layersToRemove[i].layer.displayMechanism === "points") {
                 viewer.scene.primitives.remove(layersToRemove[i].cesiumLayerRef)
                 if (layersToRemove[i].eventCallback) {
                     layersToRemove[i].eventCallback()
+                }
+                if (layersToRemove[i].layer.shortName === "olympexapu") {
+                    viewer.entities.removeById("APU")
+                    viewer.entities.removeById("APU_pin")
+                }
+                if (layersToRemove[i].layer.shortName === "olympexmrr") {
+                    viewer.entities.removeById("MRR")
                 }
             } else if (layersToRemove[i].layer.displayMechanism === "wmts") {
                 viewer.imageryLayers.remove(layersToRemove[i].cesiumLayerRef)
@@ -175,14 +201,13 @@ class Viz extends Component {
             }
         }
 
-        // After all the active layers resolves, then do the following
+        // Fix/changes for camera zoom prioritization
         Promise.all(layersRenderPromises).then((values) => {
-            const pactiveLayer = this.extractPrioritizedLayer(this.activeLayers);
+            if (this.activeLayers.length === 0) return
+            const pactiveLayer = this.activeLayers[this.activeLayers.length - 1];
             this.prioritizedTimelineZoom(pactiveLayer, campaign);
-            if (this.layerChanged) {
-                // after all the layers are loaded and are active, check the need for camera position and set accordingly
-                this.prioritizedCameraPosition(pactiveLayer, this.activeLayers, campaign);
-            }
+            this.prioritizedCameraPosition(pactiveLayer, this.activeLayers, campaign);
+
         }).catch(error => console.error(error));
     }
 
@@ -221,46 +246,6 @@ class Viz extends Component {
                         tileset.style.color = 'mix(color("yellow"), color("red"), -1*${value})';
                         // tileset.pointCloudShading.attenuation = true;
                     }
-                } else if (layer.displayName === "DROPSONDE") {
-                    // tileset.style.color = getColorExpression();
-                    tileset.style.color = 'mix(color("red"), color("red"), -1*${value})';
-                    tileset.style.pointSize = 5.0;
-                    // add pin to visualize the skewT
-                    //location
-                    setTimeout(() => {
-                        let ds = viewer && viewer.dataSources.getByName("wall czml")[0]; // make it unique for cpex
-                        let entity = ds && ds.entities.getById("Flight Track");
-                        if (entity) {
-                            let timeOfDrop = JulianDate.fromIso8601(tileset.properties.epoch);
-                            JulianDate.addSeconds(timeOfDrop, -10, timeOfDrop);
-                            let positionProperty = entity.position;
-                            const position = positionProperty.getValue(timeOfDrop)
-                            // Instead, getting position directly from the 3dtile json would be much faster.
-                            // If critical information could be added directly to the json header, when the 3d tile is created.
-
-                            // add pin
-                            let date = tileset.properties.epoch.split("T")[0]
-                            let parsedDate = date.replace(/-/g,'');
-                            const pinBuilder = new PinBuilder();
-                            let pin = viewer.entities.add({
-                                name: `cpexawDropsonde-${parsedDate}`,
-                                position: position,
-                                billboard: {
-                                image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
-                                verticalOrigin: VerticalOrigin.BOTTOM,
-                                },
-                            });
-                            this.activeLayers.push({ layer: {...layer, displayMechanism: "entities"}, cesiumLayerRef: pin })
-                            // add event handler
-                            viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
-                                if (defined(selectedEntity) && defined(selectedEntity.name) && selectedEntity.name.includes('cpexawDropsonde')) {
-                                    let date = selectedEntity.name.split("-")[1];
-                                    let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/dropsonde/skewT/${date}/dropsonde.png`;
-                                    this.setImageViewerState(true, url);
-                                }
-                            });
-                        }
-                    }, 1000);
                 } else {
                     tileset.style.pointSize = 1.0;
                     tileset.style.color = getColorExpression();
@@ -306,10 +291,77 @@ class Viz extends Component {
 
     handleCZML(layer, selectedLayerId) {
         const dataSource = new CzmlDataSource()
+
+        if(layer.shortName === 'olympexd3rKa') {
+            handleOlympexD3rKa(viewer)
+        }
+
+        if(layer.shortName === 'olympexd3rKu') {
+            handleOlympexD3rKu(viewer)
+        }
+
+        if(layer.shortName === 'olympexnpol') {
+            handleOlympexNpol(viewer)
+        }
+
+        if(layer.shortName === 'olympexnexrad') {
+            let lon;
+            let lat;
+            let id;
+            if(layer.displayName === 'KATX NEXRAD') {
+                lon = -122.495
+                lat = 48.194
+                id = 'KATX'
+                handleOlympexNexrad(viewer, lon, lat, id)
+            } 
+            if(layer.displayName === 'KLGX NEXRAD') {
+                lon = -124.106
+                lat = 47.11889
+                id = 'KLGX'
+                handleOlympexNexrad(viewer, lon, lat, id)
+            }
+            if(layer.displayName === 'KRTX NEXRAD') {
+                lon = -122.965
+                lat = 45.714
+                id = 'KRTX'
+                handleOlympexNexrad(viewer, lon, lat, id)
+            }
+        }
+
         // eslint-disable-next-line no-loop-func
         return new Promise((resolve, reject) => {
             dataSource.load(layer.czmlLocation).then((ds) => {
                 store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+                // dropsonde and radiosonde code changes
+                if (layer.type === "instrument-sonde") {
+                    let instrument = layer.displayName.toLowerCase();
+                    let pinReference = ds.entities.getById(`cpexaw-${instrument}-pin`);
+                    const pinBuilder = new PinBuilder();
+                    pinReference.billboard = new BillboardGraphics({
+                        image: pinBuilder.fromColor(Color.ROYALBLUE, 48).toDataURL(),
+                        verticalOrigin: VerticalOrigin.BOTTOM,
+                    });
+
+                    let modelReference = ds.entities.getById(`cpexaw-${instrument}`);
+                    const position = new Cartesian3.fromDegrees(0,0,0);
+                    const hpr = new HeadingPitchRoll(
+                        400,
+                        0,
+                        0
+                    );
+                    const orientation = Transforms.headingPitchRollQuaternion(position, hpr);
+                    modelReference.orientation = orientation;
+
+                    viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
+                        if (defined(selectedEntity) && defined(selectedEntity.name)) {
+                            console.log("wowo", selectedEntity.name, selectedEntity.name.split("-")[2])
+                            let date = selectedEntity.name.split("-")[2];
+                            let url = `${newFieldCampaignsBaseUrl}/CPEX-AW/instrument-processed-data/${instrument}/skewT/${date}/${instrument}.png`;
+                            this.setImageViewerState(true, url);
+                        }
+                    });
+                    
+                }
                 if (layer.type === "track") {
                     let modelReference = ds.entities.getById("Flight Track");
                     modelReference.orientation = new CallbackProperty((time, _result) => {
@@ -321,7 +373,9 @@ class Viz extends Component {
                         const hpr = new HeadingPitchRoll(heading, pitch, roll)
                         return Transforms.headingPitchRollQuaternion(position, hpr)
                     }, false)
-                    this.trackedEntity = dataSource.entities.getById("Flight Track") // entity to be tracked.
+                    // this.trackedEntity = dataSource.entities.getById("Flight Track") // entity to be tracked.
+                    this.trackedEntity[selectedLayerId] = ds.entities.getById("Flight Track") // entity to be tracked.
+                    emitter.emit("receiveFlightLayers", store.getState().selectedLayers);
                     if (this.trackEntity) {
                         // if track airplane is checked, then keep tracking the airplane.
                         viewer.trackedEntity = this.trackedEntity
@@ -342,7 +396,7 @@ class Viz extends Component {
     }
 
     handlePointPrimitive(layer, selectedLayerId) {
-        const intvl = 60;
+        const intvl = (layer.shortName === 'olympexmrr') ? 1 : 60;
         const promiseG = Promise.resolve(loadData(layer.tileLocation));
         return new Promise((resolve, reject) => {
             Promise.all([promiseG]).then(([LightningData]) => {
@@ -354,6 +408,23 @@ class Viz extends Component {
 
                 this.pointsCollection = viewer.scene.primitives.add(new PointPrimitiveCollection());
                 this.activeLayers.push({ layer: layer, cesiumLayerRef: this.pointsCollection })
+
+                if(layer.shortName === 'olympexapu') {
+                    handleOlympexApu(viewer, LightningData[0].Lon[0], LightningData[0].Lat[0], (pin) => {
+                        this.activeLayers.push({ layer: { ...layer, displayMechanism: "entities" }, cesiumLayerRef: pin });
+                        viewer.selectedEntityChanged.addEventListener((selectedEntity) => {
+                            if (defined(selectedEntity) && defined(selectedEntity.name)) {
+                                // TODO: Change the hardcoded url
+                                let url = 'https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com/Olympex/instrument-processed-data/apu/apu_plots1.png';
+                                this.setImageViewerState(true, url);
+                            }
+                        });
+                    });
+                } 
+
+                if(layer.shortName === 'olympexmrr') {
+                    handleOlympexMrr(viewer, LightningData[0].Lon[0], LightningData[0].Lat[0])
+                } 
 
                 store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
                 /*  Display lightning on clock ticking */
@@ -369,7 +440,7 @@ class Viz extends Component {
                         let vT60 = viewTime - viewTime % intvl;
 
                         // remove points at off-interval
-                        if (vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
+                        if (layer.shortName !== 'olympexmrr' & vT60 !== pT60 & pT60 >= initialTime & pT60 <= endTime) {
                             let indx = timingsArray.indexOf(pT60);
                             if (indx >= 0) {
                                 this.pointsCollection.removeAll();
@@ -404,17 +475,46 @@ class Viz extends Component {
                                     rad = vec.Rad;
                                 }
 
-                                for (let i = 0; i < lon.length; i += 1) {
-                                    let pixel = Math.pow(rad[i], pw) * fct
-                                    this.pointsCollection.add({
-                                        id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
-                                        show: true,
-                                        position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
-                                        pixelSize: pixel,
-                                        color: color,
-                                        scaleByDistance: nFScalar,
-                                    });
-                                };
+                                if (layer.shortName === 'olympexmrr') {
+                                    this.pointsCollection.removeAll(); //to keep showing a set of points until next occurrence
+                                    let pointColor = vec.Color;
+                                    let alt = vec.Alt;
+                                    for (let i = 0; i < alt.length; i += 1) {
+                                        this.pointsCollection.add({
+                                            id: layer.dispType + parseInt(i, 10),
+                                            show: true,
+                                            position: Cartesian3.fromDegrees(lon[i], lat[i], alt[i]+1000), //adding offset height to clearly display points and not hide behind the model
+                                            pixelSize: 7.0,
+                                            color: new ColorCesium(pointColor[i][0], pointColor[i][1], pointColor[i][2], pointColor[i][3]),
+                                            scaleByDistance: nFScalar,
+                                        });
+                                    }
+                                } else {
+                                    for (let i = 0; i < lon.length; i += 1) {
+                                        if(layer.shortName === 'olympexapu') {
+                                            this.pointsCollection.add({
+                                                id: layer.shortName + parseInt(i, 10),
+                                                show: true,
+                                                position: Cartesian3.fromDegrees(lon[i], lat[i], 10000),
+                                                pixelSize: 100,
+                                                color: new ColorCesium(vec.r, 0.0, vec.b, 1),
+                                                outlineColor: Color.WHITE,
+                                                outlineWidth: 2,
+                                                scaleByDistance: new NearFarScalar(1e3, 2.0, 1e5, 0.2)
+                                            });
+                                        } else {
+                                            let pixel = Math.pow(rad[i], pw) * fct
+                                            this.pointsCollection.add({
+                                                id: layer.dispType + parseInt(i, 10),   //id+'_'+parseInt(i,10),
+                                                show: true,
+                                                position: Cartesian3.fromDegrees(lon[i], lat[i], 0),
+                                                pixelSize: pixel,
+                                                color: color,
+                                                scaleByDistance: nFScalar,
+                                            });
+                                        }
+                                    };
+                                }
                             }
                         }
                         lastTime = viewTime;
@@ -557,16 +657,7 @@ class Viz extends Component {
             this.restoreCamera(campaign.defaultCamera[layerDate]);
             return;
         }
-        // else set the camera position using the flight track czml position, if flight track available.
-        for (const [idx, layerObject] of activeLayers.entries()) {
-            const {layer} = layerObject;
-            // based on airflight location, place the camera.
-            // If layer display type czml, then use its position to set the camera default position.
-            if (layer.displayMechanism === "czml" && layer.type === "track") {
-               useFlightNavForCameraPosition = true;
-               flightLayerObject = layerObject;
-            }
-        }
+        
         if (useFlightNavForCameraPosition && flightLayerObject) {
             const {cesiumLayerRef: dataSource} = flightLayerObject;
             let modelReference = dataSource.entities.getById("Flight Track");
@@ -597,6 +688,27 @@ class Viz extends Component {
             viewer.zoomTo(tileset);
             return;
         }
+        if (prioritizedActiveLayer.layer.dispType === "RainIntensity" || prioritizedActiveLayer.layer.dispType === "MRRIntensity") {
+            var heading = 5.65;
+            var pitch = -0.17;
+            var roll = 0;
+            let entity = viewer.entities.getById("APU")
+            if (!entity) {
+                entity = viewer.entities.getById("MRR")
+            }
+            var cartographicPosition = new Cartographic.fromCartesian(entity.position.getValue(JulianDate.now()));
+            var latitude = cMath.toDegrees(cartographicPosition.latitude) - 0.5;
+            var longitude = cMath.toDegrees(cartographicPosition.longitude) + 0.5; // Need to adjust after trying with other dates
+            viewer.camera.flyTo({
+                destination: Cartesian3.fromDegrees(longitude, latitude, 9990),
+                orientation: {
+                    heading: heading,
+                    pitch: pitch,
+                    roll: roll
+                }
+            });
+            return;
+        } 
     }
 
     // Priority based cesium clock, timeline zoom and camera position handler END
@@ -637,8 +749,22 @@ class Viz extends Component {
         if (JSON.stringify(this.lastSelectedLayers) !== JSON.stringify(selectedLayers)) {
             this.lastSelectedLayers = selectedLayers
             this.renderLayers(selectedLayers, campaign)
+            emitter.emit("receiveFlightLayers", selectedLayers)
         }
     }
+
+    multipleFlightsFollowAirplane() {
+        const selectedLayers = store.getState().selectedLayers;
+        console.log(selectedLayers, "follow airplane", this.lastSelectedLayers)
+        setTimeout(() => this.countTrackLayers(this.lastSelectedLayers), 1000);
+    }
+    countTrackLayers(selectedFlightLayers) {
+        // Filter the array for elements containing 'track' and get the length of the filtered array
+        this.selectedFlightLayers = selectedFlightLayers.filter(layer =>
+            layer.toLowerCase().includes('track')
+        );
+        console.log(`Number of layers containing 'track': ${this.selectedFlightLayers.length}`);
+    }; 
 
     restoreCamera(cameraObj, updateTime = true) {
         if (cameraObj) {
@@ -750,17 +876,21 @@ class Viz extends Component {
             adjustHeightOfPanels()
         })
 
-        emitter.on("trackairplaneChange", (checked) => {
-            if (checked) {
-                this.trackEntity = true
-                viewer.trackedEntity = this.trackedEntity
-                viewer.clock.shouldAnimate = true
-                viewer.clock.canAnimate = true
+        emitter.on("trackairplaneChange", (selectedFlightLayer) => {
+            if (selectedFlightLayer) { 
+                setTimeout(() => {
+                    viewer.trackedEntity = this.trackedEntity[selectedFlightLayer]
+                    viewer.clock.shouldAnimate = true
+                    viewer.clock.canAnimate = true
+                }, 1000)
             } else {
-                this.trackEntity = false
-                viewer.trackedEntity = null
+                viewer.trackedEntity = null                
             }
         })
+
+        emitter.on("requestFlightLayers", () => {
+            emitter.emit("receiveFlightLayers", store.getState().selectedLayers);
+        }); 
 
         emitter.on("listcheck", (selectedLayers) => {
             this.lastSelectedLayers = selectedLayers

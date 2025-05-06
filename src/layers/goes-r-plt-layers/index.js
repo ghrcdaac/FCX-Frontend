@@ -3,7 +3,7 @@
   TODO: In future make this customizable as more field campaign data is prepared to be shown using FCX
  */
 
-  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl } from "../../config"
+  import { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, newFieldCampaignsBaseUrl } from "../../config"
 
   const layers_2017_05_17 = [
     {
@@ -1697,7 +1697,7 @@
       type: "track",
       platform: "air",
       displayMechanism: "czml",
-    },
+    }
   ]
   
   const layers_2017_04_11 = [
@@ -1726,6 +1726,32 @@
       date: "2017-04-11",
       type: "track",
       platform: "air",
+      displayMechanism: "czml",
+    },
+    {
+      layerId: "2017-04-11-lma",
+      shortName: "goesrpltnalma",
+      displayName: "North Alabama Lightning Mapping Array (LMA)",
+      variableName: "Lightning Events",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/2017-04-11/lma/NALMA/NALMA_tiles.czml`,
+      date: "2017-04-11",
+      start: "2017-04-11T00:00:00Z",
+      end: "2017-04-11T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
+      displayMechanism: "czml",
+    },
+    {
+      layerId: "2017-04-11-lma-stations",
+      shortName: "lma_stations",
+      displayName: "North Alabama LMA Stations",
+      variableName: "Station Location",
+      czmlLocation: `${dataBaseUrl}/fieldcampaign/goesrplt/LMA_asset/NALMA_stations.czml`,
+      date: "2017-04-11",
+      start: "2017-04-11T00:00:00Z",
+      end: "2017-04-11T23:59:59Z",
+      type: "instrument",
+      platform: "ground",
       displayMechanism: "czml",
     },
   ]
