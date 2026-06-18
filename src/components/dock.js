@@ -252,13 +252,23 @@ let createViewer = () => {
     homeButton: false,
     sceneModePicker: true,
     shadows: false,
-    infoBox: false,
+    infoBox: true,
     imageryProviderViewModels: getProviderViewModels(),
     selectedImageryProviderViewModel: getProviderViewModels()[0],
   })
 
   viewerObj.viewer = viewer;
 
+  viewer.scene.globe.depthTestAgainstTerrain = false
+  if (viewer.selectionIndicator?.viewModel) {
+    viewer.selectionIndicator.viewModel.showSelection = false
+  }
+
+  emitter.on("cesiumResize", () => {
+    if (viewer && !viewer.isDestroyed?.()) {
+      viewer.resize()
+    }
+  })
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {

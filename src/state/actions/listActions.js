@@ -1,6 +1,7 @@
 const addDefaultSelectedLayers = (defaultSelectedLayers) => ({type: "ADD_DEFAULT_SELECTED_LAYERS", defaultSelectedLayers })
 const handleToggle = (layerId) => ({ type: "HANDLE_TOGGLE", layerId: layerId })
 const removeLayersByDate = (date) => ({ type: "REMOVE_LAYER_BY_DATE", date: date })
+const removeLayerId = (layerId) => ({ type: "REMOVE_LAYER_ID", layerId })
 
 const markLoading = (layerId) => ({ type: "MARK_LOADING", layerId: layerId })
 const markLoaded = (layerId) => ({ type: "MARK_LOADED", layerId: layerId })
@@ -11,6 +12,7 @@ const listActions = {
   addDefaultSelectedLayers,
   handleToggle,
   removeLayersByDate,
+  removeLayerId,
   markLoading,
   markLoaded,
   markUnLoaded,

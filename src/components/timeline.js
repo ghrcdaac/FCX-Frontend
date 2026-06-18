@@ -17,7 +17,6 @@ const { TIMELINE_MODES } = Timeline
 function FcxTimeline({ campaign }) {
   const state = useSelector((state) => state)
 
-  let layerDate
   let startDate
   let endDate
 
@@ -33,6 +32,7 @@ function FcxTimeline({ campaign }) {
 
   for (const [selectedLayerIndex, selectedLayerValue] of state.selectedLayers.entries()) {
     let layer = getLayer(selectedLayerValue, campaign)
+    if (!layer) continue
 
     // If no start and end, take it through viewer.clock.
     const viewerClock = viewer.clock;
@@ -41,12 +41,20 @@ function FcxTimeline({ campaign }) {
     let endDateJulian = viewerClock.stopTime;
     let endJSDate = JulianDate.toDate(endDateJulian);
 
-    if (!layerDate || layerDate !== layer.date) {
-      let layerDate = layer.date
-      const viewerStart = layer.start ? addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER) : moment(startJSDate).format()
-      const viewerEnd = layer.end ? addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER) : moment(endJSDate).format()
-      startDate = moment.utc(viewerStart)
-      endDate = moment.utc(viewerEnd)
+    const viewerStart = layer.start
+      ? addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+      : moment(startJSDate).format()
+    const viewerEnd = layer.end
+      ? addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
+      : moment(endJSDate).format()
+    const candidateStart = moment.utc(viewerStart)
+    const candidateEnd = moment.utc(viewerEnd)
+
+    if (!startDate || candidateStart.isBefore(startDate)) {
+      startDate = candidateStart
+    }
+    if (!endDate || candidateEnd.isAfter(endDate)) {
+      endDate = candidateEnd
     }
 
     let color = "red"
