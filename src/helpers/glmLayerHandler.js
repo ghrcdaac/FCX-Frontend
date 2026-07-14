@@ -23,6 +23,7 @@ import {
   GLM_IOP2_END,
   GLM_CLOCK_MULTIPLIER,
 } from "./glmConstants"
+import { flyToLeeCamera } from "./leeCameraPolicy"
 import { getLayerLoadSession, isLayerLoadActive } from "./layerLoadSession"
 
 const FADE_WINDOW = 180
@@ -311,6 +312,7 @@ function removeHoverHandler(glmRefs) {
 }
 
 function registerClockTick(viewer, glmRefs) {
+  if (glmRefs?.useSharedLeeClock) return
   unregisterClockTick(viewer, glmRefs)
 
   const onTick = () => {
@@ -375,7 +377,8 @@ async function fetchPointsData(layer) {
   throw error
 }
 
-function buildPointPrimitives(viewer, glmRefs, data) {
+function buildPointPrimitives(viewer, glmRefs, data, cameraOptions = {}) {
+  const { flyOnLoad = true, continentalCamera } = cameraOptions
   const positions = []
   const pointRefs = []
 
@@ -414,9 +417,13 @@ function buildPointPrimitives(viewer, glmRefs, data) {
 
   glmRefs.pointRefs = pointRefs
 
-  if (positions.length > 0) {
-    const sphere = BoundingSphere.fromPoints(positions)
-    viewer.camera.flyToBoundingSphere(sphere, { duration: 1.5 })
+  if (positions.length > 0 && flyOnLoad) {
+    if (continentalCamera) {
+      flyToLeeCamera(viewer, continentalCamera)
+    } else {
+      const sphere = BoundingSphere.fromPoints(positions)
+      viewer.camera.flyToBoundingSphere(sphere, { duration: 1.5 })
+    }
   }
 }
 
@@ -456,8 +463,35 @@ function unregisterGlmEmitterHandlers(glmRefs) {
   glmRefs.emitterHandlers = null
 }
 
-export function applyGlmViewerClock(viewer, layer, glmRefs) {
+export function setGlmLayerVisible(glmRefs, visible) {
+  if (glmRefs?.pointsCollection) {
+    glmRefs.pointsCollection.show = !!visible
+  }
+}
+
+export function syncGlmAtViewerTime(viewer, glmRefs, layer) {
+  if (!viewer || viewer.isDestroyed?.() || !glmRefs?.epochJulian) return
+
+  const currentRelSec = Math.floor(
+    JulianDate.secondsDifference(viewer.clock.currentTime, glmRefs.epochJulian)
+  )
+
+  if (currentRelSec !== glmRefs.lastRelSec) {
+    glmRefs.lastRelSec = currentRelSec
+    updatePoints(glmRefs, currentRelSec)
+  }
+
+  updateHoveredGlow(glmRefs, currentRelSec)
+  viewer.scene.requestRender()
+}
+
+export function applyGlmViewerClock(viewer, layer, glmRefs, options = {}) {
   if (!viewer || viewer.isDestroyed?.()) return
+
+  if (options.skipViewerClock) {
+    syncGlmAtViewerTime(viewer, glmRefs, layer)
+    return
+  }
 
   const startIso = layer?.start || GLM_IOP2_START
   const endIso = layer?.end || GLM_IOP2_END
@@ -507,12 +541,14 @@ export function unloadGlmLayer(viewer, glmRefs) {
   })
 }
 
-export function loadGlmLayer(viewer, layer) {
+export function loadGlmLayer(viewer, layer, options = {}) {
+  const { flyOnLoad = true, continentalCamera } = options
   const layerId = layer?.layerId
   const session = getLayerLoadSession(layerId)
 
   const glmRefs = {
     viewer,
+    layer,
     pointsCollection: null,
     pointRefs: [],
     displayMode: DEFAULT_GLM_DISPLAY_MODE,
@@ -543,9 +579,12 @@ export function loadGlmLayer(viewer, layer) {
       glmRefs.resolvedPointsJsonUrl = url
       glmRefs.loadError = null
       glmRefs.failedTriedUrls = []
+      glmRefs.useSharedLeeClock = options.skipViewerClock === true
 
-      buildPointPrimitives(viewer, glmRefs, data)
-      applyGlmViewerClock(viewer, layer, glmRefs)
+      buildPointPrimitives(viewer, glmRefs, data, { flyOnLoad, continentalCamera })
+      applyGlmViewerClock(viewer, layer, glmRefs, {
+        skipViewerClock: options.skipViewerClock === true,
+      })
       createHoverBox(viewer, glmRefs)
       installHoverHandler(viewer, glmRefs)
       registerClockTick(viewer, glmRefs)

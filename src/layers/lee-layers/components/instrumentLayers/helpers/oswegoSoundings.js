@@ -1,7 +1,11 @@
 import { leeOswegoSoundingCzmlPath } from "../../../../../config"
-import { getLeeDataSubfolders, resolveThroughDate } from "./leeIop2"
+import {
+  getLeeDataSubfolders,
+  getLeeLayerListingTimes,
+  resolveThroughDate,
+} from "./leeIop2"
+import { getLeeLayerDatasetTimes } from "./leeInstrumentDatasetTimes"
 
-// S3 layout: Oswego_soundings/Nov18/oswego_animated.czml (Nov19 when uploaded)
 export default function oswegoSoundings(index, listingDate) {
   const iopFolders = getLeeDataSubfolders(listingDate)
   if (!iopFolders.length) return null
@@ -10,8 +14,10 @@ export default function oswegoSoundings(index, listingDate) {
   const czmlLocation = leeOswegoSoundingCzmlPath(iopFolder)
   if (!czmlLocation) return null
 
-  const start = "2022-11-18T23:57:00Z"
-  const end = "2022-11-19T01:20:00Z"
+  const dataset = getLeeLayerDatasetTimes(listingDate, "oswegoSoundings")
+  if (!dataset) return null
+
+  const { start, end } = getLeeLayerListingTimes(listingDate, dataset.start, dataset.end)
 
   return {
     layerId: `${listingDate}-${index}-oswego-soundings`,

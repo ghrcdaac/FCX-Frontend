@@ -22,10 +22,13 @@ import {
   normalizeEfmVisibleFlights,
 } from "./efmConstants"
 import { getLayerLoadSession, isLayerLoadActive } from "./layerLoadSession"
+import { isFlightActiveAtViewerTime } from "./leeInstrumentPlayback"
 
 function getLayerFlights(layer) {
   return layer?.efmFlights?.length ? layer.efmFlights : EFM_FLIGHTS
 }
+
+export { getLayerFlights }
 
 function getLayerModeFolders(mode, layer) {
   const modeFolder = EFM_MODES[mode]?.folder
@@ -388,6 +391,30 @@ export function applyEfmViewerClock(viewer, layer, efmRefs) {
   }
 }
 
+export function syncEfmAtViewerTime(viewer, entry) {
+  const layer = entry?.layer
+  const efmRefs = entry?.efmRefs
+  if (!viewer || viewer.isDestroyed?.() || !layer || !efmRefs) return
+
+  const currentTime = viewer.clock.currentTime
+  const flights = getLayerFlights(layer)
+
+  flights.forEach((flight) => {
+    const dataSource = efmRefs.loadedDataSourcesByFlight?.[flight.key]
+    if (!dataSource) return
+
+    const userVisible = efmRefs.visibleFlights?.[flight.key] !== false
+    if (!userVisible) {
+      dataSource.show = false
+      return
+    }
+
+    dataSource.show = isFlightActiveAtViewerTime(flight, currentTime)
+  })
+
+  viewer.scene.requestRender()
+}
+
 async function loadEfmMode(viewer, layer, efmRefs) {
   const layerFlights = getLayerFlights(layer)
   const selectedFlights = layerFlights.filter((flight) => efmRefs.visibleFlights[flight.key])
@@ -431,7 +458,11 @@ async function loadEfmMode(viewer, layer, efmRefs) {
   emitEfmState(efmRefs)
 
   if (loadedSources.length) {
-    applyEfmViewerClock(viewer, layer, efmRefs)
+    if (efmRefs.useSharedLeeClock) {
+      syncEfmAtViewerTime(viewer, { layer, efmRefs })
+    } else {
+      applyEfmViewerClock(viewer, layer, efmRefs)
+    }
     flyCameraToEfmView(viewer, loadedSources, viewer.clock.currentTime)
     return loadedSources[0]
   }
@@ -510,7 +541,7 @@ export function unloadEfmLayer(viewer, efmRefs) {
   })
 }
 
-export function loadEfmLayer(viewer, layer) {
+export function loadEfmLayer(viewer, layer, options = {}) {
   const layerId = layer?.layerId
   const session = getLayerLoadSession(layerId)
 
@@ -536,6 +567,7 @@ export function loadEfmLayer(viewer, layer) {
     resolvedBaseUrl: null,
     _dropLinesWereVisible: false,
     cesiumLayerRef: null,
+    useSharedLeeClock: options.skipViewerClock === true,
   }
 
   registerEfmEmitterHandlers(viewer, layer, efmRefs)

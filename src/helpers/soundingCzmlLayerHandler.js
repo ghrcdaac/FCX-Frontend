@@ -34,6 +34,26 @@ function getCzmlClockSettings(dataSource) {
   return getSoundingCzmlClock(dataSource)
 }
 
+export function syncSoundingCzmlAtViewerTime(viewer, entry, active) {
+  const refs = entry?.soundingCzmlRefs
+  if (!viewer || viewer.isDestroyed?.() || !refs) return
+
+  const dataSources = refs.dataSources?.length
+    ? refs.dataSources
+    : refs.dataSource
+      ? [refs.dataSource]
+      : entry?.cesiumLayerRef
+        ? [entry.cesiumLayerRef]
+        : []
+
+  dataSources.forEach((dataSource) => {
+    if (!dataSource) return
+    dataSource.show = active !== false
+  })
+
+  viewer.scene.requestRender()
+}
+
 export function applySoundingCzmlClockToViewer(viewer, layerObject) {
   const { layer, cesiumLayerRef } = layerObject || {}
   if (!viewer || viewer.isDestroyed?.() || !layer?.useCzmlClock || !cesiumLayerRef) {
@@ -287,7 +307,8 @@ async function loadSoundingCzmlSources(layer) {
   return loadFirstAvailableSoundingCzml(layer)
 }
 
-export function loadSoundingCzmlLayer(viewer, layer) {
+export function loadSoundingCzmlLayer(viewer, layer, options = {}) {
+  const { flyOnLoad = true } = options
   const layerId = layer?.layerId
   const session = getLayerLoadSession(layerId)
 
@@ -314,9 +335,22 @@ export function loadSoundingCzmlLayer(viewer, layer) {
         }
 
         dataSources.forEach((dataSource) => stabilizeSoundingEntities(dataSource))
-        const clockTime = applySoundingClock(viewer, layer, primaryDataSource)
+        let clockTime = viewer.clock.currentTime
+        if (!options.skipViewerClock) {
+          clockTime = applySoundingClock(viewer, layer, primaryDataSource)
+        }
         dataSources.forEach((dataSource) => viewer.dataSources.add(dataSource))
-        focusCameraOnSounding(viewer, primaryDataSource, layer, clockTime)
+        if (flyOnLoad) {
+          focusCameraOnSounding(viewer, primaryDataSource, layer, clockTime)
+        }
+
+        const entry = {
+          layer,
+          soundingCzmlRefs: { dataSource: primaryDataSource, dataSources },
+        }
+        if (options.skipViewerClock) {
+          syncSoundingCzmlAtViewerTime(viewer, entry, true)
+        }
 
         return {
           cesiumLayerRef: primaryDataSource,

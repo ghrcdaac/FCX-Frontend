@@ -11,6 +11,7 @@ export const LEE_NOV19_FOLDER = "Nov19"
 export const LEE_EFM_OUTPUT_FOLDER = "output"
 export const LEE_GLM_POINTS_FILE = "lee_points.json"
 export const LEE_IOP2_END = "2022-11-19T06:00:00Z"
+export const LEE_IOP2_START = "2022-11-18T00:00:00Z"
 export const LEE_EFM_IOP2_START = "2022-11-18T22:58:12Z"
 export const LEE_EFM_IOP2_END = "2022-11-19T18:39:00Z"
 
@@ -36,6 +37,20 @@ const LEE_IOP_MONTHS = [
   "Dec",
 ]
 
+export function getLeeKnownLayerAvailability(layer) {
+  if (!layer) return null
+
+  const iopFolder = layer.leeDataSubfolders?.[0]
+
+  // DOW7 tiles were only uploaded for Nov18; skip probing missing Nov19 paths.
+  if (layer.displayMechanism === "dow7") {
+    if (iopFolder === LEE_NOV18_FOLDER) return true
+    if (iopFolder === LEE_NOV19_FOLDER) return false
+  }
+
+  return null
+}
+
 /** Derive S3 IOP folder from listing date, e.g. 2022-11-19 → Nov19 */
 export function getLeeIopFolderFromListingDate(listingDate) {
   if (!listingDate || !/^\d{4}-\d{2}-\d{2}$/.test(listingDate)) return null
@@ -60,7 +75,7 @@ export function getLeeDataSubfolders(listingDate) {
 
 const LEE_IOP_CLOCK_OVERRIDES = {
   [LEE_IOP2_PRIMARY_DATE]: {
-    start: "2022-11-18T19:00:00Z",
+    start: LEE_IOP2_START,
     end: LEE_IOP2_END,
   },
   [LEE_IOP2_THROUGH_DATE]: {
@@ -81,6 +96,18 @@ export function getLeeIopClockWindow(listingDate) {
     start: `${listingDate}T00:00:00Z`,
     end: `${listingDate}T23:59:59Z`,
   }
+}
+
+/** Layer list availability + viewer clock — prefer dataset bounds over the IOP tab window. */
+export function getLeeLayerListingTimes(listingDate, datasetStart, datasetEnd) {
+  if (datasetStart && datasetEnd) {
+    return { start: datasetStart, end: datasetEnd }
+  }
+
+  const iop = getLeeIopClockWindow(listingDate)
+  if (iop) return iop
+
+  return { start: datasetStart, end: datasetEnd }
 }
 
 export function usesLeeNov19DataPath(layer) {

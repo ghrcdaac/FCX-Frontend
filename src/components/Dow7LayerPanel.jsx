@@ -1,31 +1,46 @@
 import React, { useEffect, useState } from "react"
 import FormControlLabel from "@material-ui/core/FormControlLabel"
 import Checkbox from "@material-ui/core/Checkbox"
+import Radio from "@material-ui/core/Radio"
+import RadioGroup from "@material-ui/core/RadioGroup"
 import Typography from "@material-ui/core/Typography"
 import emitter from "../helpers/event"
 
-const LEGEND_ROWS = [
-  { color: "rgb(255, 0, 0)", label: "≥ 40 dBZ Strong echo", lowDbz: false },
-  { color: "rgb(255, 120, 0)", label: "30–39 dBZ Moderate/strong", lowDbz: false },
-  { color: "rgb(255, 220, 0)", label: "20–29 dBZ Moderate", lowDbz: false },
-  { color: "rgb(0, 220, 100)", label: "10–19 dBZ Light echo", lowDbz: false },
-  { color: "rgb(0, 180, 255)", label: "< 10 dBZ Very weak echo", lowDbz: true },
-  { color: "rgb(60, 80, 255)", label: "< 0 dBZ Weak/noisy return", lowDbz: true },
-]
+import { DOW7_REFLECTIVITY_LEGEND } from "../helpers/leeVizColors"
+import { DOW7_DISPLAY_MODES, DEFAULT_DOW7_DISPLAY_MODE } from "../helpers/dow7Constants"
+
+const LEGEND_ROWS = DOW7_REFLECTIVITY_LEGEND
+const DISPLAY_MODE_OPTIONS = Object.values(DOW7_DISPLAY_MODES)
 
 export default function Dow7LayerPanel() {
   const [lowDbzVisible, setLowDbzVisible] = useState(false)
+  const [displayMode, setDisplayMode] = useState(DEFAULT_DOW7_DISPLAY_MODE)
 
   useEffect(() => {
-    const onState = (visible) => setLowDbzVisible(!!visible)
-    emitter.on("dow7LowDbzState", onState)
-    return () => emitter.off("dow7LowDbzState", onState)
+    const onLowDbzState = (visible) => setLowDbzVisible(!!visible)
+    const onDisplayModeState = (mode) => {
+      if (mode) setDisplayMode(mode)
+    }
+
+    emitter.on("dow7LowDbzState", onLowDbzState)
+    emitter.on("dow7DisplayModeState", onDisplayModeState)
+
+    return () => {
+      emitter.off("dow7LowDbzState", onLowDbzState)
+      emitter.off("dow7DisplayModeState", onDisplayModeState)
+    }
   }, [])
 
-  const handleToggle = (event) => {
+  const handleLowDbzToggle = (event) => {
     const visible = event.target.checked
     setLowDbzVisible(visible)
     emitter.emit("dow7LowDbzChange", visible)
+  }
+
+  const handleDisplayModeChange = (event) => {
+    const mode = event.target.value
+    setDisplayMode(mode)
+    emitter.emit("dow7DisplayModeChange", mode)
   }
 
   return (
@@ -34,12 +49,36 @@ export default function Dow7LayerPanel() {
         DOW7 Reflectivity Legend
       </Typography>
 
+      <Typography variant="caption" display="block" style={{ fontWeight: 700, marginBottom: 4 }}>
+        Display mode
+      </Typography>
+      <RadioGroup
+        value={displayMode}
+        onChange={handleDisplayModeChange}
+        style={{ marginBottom: 8 }}
+      >
+        {DISPLAY_MODE_OPTIONS.map((option) => (
+          <FormControlLabel
+            key={option.key}
+            value={option.key}
+            control={<Radio size="small" color="primary" />}
+            label={option.label}
+            style={{ marginBottom: 0 }}
+          />
+        ))}
+      </RadioGroup>
+      <Typography variant="caption" display="block" style={{ opacity: 0.75, marginBottom: 8 }}>
+        {displayMode === DOW7_DISPLAY_MODES.accumulate.key
+          ? "Shows radar scans from the last 30 minutes up to the current timeline time."
+          : "Shows all radar scans for the deployment."}
+      </Typography>
+
       <FormControlLabel
         control={
           <Checkbox
             size="small"
             checked={lowDbzVisible}
-            onChange={handleToggle}
+            onChange={handleLowDbzToggle}
             color="primary"
           />
         }

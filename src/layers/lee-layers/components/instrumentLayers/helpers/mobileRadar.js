@@ -1,23 +1,29 @@
 import {
-  leeMobileRadarSurfaceCzmlPath,
-  leeMobileRadarTilesetPath,
+  buildLeeMobileRadarSurfaceCzmlUrls,
+  buildLeeMobileRadarTilesetUrls,
 } from "../../../../../config"
 import {
-  getLeeDataSubfolders,
-  getLeeIopClockWindow,
+  getLeeLayerListingTimes,
   LEE_IOP2_PRIMARY_DATE,
+  LEE_NOV18_FOLDER,
   resolveThroughDate,
 } from "./leeIop2"
+import { getLeeLayerDatasetTimes } from "./leeInstrumentDatasetTimes"
+import { LEE_S3_DEFAULT_BASE } from "../../../../../config"
 
-// S3 layout per IOP tab: Mobile_radar/{Nov18|Nov19|…}/high|low/tileset.json + dow7_surface_obs.czml
-// Folder name is derived from the listing date (2022-11-19 → Nov19) — upload only; no layer code changes.
+// DOW7 tiles live only under Mobile_radar/Nov18/ (high|low/tileset.json + dow7_surface_obs.czml).
 export default function mobileRadar(index, listingDate) {
-  const iopFolders = getLeeDataSubfolders(listingDate)
-  const clockWindow = getLeeIopClockWindow(listingDate)
-  if (!iopFolders.length || !clockWindow) return null
+  if (listingDate !== LEE_IOP2_PRIMARY_DATE) return null
 
-  const iopFolder = iopFolders[0]
-  const { start, end } = clockWindow
+  const iopFolders = [LEE_NOV18_FOLDER]
+  const dataset = getLeeLayerDatasetTimes(listingDate, "dow7")
+  if (!dataset) return null
+
+  const { start, end } = getLeeLayerListingTimes(listingDate, dataset.start, dataset.end)
+  const iopFolder = LEE_NOV18_FOLDER
+  const highTileLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/high/tileset.json`
+  const lowTileLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/low/tileset.json`
+  const surfaceCzmlLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/dow7_surface_obs.czml`
 
   return {
     layerId: `${listingDate}-${index}-mobile-radar`,
@@ -31,14 +37,18 @@ export default function mobileRadar(index, listingDate) {
     throughDate: resolveThroughDate(start, end),
     start,
     end,
+    clockMultiplier: 60,
     type: "tiles",
     platform: "ground",
     displayMechanism: "dow7",
-    highTileLocation: leeMobileRadarTilesetPath(iopFolder, "high"),
-    lowTileLocation: leeMobileRadarTilesetPath(iopFolder, "low"),
-    surfaceCzmlLocation: leeMobileRadarSurfaceCzmlPath(iopFolder),
+    highTileUrls: [highTileLocation, ...buildLeeMobileRadarTilesetUrls(iopFolder, "high").filter((url) => url !== highTileLocation)],
+    lowTileUrls: [lowTileLocation, ...buildLeeMobileRadarTilesetUrls(iopFolder, "low").filter((url) => url !== lowTileLocation)],
+    surfaceCzmlUrls: [surfaceCzmlLocation, ...buildLeeMobileRadarSurfaceCzmlUrls(iopFolder).filter((url) => url !== surfaceCzmlLocation)],
+    highTileLocation,
+    lowTileLocation,
+    surfaceCzmlLocation,
     leeDataSubfolders: iopFolders,
-    defaultSelected: listingDate === LEE_IOP2_PRIMARY_DATE ? undefined : false,
+    defaultSelected: false,
     center: {
       lon: -76.026593,
       lat: 43.990895,

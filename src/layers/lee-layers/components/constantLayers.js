@@ -1,4 +1,5 @@
 import { dataBaseUrl } from "../../../config"
+import { LEE_VIZ_LEGENDS } from "../../../helpers/leeVizColors"
 
 const campaign = "lee"
 
@@ -27,8 +28,14 @@ const links = [
 const legends = {
   leemobileradar: {
     url: `${dataBaseUrl}/fieldcampaign/goesrplt/legend/lma_stations_legend.png`,
-    color: "lightred",
+    ...LEE_VIZ_LEGENDS.leemobileradar,
   },
+  leenexrad: { ...LEE_VIZ_LEGENDS.leenexrad },
+  leeglm: { ...LEE_VIZ_LEGENDS.leeglm },
+  leecombinedlma: { ...LEE_VIZ_LEGENDS.leecombinedlma },
+  leeoswegosoundings: { ...LEE_VIZ_LEGENDS.leeoswegosoundings },
+  leensslmobilesounding: { ...LEE_VIZ_LEGENDS.leensslmobilesounding },
+  leeballoonefm: { ...LEE_VIZ_LEGENDS.leeballoonefm },
 }
 
 const defaultCamera = {}

@@ -16,7 +16,8 @@ export function unloadLma3dtileLayer(viewer, lma3dtileRefs) {
   }
 }
 
-export function loadLma3dtileLayer(viewer, layer) {
+export function loadLma3dtileLayer(viewer, layer, options = {}) {
+  const { flyOnLoad = true, pointSize = 4.0, skipViewerClock = false } = options
   const layerId = layer?.layerId
   const session = getLayerLoadSession(layerId)
 
@@ -37,23 +38,25 @@ export function loadLma3dtileLayer(viewer, layer) {
 
   tileset.style = new Cesium3DTileStyle({
     color: "${COLOR}",
-    pointSize: 4.0,
+    pointSize,
   })
 
   viewer.scene.primitives.add(tileset)
 
-  const startTime = JulianDate.fromIso8601(layer.start || "2022-11-18T00:00:00Z")
-  const endTime = JulianDate.fromIso8601(layer.end || "2022-11-19T06:00:00Z")
+  if (!options.skipViewerClock) {
+    const startTime = JulianDate.fromIso8601(layer.start || "2022-11-18T00:00:00Z")
+    const endTime = JulianDate.fromIso8601(layer.end || "2022-11-19T06:00:00Z")
 
-  viewer.clock.startTime = startTime.clone()
-  viewer.clock.stopTime = endTime.clone()
-  viewer.clock.currentTime = startTime.clone()
-  viewer.clock.multiplier = 60
-  viewer.clock.shouldAnimate = true
-  viewer.clock.clockRange = ClockRange.LOOP_STOP
+    viewer.clock.startTime = startTime.clone()
+    viewer.clock.stopTime = endTime.clone()
+    viewer.clock.currentTime = startTime.clone()
+    viewer.clock.multiplier = 60
+    viewer.clock.shouldAnimate = true
+    viewer.clock.clockRange = ClockRange.LOOP_STOP
 
-  if (viewer.timeline) {
-    viewer.timeline.zoomTo(startTime, endTime)
+    if (viewer.timeline) {
+      viewer.timeline.zoomTo(startTime, endTime)
+    }
   }
 
   return new Promise((resolve, reject) => {
@@ -77,7 +80,9 @@ export function loadLma3dtileLayer(viewer, layer) {
         return
       }
 
-      viewer.zoomTo(tileset)
+      if (flyOnLoad) {
+        viewer.zoomTo(tileset)
+      }
       resolve({
         cesiumLayerRef: tileset,
         lma3dtileRefs: { tileset },

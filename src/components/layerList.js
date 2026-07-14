@@ -21,14 +21,17 @@ import Accordion from "@material-ui/core/Accordion"
 import AccordionSummary from "@material-ui/core/AccordionSummary"
 import AccordionDetails from "@material-ui/core/AccordionDetails"
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore"
-import moment from "moment"
 import allActions from "../state/actions"
 import {BsCardImage} from 'react-icons/bs'
 import Dow7LayerPanel from "./Dow7LayerPanel"
 import EfmLayerPanel from "./EfmLayerPanel"
 import NexradLayerPanel from "./NexradLayerPanel"
 import GlmLayerPanel from "./GlmLayerPanel"
-import { getLeeLayersWithData } from "../helpers/leeDataAvailability"
+import { getLeeLayersAvailabilityInfo, enrichLeeLayerDatasetTimes } from "../helpers/leeDataAvailability"
+import {
+  formatLeeAvailabilityTimes,
+  getLeeAvailabilityBarLayout,
+} from "../helpers/leeAvailabilityTimeline"
 
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 import { Dock, viewer } from "./dock"
@@ -58,19 +61,31 @@ export default function LayerList({ campaign }) {
     campaign.layers[0]?.date || null
   )
   const [leeAvailableLayerIds, setLeeAvailableLayerIds] = useState(null)
+  const [leeDatasetTimesByLayerId, setLeeDatasetTimesByLayerId] = useState({})
 
   useEffect(() => {
     if (!leeDateFilter) {
       setLeeAvailableLayerIds(null)
+      setLeeDatasetTimesByLayerId({})
       return undefined
     }
 
     let cancelled = false
     const allLayers = campaign.layers.flatMap((group) => group.items || [])
 
-    getLeeLayersWithData(allLayers).then((availableIds) => {
+    getLeeLayersAvailabilityInfo(allLayers).then(({ availableIds, datasetTimesByLayerId }) => {
       if (!cancelled) {
         setLeeAvailableLayerIds(availableIds)
+        setLeeDatasetTimesByLayerId(datasetTimesByLayerId)
+      }
+    })
+
+    enrichLeeLayerDatasetTimes(allLayers).then((datasetTimesByLayerId) => {
+      if (!cancelled && Object.keys(datasetTimesByLayerId).length) {
+        setLeeDatasetTimesByLayerId((current) => ({
+          ...current,
+          ...datasetTimesByLayerId,
+        }))
       }
     })
 
@@ -128,6 +143,41 @@ export default function LayerList({ campaign }) {
     }
 
     if (leeDateFilter && leeAvailableLayerIds === null) {
+      dates.push(
+        <Accordion
+          key={"panel-loading-" + itemIndex}
+          expanded={activeListingDate === layerItems.date}
+          onChange={(_event, isExpanded) => {
+            if (isExpanded) {
+              selectListingDate(layerItems.date)
+            } else {
+              setActiveListingDate((current) =>
+                current === layerItems.date ? null : current
+              )
+            }
+          }}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel-loading-content">
+            <div style={{ width: "100%" }}>
+              <Box display="flex" justifyContent="center" m={1} p={1}>
+                <Box p={1}>
+                  <MdDateRange /> {layerItems.date}
+                </Box>
+              </Box>
+            </div>
+          </AccordionSummary>
+          <AccordionDetails>
+            <List className={classes.root}>
+              <ListItem>
+                <ListItemIcon>
+                  <CircularProgress size={20} />
+                </ListItemIcon>
+                <ListItemText primary="Checking instrument availability…" />
+              </ListItem>
+            </List>
+          </AccordionDetails>
+        </Accordion>
+      )
       continue
     }
 
@@ -208,6 +258,13 @@ export default function LayerList({ campaign }) {
         }
       }
 
+      const layerLegend = campaign.legends?.[layerValue.shortName]
+      const layerRangeStyle = layerLegend?.timelineGradient
+        ? { background: layerLegend.timelineGradient }
+        : layerLegend?.color
+          ? { backgroundColor: layerLegend.color }
+          : { backgroundColor: "#4a90d9" }
+
       if (layerValue.platform === "satellite") {
         icon = <FaSatellite />
       } else if (layerValue.platform === "air") {
@@ -219,7 +276,8 @@ export default function LayerList({ campaign }) {
         icon = <CircularProgress />
       }
       if (state.layerStatus.loaded.indexOf(layerValue.layerId) !== -1) {
-        icon = <div style={{ color: "green" }}>{icon}</div>
+        const loadedTint = layerLegend?.color || "green"
+        icon = <div style={{ color: loadedTint }}>{icon}</div>
       }
 
       let layerVariable
@@ -232,39 +290,80 @@ export default function LayerList({ campaign }) {
         )
       }
 
+      const probedTimes = leeDatasetTimesByLayerId[layerValue.layerId]
+      const layerStartIso = probedTimes?.start || layerValue.start
+      const layerEndIso = probedTimes?.end || layerValue.end
+
       let layerAvailability
-      if (layerValue.start && layerValue.end) {
-        const startMoment = moment.utc(layerValue.start)
-        const endMoment = moment.utc(layerValue.end)
-        const sameClockTime =
-          startMoment.format("HH:mm:ss") === endMoment.format("HH:mm:ss")
-        const availabilityFormat = sameClockTime || !startMoment.isSame(endMoment, "day")
-          ? "YYYY-MM-DD HH:mm:ss"
-          : "HH:mm:ss"
-        const layerStartTime = startMoment.format(availabilityFormat)
-        const layerEndTime = endMoment.format(availabilityFormat)
-        const utcSuffix = availabilityFormat === "YYYY-MM-DD HH:mm:ss" ? " UTC" : ""
+      let layerAvailabilityRange
+      if (layerStartIso && layerEndIso) {
+        const { startLabel, endLabel, utcSuffix } = formatLeeAvailabilityTimes(
+          layerStartIso,
+          layerEndIso
+        )
 
         layerAvailability = (
           <span>
             {" "}
-            <i>{"Availability: "}</i> {layerStartTime + " - " + layerEndTime + utcSuffix}
+            <i>{"Availability: "}</i> {startLabel + " - " + endLabel + utcSuffix}
           </span>
         )
-      }
 
-      let layerVariableAvailability
+        const barLayout = leeDateFilter
+          ? getLeeAvailabilityBarLayout(layerItems.date, layerStartIso, layerEndIso)
+          : null
 
-      if (layerVariable) {
-        layerVariableAvailability = (
-          <span style={{ fontSize: 12 }}>
-            {layerVariable}
-            {layerVariable && <br />}
-            {layerAvailability}
-          </span>
-        )
-      } else {
-        layerVariableAvailability = <span style={{ fontSize: 12 }}>{layerAvailability}</span>
+        if (barLayout) {
+          layerAvailabilityRange = (
+            <div style={{ marginTop: 6, width: "100%" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 10,
+                  opacity: 0.7,
+                  marginBottom: 2,
+                }}
+              >
+                <span>{barLayout.iopStartLabel}</span>
+                <span>{barLayout.iopEndLabel}</span>
+              </div>
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: 8,
+                  borderRadius: 4,
+                  background: "rgba(0,0,0,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${barLayout.leftPct}%`,
+                    width: `${Math.max(barLayout.widthPct, 1)}%`,
+                    height: "100%",
+                    borderRadius: 4,
+                    minWidth: 2,
+                    ...layerRangeStyle,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        } else {
+          layerAvailabilityRange = (
+            <div
+              style={{
+                width: "100%",
+                height: 8,
+                borderRadius: 4,
+                marginTop: 6,
+                ...layerRangeStyle,
+              }}
+            />
+          )
+        }
       }
 
       // with the gathered information, populate and push the layer card to the layers array.
@@ -290,9 +389,26 @@ export default function LayerList({ campaign }) {
               />
             </ListItemSecondaryAction>
           </ListItem>
-          {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && layerVariableAvailability && (
+          {layerAvailability && (
+            <ListItem key={"secondary-item-availability" + layerIndex} dense style={{ display: "block" }}>
+              <ListItemText
+                id={`secondary-list-availability-${layerValue.layerId}`}
+                style={{ width: "100%", marginRight: 0 }}
+                primary={
+                  <span style={{ fontSize: 12, display: "block", width: "100%" }}>
+                    {layerAvailability}
+                    {layerAvailabilityRange}
+                  </span>
+                }
+              />
+            </ListItem>
+          )}
+          {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && layerVariable && (
             <ListItem key={"secondary-item-variable" + layerIndex}>
-              <ListItemText id={`secondary-list-label-${layerValue.layerId}`} primary={layerVariableAvailability}></ListItemText>
+              <ListItemText
+                id={`secondary-list-label-${layerValue.layerId}`}
+                primary={<span style={{ fontSize: 12 }}>{layerVariable}</span>}
+              />
             </ListItem>
           )}
           {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && isDow7Layer && (

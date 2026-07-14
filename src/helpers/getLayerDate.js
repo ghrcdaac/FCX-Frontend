@@ -1,4 +1,19 @@
 import {JulianDate} from "cesium";
+import moment from "moment";
+
+export function viewerDateMatchesLayer(layer, viewerDate) {
+  if (!layer || !viewerDate) return false
+
+  const listingDay = moment.utc(layer.listingDate || layer.date).format("YYYY-MM-DD")
+  if (viewerDate === listingDay) return true
+
+  if (layer.throughDate) {
+    const throughDay = moment.utc(layer.throughDate).format("YYYY-MM-DD")
+    if (viewerDate === throughDay) return true
+  }
+
+  return false
+}
 
 export function extractLayerDate(layerObject){
     /**

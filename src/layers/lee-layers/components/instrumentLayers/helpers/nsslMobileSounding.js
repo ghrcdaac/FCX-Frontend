@@ -4,14 +4,14 @@ import {
   LEE_IOP2_THROUGH_DATE,
   LEE_NOV18_FOLDER,
   LEE_NOV19_FOLDER,
+  getLeeLayerListingTimes,
 } from "./leeIop2"
+import { getLeeLayerDatasetTimes } from "./leeInstrumentDatasetTimes"
 
 const NSSL_SESSIONS = {
   [LEE_IOP2_PRIMARY_DATE]: {
     iopFolder: LEE_NOV18_FOLDER,
     files: ["nssl1_225843_sounding_animated.czml"],
-    start: "2022-11-18T22:58:43Z",
-    end: "2022-11-19T01:39:25Z",
     useCzmlClock: true,
   },
   [LEE_IOP2_THROUGH_DATE]: {
@@ -20,8 +20,6 @@ const NSSL_SESSIONS = {
       "nssl1_013925_sounding_animated.czml",
       "nssl1_025242_sounding_animated.czml",
     ],
-    start: "2022-11-19T01:39:25Z",
-    end: "2022-11-19T04:00:00Z",
     useCzmlClock: false,
   },
 }
@@ -35,6 +33,8 @@ export default function nsslMobileSounding(index, listingDate) {
   if (!session) return null
 
   const czmlLocations = buildNsslCzmlUrls(session.iopFolder, session.files)
+  const dataset = getLeeLayerDatasetTimes(listingDate, "nsslSoundings")
+  const { start, end } = getLeeLayerListingTimes(listingDate, dataset?.start, dataset?.end)
 
   return {
     layerId: `${listingDate}-${index}-nssl-mobile-sounding`,
@@ -44,8 +44,8 @@ export default function nsslMobileSounding(index, listingDate) {
     variableName: "Atmospheric Profile",
     date: listingDate,
     listingDate,
-    start: session.start,
-    end: session.end,
+    start,
+    end,
     useCzmlClock: session.useCzmlClock,
     launchEntityId: "launch_site",
     type: "instrument",

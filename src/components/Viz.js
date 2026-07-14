@@ -42,7 +42,7 @@ import { getColorExpression, getShowExpression, loadData, getTimes, mousePositio
 import { checkPath } from "../helpers/path"
 import emitter from "../helpers/event"
 import { getLayer, adjustHeightOfPanels, getGPUInfo } from "../helpers/utils"
-import { Dock, viewer } from "./dock"
+import { Dock, viewer, getViewer } from "./dock"
 import store from "../state/store"
 import allActions from "../state/actions"
 import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/cesium/dates' 
@@ -51,13 +51,35 @@ import { addTimeToISODate } from "../layers/utils/layerDates"
 
 import ImageViewer from "./imageViewerModal";
 import { extractLayerStartDatetime, extractLayerDate, viewerDateMatchesLayer } from "../helpers/getLayerDate";
-import { loadDow7Layer, unloadDow7Layer } from "../helpers/dow7LayerHandler";
+import { loadDow7Layer, unloadDow7Layer, flyToDow7InitialView, syncDow7MultiLayerVisibility } from "../helpers/dow7LayerHandler";
 import { loadLma3dtileLayer, unloadLma3dtileLayer } from "../helpers/lma3dtileLayerHandler";
 import { loadSoundingCzmlLayer, unloadSoundingCzmlLayer, applySoundingCzmlClockToViewer } from "../helpers/soundingCzmlLayerHandler";
 import { loadEfmLayer, unloadEfmLayer, applyEfmViewerClock } from "../helpers/efmLayerHandler";
 import { loadNexradLayer, unloadNexradLayer, unloadAllNexradLayers, applyNexradViewerClock, abortNexradLayerLoad } from "../helpers/nexradLayerHandler";
 import { loadGlmLayer, unloadGlmLayer, applyGlmViewerClock } from "../helpers/glmLayerHandler";
 import { startLayerLoad, cancelLayerLoad } from "../helpers/layerLoadSession";
+import {
+  applyCombinedLeeLayersClock,
+  pickLeeLayersOnListingDate,
+  shouldUseLeeDatasetClock,
+} from "../helpers/leeCombinedClock";
+import {
+  registerLeeInstrumentClockSync,
+  syncLeeInstrumentsAtViewerTime,
+  unregisterLeeInstrumentClockSync,
+} from "../helpers/leeInstrumentSync";
+import {
+  shouldLeeRegionalLayerFlyOnLoad,
+  shouldLeeWideAreaLayerFlyOnLoad,
+  shouldUseLeeRegionalCamera,
+  shouldUseLeeWideAreaCamera,
+  shouldUseLeeMultiInstrumentCamera,
+  isLeeWideAreaLayer,
+  flyToLeeCamera,
+  getLeeMultiInstrumentCamera,
+  LEE_GLM_CONTINENTAL_CAMERA,
+  LEE_REGIONAL_CAMERA,
+} from "../helpers/leeCameraPolicy";
 
 class Viz extends Component {
     
@@ -75,6 +97,7 @@ class Viz extends Component {
         this.pointsCollection = null
         this.Temporal3DTileset = extendCesium3DTileset({ Cesium3DTileset, Cesium3DTile, Cesium3DTileOptimizations, Cesium3DTileRefine, CullingVolume, RuntimeError, TimeInterval, defined })
         this.layerChanged = false
+        this.leeClockSync = { handler: null, timelineHandler: null }
         this.state = {
             showImageViewer: false,
             imageViewerUrl: null
@@ -85,11 +108,107 @@ class Viz extends Component {
         return selectedLayers.includes(layerId)
     }
 
+    isLeeDow7Selected(campaign, selectedLayers = store.getState().selectedLayers) {
+        return (selectedLayers || []).some((layerId) => {
+            const layer = getLayer(layerId, campaign)
+            return (
+                layer?.fieldCampaignName === "LEE" &&
+                layer?.displayMechanism === "dow7"
+            )
+        })
+    }
+
     abandonStaleLayerLoad(layerId, unloadFn, refs) {
         if (refs) {
             unloadFn(viewer, refs)
         }
         store.dispatch(allActions.listActions.markUnLoaded(layerId))
+    }
+
+    getLeeLoadOptions(layer, selectedLayerId) {
+        if (layer?.fieldCampaignName !== "LEE") {
+            return {}
+        }
+
+        const campaign = this.props.campaign
+        const listingDate = layer.listingDate || layer.date
+        const selectedIds = store.getState().selectedLayers || []
+        const selectedLeeOnDate = selectedIds.filter((id) => {
+            const selectedLayer = getLayer(id, campaign)
+            if (!selectedLayer || selectedLayer.fieldCampaignName !== "LEE") return false
+            return (selectedLayer.listingDate || selectedLayer.date) === listingDate
+        })
+
+        const dow7Selected = selectedLeeOnDate.some((id) => {
+            const selectedLayer = getLayer(id, campaign)
+            return selectedLayer?.displayMechanism === "dow7"
+        })
+
+        let flyOnLoad = isLeeWideAreaLayer(layer)
+            ? shouldLeeWideAreaLayerFlyOnLoad(layer, this.activeLayers, selectedLayerId)
+            : shouldLeeRegionalLayerFlyOnLoad(layer, this.activeLayers, selectedLayerId)
+
+        if (dow7Selected && layer.displayMechanism !== "dow7") {
+            flyOnLoad = false
+        }
+
+        const inProgressLeeOnDate = (store.getState().layerStatus?.inProgress || []).filter(
+            (id) => {
+                if (id === selectedLayerId) return false
+                const loadingLayer = getLayer(id, campaign)
+                if (!loadingLayer || loadingLayer.fieldCampaignName !== "LEE") return false
+                return (loadingLayer.listingDate || loadingLayer.date) === listingDate
+            }
+        )
+
+        if (inProgressLeeOnDate.length > 0 && flyOnLoad) {
+            flyOnLoad = false
+        }
+
+        if (layer.displayMechanism === "dow7") {
+            const isOnlySelectedLeeOnDate =
+                selectedLeeOnDate.length === 1 && selectedLeeOnDate[0] === selectedLayerId
+            if (isOnlySelectedLeeOnDate) {
+                flyOnLoad = true
+            } else if (this.activeLayers.length > 0) {
+                flyOnLoad = false
+            }
+        }
+
+        const options = {
+            flyOnLoad,
+            visibilityBoost:
+                selectedLeeOnDate.length > 1 ||
+                layer.displayMechanism === "dow7" ||
+                dow7Selected,
+        }
+        if (dow7Selected && layer.displayMechanism === "nexrad") {
+            options.imageryAlpha = 0.5
+        }
+        if (dow7Selected && layer.displayMechanism === "lma3dtile") {
+            options.pointSize = 2.5
+        }
+        if (isLeeWideAreaLayer(layer) && flyOnLoad) {
+            options.continentalCamera = LEE_GLM_CONTINENTAL_CAMERA
+        }
+
+        const sharedLeeClock =
+            selectedLeeOnDate.length > 1 ||
+            this.activeLayers.some((entry) => {
+                const activeLayer = entry?.layer
+                return (
+                    activeLayer?.fieldCampaignName === "LEE" &&
+                    (activeLayer.listingDate || activeLayer.date) === listingDate &&
+                    activeLayer.layerId !== selectedLayerId
+                )
+            })
+
+        if (sharedLeeClock) {
+            options.skipViewerClock = true
+            options.sharedLeeClock = true
+        }
+
+        return options
     }
 
     removeStaleViewerEntry(layer, result) {
@@ -134,6 +253,11 @@ class Viz extends Component {
 
         this.activeLayers.push(activeEntry)
         store.dispatch(allActions.listActions.markLoaded(selectedLayerId))
+
+        if (this.activeLayers.length > 1) {
+            syncDow7MultiLayerVisibility(viewer, this.activeLayers)
+        }
+
         return result.cesiumLayerRef
     }
 
@@ -214,6 +338,9 @@ class Viz extends Component {
         }
 
         /** For the remainder of the selected layers, iterate over it and visualize in cesium viewer. **/
+        const activeLayerCountBeforeBatch = this.activeLayers.length
+        const batchLoadMechanisms = []
+
         for (const [, selectedLayerId] of selectedLayers.entries()) {
             const layer = getLayer(selectedLayerId, campaign)
             if (!layer) {
@@ -277,46 +404,82 @@ class Viz extends Component {
             if (layer.displayMechanism === "czml") {
                 let czmlPromise = this.handleCZML(layer, selectedLayerId);
                 layersRenderPromises.push(czmlPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "dow7") {
                 let dow7Promise = this.handleDow7(layer, selectedLayerId);
                 layersRenderPromises.push(dow7Promise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "lma3dtile") {
                 let lmaPromise = this.handleLma3dtile(layer, selectedLayerId);
                 layersRenderPromises.push(lmaPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "soundingCzml") {
                 let soundingPromise = this.handleSoundingCzml(layer, selectedLayerId);
                 layersRenderPromises.push(soundingPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "efm") {
                 let efmPromise = this.handleEfm(layer, selectedLayerId);
                 layersRenderPromises.push(efmPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "nexrad") {
                 let nexradPromise = this.handleNexrad(layer, selectedLayerId);
                 layersRenderPromises.push(nexradPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "glm") {
                 let glmPromise = this.handleGlm(layer, selectedLayerId);
                 layersRenderPromises.push(glmPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             } else if (layer.displayMechanism === "3dtile") {
                 let tilePromise = this.handle3dTiles(layer, selectedLayerId);
                 layersRenderPromises.push(tilePromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             }
             else if (layer.displayMechanism === "points") {
                 let pointPrimitivePromise = this.handlePointPrimitive(layer, selectedLayerId);
                 layersRenderPromises.push(pointPrimitivePromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             }
             else if (layer.displayMechanism === "wmts") {
                 let wmtsPromise = this.handleWMTS(layer, selectedLayerId);
                 layersRenderPromises.push(wmtsPromise);
+                batchLoadMechanisms.push(layer.displayMechanism);
             }
         }
 
         // Only reset timeline/camera when new layers actually finished loading.
         if (layersRenderPromises.length > 0) {
+            const addedOnlyDow7 =
+                batchLoadMechanisms.length === 1 &&
+                batchLoadMechanisms[0] === "dow7" &&
+                activeLayerCountBeforeBatch > 0
+
             Promise.all(layersRenderPromises).then(() => {
                 const pactiveLayer = this.extractPrioritizedLayer(this.activeLayers)
                 if (!pactiveLayer) return
                 this.prioritizedTimelineZoom(pactiveLayer, campaign)
-                if (this.layerChanged) {
+
+                const shouldFrameCamera =
+                    !addedOnlyDow7 &&
+                    (this.layerChanged ||
+                        shouldUseLeeMultiInstrumentCamera(this.activeLayers) ||
+                        (batchLoadMechanisms.length === 1 && batchLoadMechanisms[0] === "dow7"))
+
+                if (shouldFrameCamera) {
                     this.prioritizedCameraPosition(pactiveLayer, this.activeLayers, campaign)
+                }
+
+                if (!addedOnlyDow7 && shouldUseLeeMultiInstrumentCamera(this.activeLayers)) {
+                    syncDow7MultiLayerVisibility(viewer, this.activeLayers, { flyToView: true })
+                    ;[800, 2000, 4000].forEach((delayMs) => {
+                        setTimeout(() => {
+                            syncDow7MultiLayerVisibility(viewer, this.activeLayers, { flyToView: true })
+                        }, delayMs)
+                    })
+                } else {
+                    syncDow7MultiLayerVisibility(viewer, this.activeLayers)
+                    setTimeout(() => {
+                        syncDow7MultiLayerVisibility(viewer, this.activeLayers)
+                    }, 1500)
                 }
             }).catch(error => console.error(error))
         }
@@ -325,19 +488,30 @@ class Viz extends Component {
     // visualization handlers for different visualization types START
 
     handleDow7(layer, selectedLayerId) {
-        return loadDow7Layer(viewer, layer)
+        const activeViewer = getViewer()
+        if (!activeViewer) {
+            console.warn("DOW7: Cesium viewer not ready yet")
+            store.dispatch(allActions.listActions.markUnLoaded(selectedLayerId))
+            return Promise.resolve(null)
+        }
+
+        const leeOptions = this.getLeeLoadOptions(layer, selectedLayerId)
+        return loadDow7Layer(activeViewer, layer, leeOptions)
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadDow7Layer, "dow7Refs"))
             .catch((error) => {
                 console.error("Error loading DOW7:", error)
                 store.dispatch(allActions.listActions.markUnLoaded(selectedLayerId))
-                store.dispatch(allActions.listActions.handleToggle(selectedLayerId))
+                window.alert(
+                    `Error loading DOW7. ${error?.message || "Check the browser console for details."}`
+                )
                 this.errorLayers.push(selectedLayerId)
-                throw error
+                return null
             })
     }
 
     handleLma3dtile(layer, selectedLayerId) {
-        return loadLma3dtileLayer(viewer, layer)
+        const leeOptions = this.getLeeLoadOptions(layer, selectedLayerId)
+        return loadLma3dtileLayer(viewer, layer, leeOptions)
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadLma3dtileLayer, "lma3dtileRefs"))
             .catch((error) => {
                 console.error(error)
@@ -348,7 +522,8 @@ class Viz extends Component {
     }
 
     handleSoundingCzml(layer, selectedLayerId) {
-        return loadSoundingCzmlLayer(viewer, layer)
+        const leeOptions = this.getLeeLoadOptions(layer, selectedLayerId)
+        return loadSoundingCzmlLayer(viewer, layer, leeOptions)
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadSoundingCzmlLayer, "soundingCzmlRefs"))
             .catch((error) => {
                 const triedUrls = [
@@ -364,7 +539,8 @@ class Viz extends Component {
     }
 
     handleEfm(layer, selectedLayerId) {
-        return loadEfmLayer(viewer, layer)
+        const leeOptions = this.getLeeLoadOptions(layer, selectedLayerId)
+        return loadEfmLayer(viewer, layer, leeOptions)
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadEfmLayer, "efmRefs"))
             .catch((error) => {
                 console.error(`Error loading ${layer.displayName}:`, error)
@@ -383,7 +559,7 @@ class Viz extends Component {
             (entry) => entry.layer.displayMechanism !== "nexrad"
         )
 
-        return loadNexradLayer(viewer, layer)
+        return loadNexradLayer(viewer, layer, this.getLeeLoadOptions(layer, selectedLayerId))
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadNexradLayer, "nexradRefs"))
             .catch((error) => {
                 console.error(`Error loading ${layer.displayName}:`, error)
@@ -394,7 +570,8 @@ class Viz extends Component {
     }
 
     handleGlm(layer, selectedLayerId) {
-        return loadGlmLayer(viewer, layer)
+        const leeOptions = this.getLeeLoadOptions(layer, selectedLayerId)
+        return loadGlmLayer(viewer, layer, leeOptions)
             .then((result) => this.commitLayerLoad(selectedLayerId, layer, result, unloadGlmLayer, "glmRefs"))
             .catch((error) => {
                 console.error(`Error loading ${layer.displayName}:`, error)
@@ -808,40 +985,77 @@ class Viz extends Component {
     }
 
     prioritizedTimelineZoom = (layer, campaign) => {
+        if (!layer?.layer) return
+
+        const layerMeta = layer.layer
+        const listingDate = layerMeta.listingDate || layerMeta.date
+
+        if (layerMeta.fieldCampaignName === "LEE" && listingDate) {
+            const leeOnDate = pickLeeLayersOnListingDate(this.activeLayers, listingDate)
+            if (leeOnDate.length >= 2) {
+                applyCombinedLeeLayersClock(viewer, this.activeLayers, listingDate)
+                syncLeeInstrumentsAtViewerTime(viewer, this.activeLayers)
+                registerLeeInstrumentClockSync(
+                    viewer,
+                    () => this.activeLayers,
+                    this.leeClockSync
+                )
+                return
+            }
+        }
+
+        if (layerMeta.fieldCampaignName === "LEE" && listingDate) {
+            if (shouldUseLeeDatasetClock(this.activeLayers, listingDate)) {
+                applyCombinedLeeLayersClock(viewer, this.activeLayers, listingDate)
+                syncLeeInstrumentsAtViewerTime(viewer, this.activeLayers)
+                unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
+                return
+            }
+        }
+
+        unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
+
         const activeNexrad = this.pickActiveNexradLayer(this.activeLayers)
         if (activeNexrad) {
+            unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
             applyNexradViewerClock(viewer, activeNexrad.layer, activeNexrad.nexradRefs)
             return
         }
 
-        if (!layer?.layer) return
-
-        const layerMeta = layer.layer;
-
         if (layerMeta.displayMechanism === "efm" && layer.efmRefs) {
+            unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
             applyEfmViewerClock(viewer, layerMeta, layer.efmRefs);
             return;
         }
 
         if (layerMeta.displayMechanism === "nexrad" && layer.nexradRefs) {
+            unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
             applyNexradViewerClock(viewer, layerMeta, layer.nexradRefs);
             return;
         }
 
         if (layerMeta.displayMechanism === "glm" && layer.glmRefs) {
+            unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
             applyGlmViewerClock(viewer, layerMeta, layer.glmRefs);
             return;
         }
 
         if (layerMeta.useCzmlClock && applySoundingCzmlClockToViewer(viewer, layer)) {
+            unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
             return;
         }
+
+        unregisterLeeInstrumentClockSync(viewer, this.leeClockSync)
 
         // get start datetime from that layer
         const layerStartDateTime = extractLayerStartDatetime(layer, campaign);
         const date = extractLayerDate(layer);
         const campaignStartDateTime = layerMeta.start || `${date}T00:00:00Z`;
-        const campaignEndDateTime = layerMeta.end || `${date}T23:59:59Z`;
+        const campaignEndDateTime =
+            layerMeta.end ||
+            (layerMeta.fieldCampaignName === "LEE" && layerMeta.throughDate
+                ? `${layerMeta.throughDate}T23:59:59Z`
+                : `${date}T23:59:59Z`);
         if (layerStartDateTime) {
             viewer.automaticallyTrackDataSourceClocks = false;
             viewer.clock.currentTime = JulianDate.fromIso8601(layerStartDateTime);
@@ -861,6 +1075,16 @@ class Viz extends Component {
 
     prioritizedCameraPosition = (prioritizedActiveLayer, activeLayers, campaign) => {
         if (!prioritizedActiveLayer?.layer || !activeLayers?.length) {
+            return
+        }
+
+        if (shouldUseLeeMultiInstrumentCamera(activeLayers)) {
+            flyToLeeCamera(viewer, getLeeMultiInstrumentCamera(activeLayers))
+            return
+        }
+
+        if (shouldUseLeeWideAreaCamera(activeLayers)) {
+            flyToLeeCamera(viewer, LEE_GLM_CONTINENTAL_CAMERA)
             return
         }
 
@@ -916,6 +1140,16 @@ class Viz extends Component {
             return;
         }
         if (prioritizedActiveLayer.layer.displayMechanism === "dow7") {
+            const { cesiumLayerRef: tileset } = prioritizedActiveLayer
+            if (tileset) {
+                try {
+                    viewer.zoomTo(tileset)
+                    return
+                } catch (err) {
+                    console.warn("DOW7 zoomTo tileset failed, using center fallback:", err)
+                }
+            }
+
             const center = prioritizedActiveLayer.layer.center
             if (center) {
                 const cameraHeight = Math.max(center.radius * 2.8, 170000)
@@ -940,6 +1174,10 @@ class Viz extends Component {
             const {cesiumLayerRef: tileset} = prioritizedActiveLayer;
             viewer.zoomTo(tileset);
             return;
+        }
+
+        if (shouldUseLeeRegionalCamera(activeLayers)) {
+            flyToLeeCamera(viewer, LEE_REGIONAL_CAMERA)
         }
     }
 
@@ -1023,98 +1261,122 @@ class Viz extends Component {
         /** Fetch the campaign **/
         const campaign = (() => this.props.campaign)()
 
-        /** Error messages if viewer or campaign missing **/
-
-        // printCameraAnglesInterval(viewer)
-        if (!viewer) {
-            alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
-        }
-        
-        if (isEmpty(campaign)) {
-            alert(`Error: Couldn't fetch the data. Please contact support team at ${supportEmail}`)
-        }
-        
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener((_tiles) => { })
-
-        viewer.imageryLayers.layerAdded.addEventListener((layer) => {
-            if (layer.imageryProvider) {
-                // we can raise an event here for imagery ${layer.imageryProvider.url} loaded
-            }
-        })
-      
-        /** Set Viewer clock settings **/
-
-        viewer.clock.clockRange = ClockRange.LOOP_STOP
-        viewer.clock.multiplier = 10
-
-        /** Save the camera instance, after camera is set in viewer **/
-
-        setInterval(() => {
-            let camera = viewer.scene.camera
-            this.savedSamera = {
-                position: camera.position,
-                direction: camera.direction,
-                up: camera.up,
-                right: camera.right,
-                currentTime: viewer.clock.currentTime,
-            }
-        }, 2000)
-
-        /** Select current set of layers (in component state); by checking if layers changed (using redux store) **/
-
-        //check for default selected layers
-        this.readStateAndRender(campaign)
-
-        store.subscribe(() => {
-            this.readStateAndRender(campaign)
-        })
-
-        /******* EVENT LISTNERS *******/
-
-        /** Prepare layers to render, if the dock where cesium is displayed is ready. **/
-        emitter.on("dockRender", () => {
-            setTimeout(() => {
-                if (!checkPath()) return
-                let entitiesLength = viewer.entities.values.length
-                let dataSourcesLength = viewer.dataSources.length
-                let primitiesLength = viewer.scene.primitives.length
-                if (entitiesLength === 0 && dataSourcesLength === 0 && primitiesLength === 0) {
-                    this.activeLayers = []
-                    if (this.lastSelectedLayers.length !== 0) {
-                        this.renderLayers(this.lastSelectedLayers, campaign)
-                        // clock:: current time set
-                        this.restoreCamera(this.savedSamera)
-                        //TODO: viewer's current time is not getting restored
-                    }
+        const bootstrapViewer = (attempt = 0) => {
+            const activeViewer = getViewer()
+            if (!activeViewer) {
+                if (attempt < 80) {
+                    setTimeout(() => bootstrapViewer(attempt + 1), 250)
+                    return
                 }
-            }, 1000)
-        })
-
-        emitter.on("tabLayoutChange", () => {
-            adjustHeightOfPanels()
-        })
-
-        emitter.on("trackairplaneChange", (checked) => {
-            if (checked) {
-                this.trackEntity = true
-                viewer.trackedEntity = this.trackedEntity
-                viewer.clock.shouldAnimate = true
-                viewer.clock.canAnimate = true
-            } else {
-                this.trackEntity = false
-                viewer.trackedEntity = null
+                alert(`Error: Viewer failed to initialize. Please contact support team at ${supportEmail}`)
+                return
             }
-        })
 
-        emitter.on("listcheck", (selectedLayers) => {
-            this.lastSelectedLayers = selectedLayers
-            this.renderLayers(selectedLayers, campaign)
-        })
+            if (this.viewerBootstrapped) return
+            this.viewerBootstrapped = true
 
+            if (isEmpty(campaign)) {
+                alert(`Error: Couldn't fetch the data. Please contact support team at ${supportEmail}`)
+            }
 
-        /** Adjust the height of dock where cesium is displayed. **/
+            activeViewer.scene.globe.tileLoadProgressEvent.addEventListener((_tiles) => { })
 
-        adjustHeightOfPanels()
+            activeViewer.imageryLayers.layerAdded.addEventListener((layer) => {
+                if (layer.imageryProvider) {
+                    // we can raise an event here for imagery ${layer.imageryProvider.url} loaded
+                }
+            })
+
+            /** Set Viewer clock settings **/
+
+            activeViewer.clock.clockRange = ClockRange.LOOP_STOP
+            activeViewer.clock.multiplier = 10
+
+            if (this.isLeeDow7Selected(campaign)) {
+                flyToDow7InitialView(activeViewer)
+            }
+
+            /** Save the camera instance, after camera is set in viewer **/
+
+            setInterval(() => {
+                let camera = activeViewer.scene.camera
+                this.savedSamera = {
+                    position: camera.position,
+                    direction: camera.direction,
+                    up: camera.up,
+                    right: camera.right,
+                    currentTime: activeViewer.clock.currentTime,
+                }
+            }, 2000)
+
+            /** Select current set of layers (in component state); by checking if layers changed (using redux store) **/
+
+            //check for default selected layers
+            this.readStateAndRender(campaign)
+
+            store.subscribe(() => {
+                this.readStateAndRender(campaign)
+            })
+
+            /******* EVENT LISTNERS *******/
+
+            /** Prepare layers to render, if the dock where cesium is displayed is ready. **/
+            emitter.on("dockRender", () => {
+                setTimeout(() => {
+                    if (!checkPath()) return
+                    const v = getViewer()
+                    if (!v) return
+                    let entitiesLength = v.entities.values.length
+                    let dataSourcesLength = v.dataSources.length
+                    let primitiesLength = v.scene.primitives.length
+                    if (entitiesLength === 0 && dataSourcesLength === 0 && primitiesLength === 0) {
+                        this.activeLayers = []
+                        if (this.lastSelectedLayers.length !== 0) {
+                            if (this.isLeeDow7Selected(campaign, this.lastSelectedLayers)) {
+                                flyToDow7InitialView(v)
+                            }
+                            this.renderLayers(this.lastSelectedLayers, campaign)
+                            if (!this.isLeeDow7Selected(campaign, this.lastSelectedLayers)) {
+                                this.restoreCamera(this.savedSamera)
+                            }
+                            //TODO: viewer's current time is not getting restored
+                        }
+                    }
+                }, 1000)
+            })
+
+            emitter.on("tabLayoutChange", () => {
+                adjustHeightOfPanels()
+            })
+
+            emitter.on("trackairplaneChange", (checked) => {
+                if (checked) {
+                    this.trackEntity = true
+                    activeViewer.trackedEntity = this.trackedEntity
+                    activeViewer.clock.shouldAnimate = true
+                    activeViewer.clock.canAnimate = true
+                } else {
+                    this.trackEntity = false
+                    activeViewer.trackedEntity = null
+                }
+            })
+
+            emitter.on("listcheck", (selectedLayers) => {
+                this.lastSelectedLayers = selectedLayers
+                this.renderLayers(selectedLayers, campaign)
+            })
+
+            /** Adjust the height of dock where cesium is displayed. **/
+
+            adjustHeightOfPanels()
+
+            setTimeout(() => {
+                adjustHeightOfPanels()
+            }, 1000)
+        }
+
+        emitter.on("cesiumViewerReady", () => bootstrapViewer())
+        bootstrapViewer()
 
         setTimeout(() => {
             if (!checkPath()) return

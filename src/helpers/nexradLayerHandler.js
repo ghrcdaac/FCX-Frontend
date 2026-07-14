@@ -424,13 +424,18 @@ async function createImageryProvider(frame, rectangle, framesJsonUrl) {
   throw error
 }
 
-async function showFrameForCurrentTime(viewer, nexradRefs) {
+async function showFrameForCurrentTime(viewer, nexradRefs, layer) {
   if (!nexradRefs.framesMeta?.length || viewer.isDestroyed?.()) return
   if (!isNexradLoadStillActive(nexradRefs)) return
 
   const requestId = ++nexradRefs.frameRequestId
   const currentMs = JulianDate.toDate(viewer.clock.currentTime).getTime()
-  const idx = getClosestFrameIndex(nexradRefs.framesMeta, currentMs)
+  const firstMs = new Date(nexradRefs.framesMeta[0].timestamp).getTime()
+  const lastMs = new Date(
+    nexradRefs.framesMeta[nexradRefs.framesMeta.length - 1].timestamp
+  ).getTime()
+  const clampedMs = Math.max(firstMs, Math.min(lastMs, currentMs))
+  const idx = getClosestFrameIndex(nexradRefs.framesMeta, clampedMs)
 
   if (idx < 0) return
 
@@ -478,7 +483,7 @@ async function showFrameForCurrentTime(viewer, nexradRefs) {
 
     const layer = viewer.imageryLayers.addImageryProvider(provider)
     viewer.imageryLayers.raiseToTop(layer)
-    layer.alpha = 1.0
+    layer.alpha = nexradRefs.imageryAlpha ?? 1.0
     layer.brightness = 1.18
     layer.contrast = 1.28
     layer.saturation = 1.2
@@ -529,6 +534,7 @@ function unregisterNexradClockTick(viewer, nexradRefs) {
 }
 
 function registerNexradClockTick(viewer, nexradRefs) {
+  if (nexradRefs?.useSharedLeeClock) return
   unregisterNexradClockTick(viewer, nexradRefs)
 
   let lastSecond = null
@@ -542,7 +548,7 @@ function registerNexradClockTick(viewer, nexradRefs) {
 
     if (sec !== lastSecond) {
       lastSecond = sec
-      showFrameForCurrentTime(viewer, nexradRefs)
+      showFrameForCurrentTime(viewer, nexradRefs, nexradRefs.layer)
     }
   }
 
@@ -550,8 +556,27 @@ function registerNexradClockTick(viewer, nexradRefs) {
   nexradRefs.clockTickHandler = onTick
 }
 
+export function setNexradLayerVisible(nexradRefs, visible) {
+  if (!nexradRefs?.currentLayer) return
+  nexradRefs.currentLayer.show = !!visible
+  if (visible) {
+    nexradRefs.currentLayer.alpha = nexradRefs.imageryAlpha ?? 1.0
+  }
+}
+
+export function syncNexradAtViewerTime(viewer, nexradRefs, layer) {
+  return showFrameForCurrentTime(viewer, nexradRefs, layer || nexradRefs.layer)
+}
+
 export function applyNexradViewerClock(viewer, layer, nexradRefs, options = {}) {
   if (!viewer || viewer.isDestroyed?.() || !nexradRefs?.framesMeta?.length) return
+
+  if (options.skipViewerClock) {
+    if (!options.skipInitialFrame) {
+      syncNexradAtViewerTime(viewer, nexradRefs, layer)
+    }
+    return
+  }
 
   const startTime = JulianDate.fromIso8601(nexradRefs.framesMeta[0].timestamp)
   const endTime = JulianDate.fromIso8601(
@@ -571,7 +596,7 @@ export function applyNexradViewerClock(viewer, layer, nexradRefs, options = {}) 
   }
 
   if (!options.skipInitialFrame) {
-    showFrameForCurrentTime(viewer, nexradRefs)
+    syncNexradAtViewerTime(viewer, nexradRefs, layer)
   }
 }
 
@@ -685,7 +710,8 @@ function clearPendingNexradLoad(layerId) {
   }
 }
 
-export function loadNexradLayer(viewer, layer) {
+export function loadNexradLayer(viewer, layer, options = {}) {
+  const { flyOnLoad = true, imageryAlpha = 1.0 } = options
   const layerId = layer?.layerId
   const existingPending = pendingNexradLoads.get(layerId)
   if (existingPending) {
@@ -700,6 +726,7 @@ export function loadNexradLayer(viewer, layer) {
 
   const nexradRefs = {
     layerId,
+    layer,
     loadSession,
     sessionId,
     framesMeta: null,
@@ -711,7 +738,8 @@ export function loadNexradLayer(viewer, layer) {
     currentFrameMeta: null,
     currentTimestamp: null,
     frameRequestId: 0,
-    hasFlownToRadar: false,
+    hasFlownToRadar: !flyOnLoad,
+    imageryAlpha,
     radarCursorEnabled: true,
     loadError: null,
     frameError: null,
@@ -742,13 +770,15 @@ export function loadNexradLayer(viewer, layer) {
       nexradRefs.resolvedFramesJsonUrl = url
       nexradRefs.loadError = null
       nexradRefs.failedTriedUrls = []
+      nexradRefs.useSharedLeeClock = options.skipViewerClock === true
 
       applyNexradViewerClock(viewer, layer, nexradRefs, {
         skipInitialFrame: true,
         shouldAnimate: false,
+        skipViewerClock: options.skipViewerClock === true,
       })
       addHoverTooltip(viewer, nexradRefs)
-      await showFrameForCurrentTime(viewer, nexradRefs)
+      await syncNexradAtViewerTime(viewer, nexradRefs, layer)
 
       if (!isLayerLoadActive(layerId, loadSession)) {
         unloadNexradLayer(viewer, nexradRefs)

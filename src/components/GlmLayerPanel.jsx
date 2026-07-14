@@ -2,13 +2,9 @@ import React, { useEffect, useState } from "react"
 import Typography from "@material-ui/core/Typography"
 import emitter from "../helpers/event"
 
-const INTENSITY_LEGEND = [
-  { color: "#4dd2ff", label: "Very Low" },
-  { color: "#ff5c5c", label: "Low" },
-  { color: "#ff9f43", label: "Medium" },
-  { color: "#ffe44d", label: "High" },
-  { color: "#ffffff", label: "Very High" },
-]
+import { GLM_INTENSITY_LEGEND } from "../helpers/leeVizColors"
+
+const INTENSITY_LEGEND = GLM_INTENSITY_LEGEND
 
 export default function GlmLayerPanel() {
   const [pointCount, setPointCount] = useState(0)

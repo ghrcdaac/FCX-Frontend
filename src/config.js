@@ -11,6 +11,106 @@ const abiBaseUrl = process.env.REACT_APP_BAMBOO_ABI_BASE_URL
 const flightTrackBaseUrl = process.env.REACT_APP_BAMBOO_FLIGHT_TRACK_BASE_URL 
 const newFieldCampaignsBaseUrl = process.env.REACT_APP_NEW_FIELD_CAMPAIGNS_BASE_URL
 
+const LEE_S3_DEFAULT_BASE = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com"
+
+function leeCampaignRoots() {
+  const roots = new Set()
+  // Prefer the canonical public bucket first — other roots often 403 from the browser.
+  roots.add(LEE_S3_DEFAULT_BASE)
+  if (newFieldCampaignsBaseUrl) {
+    roots.add(newFieldCampaignsBaseUrl.replace(/\/$/, ""))
+  }
+  if (dataBaseUrl) {
+    roots.add(`${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign`)
+  }
+  return [...roots]
+}
+
+function pushLeeUrl(urls, seen, ...parts) {
+  const url = parts
+    .filter(Boolean)
+    .join("/")
+    .replace(/([^:]\/)\/+/g, "$1")
+  if (url && !seen.has(url)) {
+    seen.add(url)
+    urls.push(url)
+  }
+}
+
+function buildLeeMobileRadarTilesetUrls(iopFolder, level) {
+  const urls = []
+  const seen = new Set()
+  const legacyLevel = level === "high" ? "dow7_3dtiles_high" : "dow7_3dtiles_low"
+
+  if (process.env.REACT_APP_LEE_DOW7_BASE_URL) {
+    const base = process.env.REACT_APP_LEE_DOW7_BASE_URL.replace(/\/$/, "")
+    pushLeeUrl(urls, seen, base, iopFolder, level, "tileset.json")
+    pushLeeUrl(urls, seen, base, legacyLevel, "tileset.json")
+  }
+
+  for (const root of leeCampaignRoots()) {
+    pushLeeUrl(
+      urls,
+      seen,
+      root,
+      "Lee/instrument-processed-data/Mobile_radar",
+      iopFolder,
+      level,
+      "tileset.json"
+    )
+    pushLeeUrl(
+      urls,
+      seen,
+      root,
+      "LEE/instrument-processed-data/Mobile_radar",
+      iopFolder,
+      level,
+      "tileset.json"
+    )
+    pushLeeUrl(urls, seen, root, "LEE/Mobile_radar", iopFolder, level, "tileset.json")
+    pushLeeUrl(urls, seen, root, "Lee/Mobile_radar", iopFolder, level, "tileset.json")
+    pushLeeUrl(urls, seen, root, "LEE/Mobile_radar", legacyLevel, "tileset.json")
+    pushLeeUrl(urls, seen, root, "Lee/Mobile_radar", legacyLevel, "tileset.json")
+  }
+
+  return urls
+}
+
+function buildLeeMobileRadarSurfaceCzmlUrls(iopFolder) {
+  const urls = []
+  const seen = new Set()
+
+  if (process.env.REACT_APP_LEE_DOW7_BASE_URL) {
+    const base = process.env.REACT_APP_LEE_DOW7_BASE_URL.replace(/\/$/, "")
+    pushLeeUrl(urls, seen, base, iopFolder, "dow7_surface_obs.czml")
+    pushLeeUrl(urls, seen, base, "mesonet", "dow7_surface_obs.czml")
+  }
+
+  for (const root of leeCampaignRoots()) {
+    pushLeeUrl(
+      urls,
+      seen,
+      root,
+      "Lee/instrument-processed-data/Mobile_radar",
+      iopFolder,
+      "dow7_surface_obs.czml"
+    )
+    pushLeeUrl(
+      urls,
+      seen,
+      root,
+      "LEE/instrument-processed-data/Mobile_radar",
+      iopFolder,
+      "dow7_surface_obs.czml"
+    )
+    pushLeeUrl(urls, seen, root, "LEE/Mobile_radar", iopFolder, "dow7_surface_obs.czml")
+    pushLeeUrl(urls, seen, root, "LEE/Mobile_radar/mesonet", "dow7_surface_obs.czml")
+    pushLeeUrl(urls, seen, root, "Lee/Mobile_radar/mesonet", "dow7_surface_obs.czml")
+  }
+
+  return urls
+}
+
 function leeInstrumentBaseUrl(folder) {
   if (process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL) {
     return `${process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL}/${folder}`
@@ -19,9 +119,9 @@ function leeInstrumentBaseUrl(folder) {
     return `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/${folder}`
   }
   if (dataBaseUrl) {
-    return `${dataBaseUrl}/fieldcampaign/Lee/instrument-processed-data/${folder}`
+    return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data/${folder}`
   }
-  return ""
+  return `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/${folder}`
 }
 
 const leeDow7BaseUrl =
@@ -41,9 +141,9 @@ function leeProcessedDataBaseUrl() {
     return `${newFieldCampaignsBaseUrl.replace(/\/$/, "")}/Lee/instrument-processed-data`
   }
   if (dataBaseUrl) {
-    return `${dataBaseUrl}/fieldcampaign/Lee/instrument-processed-data`
+    return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data`
   }
-  return ""
+  return `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data`
 }
 
 /** Shared IOP folder at processed-data root, e.g. Nov18/lee_points.json */
@@ -89,19 +189,13 @@ function leeNexradFramesPath(iopFolder) {
 }
 
 function leeMobileRadarTilesetPath(iopFolder, level) {
-  if (process.env.REACT_APP_LEE_DOW7_BASE_URL) {
-    const base = process.env.REACT_APP_LEE_DOW7_BASE_URL.replace(/\/$/, "")
-    return `${base}/${iopFolder}/${level}/tileset.json`
-  }
-  return leeInstrumentIopPath("Mobile_radar", iopFolder, level, "tileset.json")
+  const urls = buildLeeMobileRadarTilesetUrls(iopFolder, level)
+  return urls[0] || ""
 }
 
 function leeMobileRadarSurfaceCzmlPath(iopFolder) {
-  if (process.env.REACT_APP_LEE_DOW7_BASE_URL) {
-    const base = process.env.REACT_APP_LEE_DOW7_BASE_URL.replace(/\/$/, "")
-    return `${base}/${iopFolder}/dow7_surface_obs.czml`
-  }
-  return leeInstrumentIopPath("Mobile_radar", iopFolder, "dow7_surface_obs.czml")
+  const urls = buildLeeMobileRadarSurfaceCzmlUrls(iopFolder)
+  return urls[0] || ""
 }
 
 function buildLeeEfmBaseUrls() {
@@ -198,7 +292,7 @@ const WSEndpoint = process.env.REACT_APP_WS_ENDPOINT
 const histogramToolApiUrl = process.env.REACT_APP_HISTOGRAM_TOOL_API
 const histogramToolApikey = process.env.REACT_APP_HISTOGRAM_TOOL_API_KEY
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl, leeDow7BaseUrl, leeLmaBaseUrl, leeOswegoSoundingBaseUrl, leeNsslSoundingBaseUrl, leeNov18Folder, leeNov19Folder, leeGlmPointsFile, leeProcessedDataBaseUrl, leeIopOutputPath, leeInstrumentIopPath, leeInstrumentNov19Path, leeGlmLeePointsPath, leeNsslSoundingCzmlPath, leeOswegoSoundingCzmlPath, leeCombinedLmaTilesetPath, leeEfmCzmlPath, leeNexradFramesPath, leeMobileRadarTilesetPath, leeMobileRadarSurfaceCzmlPath, leeEfmBaseUrl, leeEfmBaseUrls, leeNexradFramesUrl, leeNexradFramesUrls, leeGlmPointsUrl, leeGlmPointsUrls, leeInstrumentBaseUrl,
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl, LEE_S3_DEFAULT_BASE, leeDow7BaseUrl, leeLmaBaseUrl, leeOswegoSoundingBaseUrl, leeNsslSoundingBaseUrl, leeNov18Folder, leeNov19Folder, leeGlmPointsFile, leeProcessedDataBaseUrl, leeIopOutputPath, leeInstrumentIopPath, leeInstrumentNov19Path, leeGlmLeePointsPath, leeNsslSoundingCzmlPath, leeOswegoSoundingCzmlPath, leeCombinedLmaTilesetPath, leeEfmCzmlPath, leeNexradFramesPath, leeMobileRadarTilesetPath, leeMobileRadarSurfaceCzmlPath, buildLeeMobileRadarTilesetUrls, buildLeeMobileRadarSurfaceCzmlUrls, leeEfmBaseUrl, leeEfmBaseUrls, leeNexradFramesUrl, leeNexradFramesUrls, leeGlmPointsUrl, leeGlmPointsUrls, leeInstrumentBaseUrl,
   subsettingEndpoint, subsettingApiKey, outputSubsetsBucket, outputSubsetsBucketRegion, subsetCloudfrontUrl, subsetFilenamesListEndpoint, WSEndpoint,
   histogramToolApiUrl, histogramToolApikey }
 
