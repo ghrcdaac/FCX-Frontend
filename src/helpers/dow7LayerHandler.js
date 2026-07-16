@@ -770,10 +770,44 @@ export function unloadDow7Layer(viewer, dow7Refs) {
 
   if (!viewerDestroyed && dow7Refs.surfaceObs) {
     try {
-      viewer.dataSources.remove(dow7Refs.surfaceObs)
+      viewer.dataSources.remove(dow7Refs.surfaceObs, true)
     } catch (err) {
       console.warn("Could not remove DOW7 surface observations:", err)
     }
+    dow7Refs.surfaceObs = null
+  }
+
+  // Orphan surface CZML can remain if it finished loading after unload.
+  if (!viewerDestroyed && viewer?.dataSources) {
+    const toRemove = []
+    for (let i = 0; i < viewer.dataSources.length; i++) {
+      const dataSource = viewer.dataSources.get(i)
+      if (dataSource?.entities?.getById?.("dow7_surface_obs")) {
+        toRemove.push(dataSource)
+      }
+    }
+    toRemove.forEach((dataSource) => {
+      try {
+        viewer.dataSources.remove(dataSource, true)
+      } catch (err) {
+        console.warn("Could not remove orphaned DOW7 surface observations:", err)
+      }
+    })
+  }
+
+  if (dow7Refs.surfaceObsIdleHandle != null) {
+    if (typeof cancelIdleCallback === "function") {
+      try {
+        cancelIdleCallback(dow7Refs.surfaceObsIdleHandle)
+      } catch {
+        // ignore
+      }
+    }
+    dow7Refs.surfaceObsIdleHandle = null
+  }
+  if (dow7Refs.surfaceObsTimeoutHandle != null) {
+    clearTimeout(dow7Refs.surfaceObsTimeoutHandle)
+    dow7Refs.surfaceObsTimeoutHandle = null
   }
 }
 
@@ -833,6 +867,11 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
         dow7Prefs,
         loadedTilesByTileset: new Map(),
         useSharedLeeClock: skipViewerClock === true,
+        surfaceObs: null,
+        surfaceObsIdleHandle: null,
+        surfaceObsTimeoutHandle: null,
+        layerId,
+        loadSession: session,
       }
 
       registerDow7TemporalTiles(viewer, highTileset, dow7Refs)
@@ -938,6 +977,11 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
 
       window.addEventListener("keydown", homeShortcutHandler)
 
+      dow7Refs.cameraChangedHandler = cameraChangedHandler
+      dow7Refs.homeShortcutHandler = homeShortcutHandler
+      dow7Refs.lowDbzChangeHandler = lowDbzChangeHandler
+      dow7Refs.displayModeChangeHandler = displayModeChangeHandler
+
       return {
         highTileset,
         lowTileset,
@@ -995,8 +1039,11 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
 
       let surfaceDs = null
       const loadSurfaceObs = async () => {
+        if (!isLayerLoadActive(layerId, session) || viewer.isDestroyed?.()) return
+
         const surfaceCandidates = getDow7SurfaceCzmlCandidates(layer)
         for (const surfaceUrl of surfaceCandidates) {
+          if (!isLayerLoadActive(layerId, session) || viewer.isDestroyed?.()) return
           const resolvedSurfaceUrl = resolveLeeS3Url(surfaceUrl)
           try {
             surfaceDs = await CzmlDataSource.load(resolvedSurfaceUrl)
@@ -1007,28 +1054,44 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
           }
         }
 
-        if (surfaceDs && !viewer.isDestroyed?.()) {
-          try {
-            viewer.dataSources.add(surfaceDs)
+        if (!surfaceDs) return
+        if (!isLayerLoadActive(layerId, session) || viewer.isDestroyed?.()) {
+          // Layer was turned off while CZML was loading — don't leave the label behind.
+          return
+        }
 
-            const entity = surfaceDs.entities.getById("dow7_surface_obs")
-            if (entity) {
-              if (entity.path) entity.path.show = false
-              if (entity.point) {
-                entity.point.pixelSize = 14
-                entity.point.outlineWidth = 2
-                entity.point.disableDepthTestDistance = Number.POSITIVE_INFINITY
-              }
-              if (entity.label) {
-                entity.label.show = true
-                entity.label.font = "16px sans-serif"
-                entity.label.pixelOffset = new Cartesian2(0, -30)
-                entity.label.disableDepthTestDistance = Number.POSITIVE_INFINITY
-              }
+        try {
+          viewer.dataSources.add(surfaceDs)
+          dow7Refs.surfaceObs = surfaceDs
+
+          const entity = surfaceDs.entities.getById("dow7_surface_obs")
+          if (entity) {
+            if (entity.path) entity.path.show = false
+            if (entity.point) {
+              entity.point.pixelSize = 14
+              entity.point.outlineWidth = 2
+              entity.point.disableDepthTestDistance = Number.POSITIVE_INFINITY
             }
-          } catch (err) {
-            console.warn("DOW7 surface observations not loaded (optional):", err)
+            if (entity.label) {
+              entity.label.show = true
+              entity.label.font = "16px sans-serif"
+              entity.label.pixelOffset = new Cartesian2(0, -30)
+              entity.label.disableDepthTestDistance = Number.POSITIVE_INFINITY
+            }
           }
+        } catch (err) {
+          console.warn("DOW7 surface observations not loaded (optional):", err)
+          return
+        }
+
+        if (!isLayerLoadActive(layerId, session)) {
+          try {
+            viewer.dataSources.remove(surfaceDs, true)
+          } catch {
+            // ignore
+          }
+          dow7Refs.surfaceObs = null
+          return
         }
 
         if (!skipViewerClock) {
@@ -1040,9 +1103,11 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
       }
 
       if (typeof requestIdleCallback === "function") {
-        requestIdleCallback(() => loadSurfaceObs(), { timeout: 2500 })
+        dow7Refs.surfaceObsIdleHandle = requestIdleCallback(() => loadSurfaceObs(), {
+          timeout: 2500,
+        })
       } else {
-        setTimeout(loadSurfaceObs, 1500)
+        dow7Refs.surfaceObsTimeoutHandle = setTimeout(loadSurfaceObs, 1500)
       }
 
       const lowTileset = getLowTileset?.()
@@ -1054,17 +1119,7 @@ function loadDow7LayerInternal(viewer, layer, options = {}) {
 
       return {
         cesiumLayerRef: highTileset,
-        dow7Refs: {
-          ...dow7Refs,
-          highDbzTileset: highTileset,
-          lowDbzTileset: lowTileset,
-          surfaceObs: surfaceDs,
-          cameraChangedHandler,
-          homeShortcutHandler,
-          lowDbzChangeHandler,
-          displayModeChangeHandler,
-          getLowTileset,
-        },
+        dow7Refs,
       }
     })
 }

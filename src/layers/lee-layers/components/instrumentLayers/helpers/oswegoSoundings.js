@@ -37,6 +37,12 @@ export default function oswegoSoundings(index, listingDate) {
     displayMechanism: "soundingCzml",
     czmlLocation,
     leeDataSubfolders: iopFolders,
+    launchLabel: "Oswego Launch",
+    endLabel: "Oswego Landing",
+    launchEntityId: "launch_site",
+    endEntityId: "landing_site",
+    launchMarkerColor: "#00897b",
+    endMarkerColor: "#f9a825",
     launch: {
       lon: -76.539,
       lat: 43.455,

@@ -6,8 +6,218 @@ import {
   Cartographic,
   Math as CesiumMath,
   ConstantProperty,
+  Color,
+  LabelStyle,
+  VerticalOrigin,
+  Cartesian2,
 } from "cesium"
 import { getLayerLoadSession, isLayerLoadActive } from "./layerLoadSession"
+import {
+  OSWEGO_SOUNDING_START_COLOR,
+  OSWEGO_SOUNDING_END_COLOR,
+  NSSL_SOUNDING_START_COLOR,
+  NSSL_SOUNDING_END_COLOR,
+} from "./leeVizColors"
+
+function getSoundingMarkerStyle(layer) {
+  const shortName = layer?.shortName
+  if (shortName === "leeoswegosoundings") {
+    return {
+      launchLabel: layer.launchLabel || "Oswego Launch",
+      endLabel: layer.endLabel || "Oswego Landing",
+      launchColor: layer.launchMarkerColor || OSWEGO_SOUNDING_START_COLOR,
+      endColor: layer.endMarkerColor || OSWEGO_SOUNDING_END_COLOR,
+    }
+  }
+  if (shortName === "leensslmobilesounding") {
+    return {
+      launchLabel: layer.launchLabel || "NSSL Launch",
+      endLabel: layer.endLabel || "NSSL Landing",
+      launchColor: layer.launchMarkerColor || NSSL_SOUNDING_START_COLOR,
+      endColor: layer.endMarkerColor || NSSL_SOUNDING_END_COLOR,
+    }
+  }
+  return {
+    launchLabel: layer?.launchLabel || "Launch",
+    endLabel: layer?.endLabel || "Landing",
+    launchColor: layer?.launchMarkerColor || "#1f7aec",
+    endColor: layer?.endMarkerColor || "#d94a4a",
+  }
+}
+
+function entityLooksLikeLaunch(entity, layer) {
+  const id = String(entity?.id || "").toLowerCase()
+  const name = String(entity?.name || "").toLowerCase()
+  const launchId = String(layer?.launchEntityId || "launch_site").toLowerCase()
+
+  return (
+    id === launchId ||
+    id.includes("launch") ||
+    name.includes("launch") ||
+    name.includes("launch site")
+  )
+}
+
+function entityLooksLikeEnd(entity, layer) {
+  const id = String(entity?.id || "").toLowerCase()
+  const name = String(entity?.name || "").toLowerCase()
+  const endId = String(layer?.endEntityId || "landing_site").toLowerCase()
+
+  if (entityLooksLikeLaunch(entity, layer)) return false
+
+  return (
+    id === endId ||
+    id.includes("landing") ||
+    id.includes("end_site") ||
+    id === "end" ||
+    id.endsWith("_end") ||
+    name.includes("landing") ||
+    name === "end" ||
+    name.includes("termination")
+  )
+}
+
+function styleSoundingMarker(entity, labelText, cssColor) {
+  const color = Color.fromCssColorString(cssColor)
+
+  entity.name = labelText
+
+  // Prefer our own point marker so CZML billboards / baked colors cannot override legend colors.
+  if (entity.billboard) {
+    entity.billboard.show = new ConstantProperty(false)
+  }
+
+  entity.point = {
+    show: true,
+    color,
+    outlineColor: Color.WHITE,
+    outlineWidth: 2,
+    pixelSize: 14,
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+  }
+
+  entity.label = {
+    show: true,
+    text: labelText,
+    fillColor: color,
+    outlineColor: Color.BLACK,
+    outlineWidth: 2,
+    style: LabelStyle.FILL_AND_OUTLINE,
+    font: "bold 14px sans-serif",
+    verticalOrigin: VerticalOrigin.BOTTOM,
+    pixelOffset: new Cartesian2(0, -18),
+    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+  }
+}
+
+function synthesizeLandingMarker(dataSource, layer, style) {
+  if (!dataSource?.entities) return
+
+  const hasEnd = dataSource.entities.values.some((entity) => entityLooksLikeEnd(entity, layer))
+  if (hasEnd) return
+
+  const track =
+    dataSource.entities.getById("Flight Track") ||
+    dataSource.entities.values.find((entity) => {
+      const id = String(entity?.id || "").toLowerCase()
+      const name = String(entity?.name || "").toLowerCase()
+      return (
+        !!entity?.position &&
+        (id.includes("track") ||
+          id.includes("balloon") ||
+          name.includes("track") ||
+          name.includes("balloon") ||
+          name.includes("sounding"))
+      )
+    })
+
+  if (!track?.position) return
+
+  let endPosition = null
+  try {
+    const clock = getSoundingCzmlClock(dataSource)
+    const stopTime = clock?.stopTime
+    if (stopTime && typeof track.position.getValue === "function") {
+      endPosition = track.position.getValue(stopTime)
+    }
+  } catch {
+    // fall through to availability sampling
+  }
+
+  if (!endPosition && track.availability?.stop) {
+    try {
+      endPosition = track.position.getValue(track.availability.stop)
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!endPosition) return
+
+  const endEntity = dataSource.entities.add({
+    id: layer?.endEntityId || "landing_site",
+    name: style.endLabel,
+    position: endPosition,
+    point: {
+      show: true,
+      pixelSize: 14,
+      color: Color.fromCssColorString(style.endColor),
+      outlineColor: Color.WHITE,
+      outlineWidth: 2,
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    },
+    label: {
+      show: true,
+      text: style.endLabel,
+      fillColor: Color.fromCssColorString(style.endColor),
+      outlineColor: Color.BLACK,
+      outlineWidth: 2,
+      style: LabelStyle.FILL_AND_OUTLINE,
+      font: "bold 14px sans-serif",
+      verticalOrigin: VerticalOrigin.BOTTOM,
+      pixelOffset: new Cartesian2(0, -18),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY,
+    },
+  })
+
+  return endEntity
+}
+
+function stabilizeSoundingEntities(dataSource, layer) {
+  const infinity = Number.POSITIVE_INFINITY
+  const style = getSoundingMarkerStyle(layer)
+
+  dataSource.entities.values.forEach((entity) => {
+    try {
+      if (entity.point) {
+        entity.point.disableDepthTestDistance = new ConstantProperty(infinity)
+      }
+      if (entity.billboard) {
+        entity.billboard.disableDepthTestDistance = new ConstantProperty(infinity)
+      }
+      if (entity.path) {
+        entity.path.disableDepthTestDistance = new ConstantProperty(infinity)
+      }
+      if (entity.label) {
+        entity.label.disableDepthTestDistance = new ConstantProperty(infinity)
+      }
+
+      if (entityLooksLikeLaunch(entity, layer)) {
+        styleSoundingMarker(entity, style.launchLabel, style.launchColor)
+      } else if (entityLooksLikeEnd(entity, layer)) {
+        styleSoundingMarker(entity, style.endLabel, style.endColor)
+      }
+    } catch (err) {
+      console.warn("Could not stabilize sounding entity:", entity?.id, err)
+    }
+  })
+
+  try {
+    synthesizeLandingMarker(dataSource, layer, style)
+  } catch (err) {
+    console.warn("Could not synthesize sounding landing marker:", err)
+  }
+}
 
 export function getSoundingCzmlClock(dataSource) {
   if (!dataSource?.clock) return null
@@ -76,29 +286,6 @@ export function applySoundingCzmlClockToViewer(viewer, layerObject) {
   }
 
   return true
-}
-
-function stabilizeSoundingEntities(dataSource) {
-  const infinity = Number.POSITIVE_INFINITY
-
-  dataSource.entities.values.forEach((entity) => {
-    try {
-      if (entity.point) {
-        entity.point.disableDepthTestDistance = new ConstantProperty(infinity)
-      }
-      if (entity.billboard) {
-        entity.billboard.disableDepthTestDistance = new ConstantProperty(infinity)
-      }
-      if (entity.path) {
-        entity.path.disableDepthTestDistance = new ConstantProperty(infinity)
-      }
-      if (entity.label) {
-        entity.label.disableDepthTestDistance = new ConstantProperty(infinity)
-      }
-    } catch (err) {
-      console.warn("Could not stabilize sounding entity:", entity?.id, err)
-    }
-  })
 }
 
 function applySoundingClock(viewer, layer, dataSource) {
@@ -334,7 +521,7 @@ export function loadSoundingCzmlLayer(viewer, layer, options = {}) {
           }
         }
 
-        dataSources.forEach((dataSource) => stabilizeSoundingEntities(dataSource))
+        dataSources.forEach((dataSource) => stabilizeSoundingEntities(dataSource, layer))
         let clockTime = viewer.clock.currentTime
         if (!options.skipViewerClock) {
           clockTime = applySoundingClock(viewer, layer, primaryDataSource)

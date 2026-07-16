@@ -27,6 +27,7 @@ import Dow7LayerPanel from "./Dow7LayerPanel"
 import EfmLayerPanel from "./EfmLayerPanel"
 import NexradLayerPanel from "./NexradLayerPanel"
 import GlmLayerPanel from "./GlmLayerPanel"
+import SoundingLayerPanel from "./SoundingLayerPanel"
 import { getLeeLayersAvailabilityInfo, enrichLeeLayerDatasetTimes } from "../helpers/leeDataAvailability"
 import {
   formatLeeAvailabilityTimes,
@@ -239,8 +240,9 @@ export default function LayerList({ campaign }) {
       const isEfmLayer = layerValue.displayMechanism === "efm"
       const isNexradLayer = layerValue.displayMechanism === "nexrad"
       const isGlmLayer = layerValue.displayMechanism === "glm"
+      const isSoundingLayer = layerValue.displayMechanism === "soundingCzml"
 
-      if (!isDow7Layer && !isEfmLayer && !isNexradLayer && !isGlmLayer) {
+      if (!isDow7Layer && !isEfmLayer && !isNexradLayer && !isGlmLayer && !isSoundingLayer) {
         let legendUrl = ""
 
         if (layerValue.type === "track") {
@@ -429,6 +431,14 @@ export default function LayerList({ campaign }) {
           {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && isGlmLayer && (
             <ListItem key={"secondary-item-glm-panel" + layerIndex}>
               <ListItemText id={`secondary-list-glm-${layerValue.layerId}`} primary={<GlmLayerPanel />} />
+            </ListItem>
+          )}
+          {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && isSoundingLayer && (
+            <ListItem key={"secondary-item-sounding-panel" + layerIndex}>
+              <ListItemText
+                id={`secondary-list-sounding-${layerValue.layerId}`}
+                primary={<SoundingLayerPanel shortName={layerValue.shortName} />}
+              />
             </ListItem>
           )}
           {state.selectedLayers.indexOf(layerValue.layerId) !== -1 && legendImage && (

@@ -61,11 +61,27 @@ export const LMA_ALTITUDE_LEGEND = [
 export const LMA_ALTITUDE_GRADIENT =
   "linear-gradient(to right, #FFFFFF 0%, #FFFF00 33%, #FF8000 66%, #FF0000 100%)"
 
+export const OSWEGO_SOUNDING_START_COLOR = "#00897b"
+export const OSWEGO_SOUNDING_END_COLOR = "#f9a825"
+
+export const NSSL_SOUNDING_START_COLOR = "#c2185b"
+export const NSSL_SOUNDING_END_COLOR = "#43a047"
+
+export const OSWEGO_SOUNDING_LEGEND = [
+  { color: OSWEGO_SOUNDING_START_COLOR, label: "Oswego Launch (start)" },
+  { color: OSWEGO_SOUNDING_END_COLOR, label: "Oswego Landing (end)" },
+]
+
+export const NSSL_SOUNDING_LEGEND = [
+  { color: NSSL_SOUNDING_START_COLOR, label: "NSSL Launch (start)" },
+  { color: NSSL_SOUNDING_END_COLOR, label: "NSSL Landing (end)" },
+]
+
 export const OSWEGO_SOUNDING_GRADIENT =
-  "linear-gradient(to right, #4a90d9 0%, #e8a838 50%, #d94a4a 100%)"
+  `linear-gradient(to right, ${OSWEGO_SOUNDING_START_COLOR} 0%, #26c6da 50%, ${OSWEGO_SOUNDING_END_COLOR} 100%)`
 
 export const NSSL_SOUNDING_GRADIENT =
-  "linear-gradient(to right, #7b68ee 0%, #da70d6 50%, #ff6347 100%)"
+  `linear-gradient(to right, ${NSSL_SOUNDING_START_COLOR} 0%, #ec407a 50%, ${NSSL_SOUNDING_END_COLOR} 100%)`
 
 /** Timeline + layer-list legend entries keyed by layer shortName */
 export const LEE_VIZ_LEGENDS = {
@@ -86,12 +102,14 @@ export const LEE_VIZ_LEGENDS = {
     timelineGradient: LMA_ALTITUDE_GRADIENT,
   },
   leeoswegosoundings: {
-    color: "darkorange",
+    color: OSWEGO_SOUNDING_START_COLOR,
     timelineGradient: OSWEGO_SOUNDING_GRADIENT,
+    markerLegend: OSWEGO_SOUNDING_LEGEND,
   },
   leensslmobilesounding: {
-    color: "mediumpurple",
+    color: NSSL_SOUNDING_START_COLOR,
     timelineGradient: NSSL_SOUNDING_GRADIENT,
+    markerLegend: NSSL_SOUNDING_LEGEND,
   },
   leeballoonefm: {
     color: "crimson",
