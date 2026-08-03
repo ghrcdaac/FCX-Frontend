@@ -5,7 +5,13 @@ import { DockLayout } from "rc-dock"
 
 import { IonWorldImageryStyle, ProviderViewModel, buildModuleUrl, createWorldImagery, UrlTemplateImageryProvider, Viewer, Ion, Cartesian3, Color, LabelStyle, VerticalOrigin, Cartesian2, defined, Entity, PinBuilder, SceneTransforms} from "cesium"
 // eslint-disable-next-line
-import { createDefaultImageryProviderViewModels } from "cesium"
+import {
+
+  OpenStreetMapImageryProvider,
+  ArcGisMapServerImageryProvider,
+  TileMapServiceImageryProvider
+} from "cesium";
+
 import { FiLayers, FiLink2, FiSettings, FiGlobe, FiInfo } from "react-icons/fi"
 import { MdFlightTakeoff, MdTimeline } from "react-icons/md"
 import FcxTimeline from "./timeline"
@@ -40,20 +46,114 @@ let viewerObj = { viewer: null } // to be able to pass by reference to other com
 
 const getProviderViewModels = () =>{
   const providerViewModels = []
-
+  
+  // 2. Cesium ion - Aerial (No Labels)
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Cesium ion - Aerial",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerial.png"),
+  //     tooltip: "Bing Maps aerial imagery without labels, provided by Cesium ion",
+  //     category: "Cesium ion",
+  //     creationFunction: function () {
+  //       return createWorldImagery({
+  //         style: IonWorldImageryStyle.AERIAL,
+  //       });
+  //     },
+  //   })
+  // );
+  
+  // // 3. Cesium ion - Roads
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Cesium ion - Roads",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingRoads.png"),
+  //     tooltip: "Bing Maps road imagery, provided by Cesium ion",
+  //     category: "Cesium ion",
+  //     creationFunction: function () {
+  //       return createWorldImagery({
+  //         style: IonWorldImageryStyle.ROAD,
+  //       });
+  //     },
+  //   })
+  // );
+  
+  // 4. OpenStreetMap (OSM)
   providerViewModels.push(
     new ProviderViewModel({
-      name: "Bing Maps Aerial with Labels",
-      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/bingAerialLabels.png"),
-      tooltip: "Bing Maps aerial imagery with labels, provided by Cesium ion",
-      category: "Cesium ion",
+      name: "OpenStreetMap",
+      iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/openStreetMap.png"),
+      tooltip: "OpenStreetMap (OSM) base imagery",
+      category: "Other",
       creationFunction: function () {
-        return createWorldImagery({
-          style: IonWorldImageryStyle.AERIAL_WITH_LABELS,
-        })
+        return new OpenStreetMapImageryProvider({
+          url: "https://a.tile.openstreetmap.org/",
+        });
       },
     })
-  )
+  );
+  
+  // 5. Esri World Imagery (ArcGIS Online)
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Esri World Imagery",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/esriWorldImagery.png"),
+  //     tooltip: "Esri World Imagery basemap",
+  //     category: "Other",
+  //     creationFunction: function () {
+  //       return new ArcGisMapServerImageryProvider({
+  //         url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+  //         enablePickFeatures: false,
+  //       });
+  //     },
+  //   })
+  // );
+  
+  // // 6. Esri World Street Map (ArcGIS Online)
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Esri World Street Map",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/esriWorldStreetMap.png"),
+  //     tooltip: "Esri World Street Map basemap",
+  //     category: "Other",
+  //     creationFunction: function () {
+  //       return new ArcGisMapServerImageryProvider({
+  //         url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer",
+  //         enablePickFeatures: false,
+  //       });
+  //     },
+  //   })
+  // );
+  
+  // // 7. Natural Earth II (Built-in)
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "Natural Earth II",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/naturalEarthII.png"),
+  //     tooltip: "Natural Earth II, included with CesiumJS",
+  //     category: "Cesium Built-in",
+  //     creationFunction: function () {
+  //       return new TileMapServiceImageryProvider({
+  //         url: buildModuleUrl("Assets/Textures/NaturalEarthII"),
+  //         maximumLevel: 2, // Low resolution, only up to level 2
+  //       });
+  //     },
+  //   })
+  // );
+
+  // providerViewModels.push(
+  //   new ProviderViewModel({
+  //     name: "OpenStreetMap",
+  //     iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/openStreetMap.png"),
+  //     tooltip: "OpenStreetMap (OSM) base imagery",
+  //     category: "Other", // Or a new category
+  //     creationFunction: function () {
+  //       return new OpenStreetMapImageryProvider({
+  //         url: "https://a.tile.openstreetmap.org/", // Default OSM tile server URL
+  //         // You can add fileExtension, credit, etc. if needed
+  //       });
+  //     },
+  //   })
+  // );
 
   // providerViewModels.push(
   //   new ProviderViewModel({
