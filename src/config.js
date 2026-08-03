@@ -9,16 +9,15 @@ const dataBaseUrl = process.env.REACT_APP_BAMBOO_DATA_BASE_URL
 
 const abiBaseUrl = process.env.REACT_APP_BAMBOO_ABI_BASE_URL 
 const flightTrackBaseUrl = process.env.REACT_APP_BAMBOO_FLIGHT_TRACK_BASE_URL 
-const newFieldCampaignsBaseUrl = process.env.REACT_APP_NEW_FIELD_CAMPAIGNS_BASE_URL
-
-const LEE_S3_DEFAULT_BASE = process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL
+const newFieldCampaignsBaseUrl = (
+  process.env.REACT_APP_NEW_FIELD_CAMPAIGNS_BASE_URL || ""
+).replace(/\/$/, "") || undefined
 
 function leeCampaignRoots() {
   const roots = new Set()
   // Prefer the canonical public bucket first — other roots often 403 from the browser.
-  roots.add(LEE_S3_DEFAULT_BASE)
   if (newFieldCampaignsBaseUrl) {
-    roots.add(newFieldCampaignsBaseUrl.replace(/\/$/, ""))
+    roots.add(newFieldCampaignsBaseUrl)
   }
   if (dataBaseUrl) {
     roots.add(`${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign`)
@@ -121,7 +120,7 @@ function leeInstrumentBaseUrl(folder) {
   if (dataBaseUrl) {
     return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data/${folder}`
   }
-  return `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/${folder}`
+  return ""
 }
 
 const leeDow7BaseUrl =
@@ -138,12 +137,12 @@ function leeProcessedDataBaseUrl() {
     return process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL.replace(/\/$/, "")
   }
   if (newFieldCampaignsBaseUrl) {
-    return `${newFieldCampaignsBaseUrl.replace(/\/$/, "")}/Lee/instrument-processed-data`
+    return `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data`
   }
   if (dataBaseUrl) {
     return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data`
   }
-  return `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data`
+  return ""
 }
 
 /** Shared IOP folder at processed-data root, e.g. Nov18/lee_points.json */
@@ -292,7 +291,7 @@ const WSEndpoint = process.env.REACT_APP_WS_ENDPOINT
 const histogramToolApiUrl = process.env.REACT_APP_HISTOGRAM_TOOL_API
 const histogramToolApikey = process.env.REACT_APP_HISTOGRAM_TOOL_API_KEY
 
-export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl, LEE_S3_DEFAULT_BASE, leeDow7BaseUrl, leeLmaBaseUrl, leeOswegoSoundingBaseUrl, leeNsslSoundingBaseUrl, leeNov18Folder, leeNov19Folder, leeGlmPointsFile, leeProcessedDataBaseUrl, leeIopOutputPath, leeInstrumentIopPath, leeInstrumentNov19Path, leeGlmLeePointsPath, leeNsslSoundingCzmlPath, leeOswegoSoundingCzmlPath, leeCombinedLmaTilesetPath, leeEfmCzmlPath, leeNexradFramesPath, leeMobileRadarTilesetPath, leeMobileRadarSurfaceCzmlPath, buildLeeMobileRadarTilesetUrls, buildLeeMobileRadarSurfaceCzmlUrls, leeEfmBaseUrl, leeEfmBaseUrls, leeNexradFramesUrl, leeNexradFramesUrls, leeGlmPointsUrl, leeGlmPointsUrls, leeInstrumentBaseUrl,
+export { dataBaseUrl, abiBaseUrl, flightTrackBaseUrl, mapboxUrl, cesiumDefaultAccessToken, supportEmail, newFieldCampaignsBaseUrl, leeDow7BaseUrl, leeLmaBaseUrl, leeOswegoSoundingBaseUrl, leeNsslSoundingBaseUrl, leeNov18Folder, leeNov19Folder, leeGlmPointsFile, leeProcessedDataBaseUrl, leeIopOutputPath, leeInstrumentIopPath, leeInstrumentNov19Path, leeGlmLeePointsPath, leeNsslSoundingCzmlPath, leeOswegoSoundingCzmlPath, leeCombinedLmaTilesetPath, leeEfmCzmlPath, leeNexradFramesPath, leeMobileRadarTilesetPath, leeMobileRadarSurfaceCzmlPath, buildLeeMobileRadarTilesetUrls, buildLeeMobileRadarSurfaceCzmlUrls, leeEfmBaseUrl, leeEfmBaseUrls, leeNexradFramesUrl, leeNexradFramesUrls, leeGlmPointsUrl, leeGlmPointsUrls, leeInstrumentBaseUrl,
   subsettingEndpoint, subsettingApiKey, outputSubsetsBucket, outputSubsetsBucketRegion, subsetCloudfrontUrl, subsetFilenamesListEndpoint, WSEndpoint,
   histogramToolApiUrl, histogramToolApikey }
 

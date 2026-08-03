@@ -1,6 +1,7 @@
 import {
   buildLeeMobileRadarSurfaceCzmlUrls,
   buildLeeMobileRadarTilesetUrls,
+  newFieldCampaignsBaseUrl,
 } from "../../../../../config"
 import {
   getLeeLayerListingTimes,
@@ -9,7 +10,6 @@ import {
   resolveThroughDate,
 } from "./leeIop2"
 import { getLeeLayerDatasetTimes } from "./leeInstrumentDatasetTimes"
-import { LEE_S3_DEFAULT_BASE } from "../../../../../config"
 
 // DOW7 tiles live only under Mobile_radar/Nov18/ (high|low/tileset.json + dow7_surface_obs.czml).
 export default function mobileRadar(index, listingDate) {
@@ -21,9 +21,9 @@ export default function mobileRadar(index, listingDate) {
 
   const { start, end } = getLeeLayerListingTimes(listingDate, dataset.start, dataset.end)
   const iopFolder = LEE_NOV18_FOLDER
-  const highTileLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/high/tileset.json`
-  const lowTileLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/low/tileset.json`
-  const surfaceCzmlLocation = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/dow7_surface_obs.czml`
+  const highTileLocation = `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/high/tileset.json`
+  const lowTileLocation = `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/low/tileset.json`
+  const surfaceCzmlLocation = `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/dow7_surface_obs.czml`
 
   return {
     layerId: `${listingDate}-${index}-mobile-radar`,

@@ -1,4 +1,6 @@
-const LEE_S3_BASE = (process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL || "").replace(/\/$/, "")
+const LEE_S3_BASE = (
+  process.env.REACT_APP_NEW_FIELD_CAMPAIGNS_BASE_URL || ""
+).replace(/\/$/, "")
 const LEE_S3_PROXY_PREFIX = "/lee-field-campaigns-szg"
 
 export function shouldUseLeeS3Proxy() {

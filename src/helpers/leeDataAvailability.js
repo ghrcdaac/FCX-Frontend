@@ -1,5 +1,5 @@
 import moment from "moment"
-import { leeEfmCzmlPath, LEE_S3_DEFAULT_BASE } from "../config"
+import { leeEfmCzmlPath, newFieldCampaignsBaseUrl } from "../config"
 import { getLeeKnownLayerAvailability } from "../layers/lee-layers/components/instrumentLayers/helpers/leeIop2"
 import { getLeeLayerDatasetTimes } from "../layers/lee-layers/components/instrumentLayers/helpers/leeInstrumentDatasetTimes"
 import { resolveLeeS3Url } from "./leeS3Url"
@@ -17,7 +17,11 @@ const LEE_INSTRUMENT_TIME_KEYS = {
 }
 
 function isLeeSzgUrl(url) {
-  return typeof url === "string" && url.includes(process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL)
+  return (
+    typeof url === "string" &&
+    !!newFieldCampaignsBaseUrl &&
+    url.includes(newFieldCampaignsBaseUrl)
+  )
 }
 
 function preferSzgProbeUrl(candidates) {
@@ -27,9 +31,9 @@ function preferSzgProbeUrl(candidates) {
 }
 
 function leeSzgInstrumentUrl(instrumentFolder, iopFolder, ...segments) {
-  if (!instrumentFolder || !iopFolder) return null
+  if (!instrumentFolder || !iopFolder || !newFieldCampaignsBaseUrl) return null
   return [
-    LEE_S3_DEFAULT_BASE,
+    newFieldCampaignsBaseUrl,
     "Lee/instrument-processed-data",
     instrumentFolder,
     iopFolder,
@@ -78,7 +82,9 @@ export function getLeeLayerProbeUrls(layer) {
       const iopFolder = layer.leeDataSubfolders?.[0]
       if (!iopFolder) return []
 
-      const canonical = `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/high/tileset.json`
+      const canonical = newFieldCampaignsBaseUrl
+        ? `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/high/tileset.json`
+        : null
       return [preferSzgProbeUrl([canonical, layer.highTileLocation, layer.highTileUrls?.[0]])].filter(
         Boolean
       )

@@ -10,7 +10,7 @@ import {
   Math as CesiumMath,
 } from "cesium"
 import emitter from "./event"
-import { LEE_S3_DEFAULT_BASE, leeInstrumentIopPath } from "../config"
+import { newFieldCampaignsBaseUrl, leeInstrumentIopPath } from "../config"
 import { LEE_NOV18_FOLDER } from "../layers/lee-layers/components/instrumentLayers/helpers/leeIop2"
 import { flyToLeeCamera, getLeeMultiInstrumentCamera } from "./leeCameraPolicy"
 import { getLayerLoadSession, isLayerLoadActive } from "./layerLoadSession"
@@ -318,9 +318,11 @@ function getDow7TileUrlCandidates(layer, level) {
     }
   }
 
-  add(
-    `${LEE_S3_DEFAULT_BASE}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/${level}/tileset.json`
-  )
+  if (newFieldCampaignsBaseUrl) {
+    add(
+      `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/Mobile_radar/${iopFolder}/${level}/tileset.json`
+    )
+  }
 
   const primary = level === "high" ? layer?.highTileLocation : layer?.lowTileLocation
   add(primary)
