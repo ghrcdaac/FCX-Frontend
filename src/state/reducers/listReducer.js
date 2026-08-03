@@ -6,7 +6,7 @@ import {downloadListSubsettingTool} from "../../components/subsettingTool/redux/
 import { histogramTool } from "../../components/instrumentsHistogram/redux";
 
 // Old way of writing the reducers in one place
-const selectedLayers = (state = ["a"], action) => {
+const selectedLayers = (state = [], action) => {
   if (action.type === "ADD_DEFAULT_SELECTED_LAYERS"){
     return [...action.defaultSelectedLayers]
   }
@@ -20,9 +20,9 @@ const selectedLayers = (state = ["a"], action) => {
       })
     }
   } else if (action.type === "REMOVE_LAYER_BY_DATE") {
-    return state.filter((id) => {
-      return id.indexOf(action.date) === -1
-    })
+    return state.filter((id) => id.indexOf(action.date) !== -1)
+  } else if (action.type === "REMOVE_LAYER_ID") {
+    return state.filter((id) => id !== action.layerId)
   }
   return state
 }
@@ -45,10 +45,8 @@ const layerStatus = (state = { inProgress: [], loaded: [] }, action) => {
   
   if (action.type === "MARK_UNLOADED") {
     return {
-      inProgress: [...state.inProgress],
-      loaded: state.loaded.filter((id) => {
-        return id !== action.layerId
-      }),
+      inProgress: state.inProgress.filter((id) => id !== action.layerId),
+      loaded: state.loaded.filter((id) => id !== action.layerId),
     }
   }
   return state

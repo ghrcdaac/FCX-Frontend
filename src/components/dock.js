@@ -29,6 +29,18 @@ import "../css/dock.css"
 
 let viewer
 let viewerObj = { viewer: null } // to be able to pass by reference to other components.
+let cesiumResizeListenerAttached = false
+let checkViewerAttempts = 0
+const MAX_CHECK_VIEWER_ATTEMPTS = 40
+
+function getViewer() {
+  if (viewer && !viewer.isDestroyed?.()) {
+    return viewer
+  }
+  return viewerObj.viewer && !viewerObj.viewer.isDestroyed?.()
+    ? viewerObj.viewer
+    : null
+}
 
 /*
   Useful links related to adding additional layers to base layer picker
@@ -239,7 +251,13 @@ let box = (campaign) => {
 }
 
 let createViewer = () => {
-  if (!checkPath()) return
+  if (!checkPath()) return false
+  if (getViewer()) return true
+
+  const container = document.getElementById("cesiumContainer")
+  if (!container) return false
+
+  try {
   Ion.defaultAccessToken = cesiumDefaultAccessToken
 
   viewer = new Viewer("cesiumContainer", {
@@ -252,13 +270,44 @@ let createViewer = () => {
     homeButton: false,
     sceneModePicker: true,
     shadows: false,
-    infoBox: false,
+    infoBox: true,
     imageryProviderViewModels: getProviderViewModels(),
     selectedImageryProviderViewModel: getProviderViewModels()[0],
   })
 
   viewerObj.viewer = viewer;
 
+  viewer.scene.globe.depthTestAgainstTerrain = false
+  if (viewer.selectionIndicator?.viewModel) {
+    viewer.selectionIndicator.viewModel.showSelection = false
+  }
+
+  viewer.scene.renderError.addEventListener((_scene, error) => {
+    const message = error?.message || String(error)
+    if (!message.includes("drawingBufferWidth")) return
+
+    console.warn("Cesium render recovered after zero-size canvas:", message)
+    const activeViewer = getViewer()
+    if (!activeViewer || activeViewer.isDestroyed?.()) return
+
+    try {
+      activeViewer.useDefaultRenderLoop = true
+      activeViewer.resize()
+      activeViewer.scene.requestRender()
+    } catch (resizeErr) {
+      console.warn("Could not recover Cesium render:", resizeErr)
+    }
+  })
+
+  if (!cesiumResizeListenerAttached) {
+    cesiumResizeListenerAttached = true
+    emitter.on("cesiumResize", () => {
+      const activeViewer = getViewer()
+      if (activeViewer) {
+        activeViewer.resize()
+      }
+    })
+  }
 
   viewer.selectedEntityChanged.addEventListener(function(selectedEntity) {
     if (defined(selectedEntity)) {
@@ -278,24 +327,44 @@ let createViewer = () => {
       console.log('Deselected.');
     }
   });
+
+  emitter.emit("cesiumViewerReady", viewer)
+  console.log("%c Viewer initialization successful", "background: green; color: white; display: block;")
+  return true
+  } catch (err) {
+    console.error("Cesium Viewer failed to initialize:", err)
+    container.innerHTML = ""
+    viewer = undefined
+    viewerObj.viewer = null
+    return false
+  }
 }
 
 
 let checkViewer = () => {
-  setTimeout(() => {
-    if(!checkPath()) return
-    let cesiumActive = document.getElementById("cesiumContainer")
-    
-    if(cesiumActive) cesiumActive = cesiumActive.querySelectorAll("canvas")[0]
+  if (!checkPath()) return
+  if (getViewer()) return
+  if (checkViewerAttempts >= MAX_CHECK_VIEWER_ATTEMPTS) return
 
-    if (!cesiumActive) {
-      createViewer()
-      adjustHeightOfPanels()
+  checkViewerAttempts += 1
+  adjustHeightOfPanels()
+
+  const container = document.getElementById("cesiumContainer")
+  if (!container) {
+    setTimeout(checkViewer, 500)
+    return
+  }
+
+  if (createViewer()) {
+    adjustHeightOfPanels()
+    const activeViewer = getViewer()
+    if (activeViewer) {
+      activeViewer.resize()
     }
-    else {
-      checkViewer()
-    }
-  }, 500)
+    return
+  }
+
+  setTimeout(checkViewer, 500)
 }
 
 /* 
@@ -306,17 +375,28 @@ class Dock extends React.Component {
   
 
   componentDidMount() {
-    createViewer()
-    if (viewer) {
-      console.log("%c Viewer initialization successful", "background: green; color: white; display: block;")
-    }
+    checkViewer()
   }
   onDragNewTab = (e) => { }
 
   onLayoutChange = (newLayout, currentTabId) => {
-    
     this.setState({ layout: newLayout })
-    checkViewer()
+    adjustHeightOfPanels()
+    const activeViewer = getViewer()
+    if (activeViewer) {
+      activeViewer.resize()
+      activeViewer.scene.requestRender()
+    } else if (currentTabId === "tabCesium") {
+      checkViewer()
+    }
+
+    setTimeout(() => {
+      const resizedViewer = getViewer()
+      if (resizedViewer) {
+        resizedViewer.resize()
+        resizedViewer.scene.requestRender()
+      }
+    }, 120)
   }
   render() {
     emitter.emit("dockRender")
@@ -340,4 +420,4 @@ class Dock extends React.Component {
   }
 }
 
-export { Dock, viewer }
+export { Dock, viewer, getViewer }

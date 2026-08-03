@@ -35,7 +35,7 @@ export function rowItemsRenderer(items, vis_start, vis_end, total_width, itemHei
     rowOffset++
   }
   return _.map(displayItems, (i) => {
-    const { color } = i
+    const { color, timelineStyle } = i
     const Comp = itemRenderer
     let top = itemHeight * i["rowOffset"]
     let item_offset_mins = i.start.diff(vis_start, "minutes")
@@ -44,7 +44,7 @@ export function rowItemsRenderer(items, vis_start, vis_end, total_width, itemHei
     let width = Math.round(item_duration_mins * pixels_per_min)
     let compClassnames = "rct9k-items-inner"
     let outerClassnames = "rct9k-items-outer item_draggable"
-    let style = { backgroundColor: color }
+    let style = timelineStyle || { backgroundColor: color }
     let isSelected = selectedItems.indexOf(Number(i.key)) > -1
 
     if (isSelected) {
