@@ -1,12 +1,5 @@
-import { LEE_S3_DEFAULT_BASE } from "../config"
-
+const LEE_S3_BASE = (process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL || "").replace(/\/$/, "")
 const LEE_S3_PROXY_PREFIX = "/lee-field-campaigns-szg"
-
-const LEE_S3_ORIGINS = [
-  LEE_S3_DEFAULT_BASE,
-  "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com",
-  "https://ghrc-fcx-field-campaigns-szg.s3.us-east-1.amazonaws.com",
-]
 
 export function shouldUseLeeS3Proxy() {
   return (
@@ -15,14 +8,12 @@ export function shouldUseLeeS3Proxy() {
   )
 }
 
-/** Rewrite szg bucket URLs to the dev-server proxy (avoids S3 CORS in local dev). */
+/** Rewrite LEE S3 URLs to the dev-server proxy (avoids S3 CORS in local dev). */
 export function resolveLeeS3Url(url) {
-  if (!url || !shouldUseLeeS3Proxy()) return url
+  if (!url || !LEE_S3_BASE || !shouldUseLeeS3Proxy()) return url
 
-  for (const origin of LEE_S3_ORIGINS) {
-    if (url.startsWith(origin)) {
-      return `${LEE_S3_PROXY_PREFIX}${url.slice(origin.length)}`
-    }
+  if (url.startsWith(LEE_S3_BASE)) {
+    return `${LEE_S3_PROXY_PREFIX}${url.slice(LEE_S3_BASE.length)}`
   }
 
   return url

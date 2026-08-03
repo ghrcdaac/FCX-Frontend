@@ -17,7 +17,7 @@ const LEE_INSTRUMENT_TIME_KEYS = {
 }
 
 function isLeeSzgUrl(url) {
-  return typeof url === "string" && url.includes("ghrc-fcx-field-campaigns-szg.s3.amazonaws.com")
+  return typeof url === "string" && url.includes(process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL)
 }
 
 function preferSzgProbeUrl(candidates) {

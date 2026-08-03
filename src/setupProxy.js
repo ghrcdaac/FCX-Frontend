@@ -1,15 +1,18 @@
 const proxy = require("http-proxy-middleware")
 
-const LEE_S3_TARGET = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com"
+const LEE_S3_TARGET = process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL
+const LEE_S3_PROXY_PREFIX = "/lee-field-campaigns-szg"
 
 module.exports = function setupLeeS3Proxy(app) {
+  if (!LEE_S3_TARGET) return
+
   app.use(
-    "/lee-field-campaigns-szg",
+    LEE_S3_PROXY_PREFIX,
     proxy({
       target: LEE_S3_TARGET,
       changeOrigin: true,
       secure: true,
-      pathRewrite: { "^/lee-field-campaigns-szg": "" },
+      pathRewrite: { [`^${LEE_S3_PROXY_PREFIX}`]: "" },
       onProxyRes(proxyRes) {
         proxyRes.headers["access-control-allow-origin"] = "*"
         proxyRes.headers["access-control-allow-methods"] = "GET, HEAD, OPTIONS"

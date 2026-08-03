@@ -11,7 +11,7 @@ const abiBaseUrl = process.env.REACT_APP_BAMBOO_ABI_BASE_URL
 const flightTrackBaseUrl = process.env.REACT_APP_BAMBOO_FLIGHT_TRACK_BASE_URL 
 const newFieldCampaignsBaseUrl = process.env.REACT_APP_NEW_FIELD_CAMPAIGNS_BASE_URL
 
-const LEE_S3_DEFAULT_BASE = "https://ghrc-fcx-field-campaigns-szg.s3.amazonaws.com"
+const LEE_S3_DEFAULT_BASE = process.env.REACT_APP_LEE_S3_DEFAULT_BASE_URL
 
 function leeCampaignRoots() {
   const roots = new Set()
