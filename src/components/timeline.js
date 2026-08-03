@@ -4,115 +4,147 @@ import moment from "moment"
 import { getLayer } from "../helpers/utils"
 import Timeline from "../customized-components/react-timeline-9000/src/timeline"
 import "../customized-components/react-timeline-9000/src/style.css"
-import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from '../constants/cesium/dates' 
+import { CLOCK_END_TIME_BUFFER, CLOCK_START_TIME_BUFFER } from "../constants/cesium/dates"
 import { addTimeToISODate } from "../layers/utils/layerDates"
-import { viewer } from "./dock";
-import {JulianDate} from "cesium";
-
-//https://github.com/BHP-DevHub/react-timeline-9000
-//https://codesandbox.io/s/op9tg
+import { getViewer } from "./dock"
+import { JulianDate } from "cesium"
 
 const { TIMELINE_MODES } = Timeline
 
-function FcxTimeline({ campaign }) {
-  const state = useSelector((state) => state)
+const DEFAULT_LAYER_COLOR = "#4a90d9"
 
-  let layerDate
+function getLayerLegendColor(layer, campaign) {
+  if (layer?.type === "track" && campaign?.legends?.track?.color) {
+    return campaign.legends.track.color
+  }
+  return campaign?.legends?.[layer?.shortName]?.color || DEFAULT_LAYER_COLOR
+}
+
+function getLayerTimelineStyle(layer, campaign) {
+  const legend = campaign?.legends?.[layer?.shortName]
+  if (legend?.timelineGradient) {
+    return { background: legend.timelineGradient }
+  }
+  const color = getLayerLegendColor(layer, campaign)
+  return { backgroundColor: color }
+}
+
+function getViewerClockRange() {
+  const viewer = getViewer()
+  if (!viewer || viewer.isDestroyed?.()) {
+    return {
+      start: moment.utc().subtract(6, "hours"),
+      end: moment.utc(),
+    }
+  }
+
+  const startJSDate = JulianDate.toDate(viewer.clock.startTime)
+  const endJSDate = JulianDate.toDate(viewer.clock.stopTime)
+  return {
+    start: moment.utc(startJSDate),
+    end: moment.utc(endJSDate),
+  }
+}
+
+function FcxTimeline({ campaign }) {
+  const state = useSelector((reduxState) => reduxState)
+
   let startDate
   let endDate
-
-  let selectedItems = []
-  let timelineMode = TIMELINE_MODES.SELECT | TIMELINE_MODES.DRAG | TIMELINE_MODES.RESIZE
-
+  const selectedItems = []
+  const timelineMode = TIMELINE_MODES.SELECT | TIMELINE_MODES.DRAG | TIMELINE_MODES.RESIZE
   const list = []
   const groups = []
   const snap = 1
-  let rowIndex = 0
-
-  groups.push({ id: rowIndex, title: `` })
+  const viewerClock = getViewerClockRange()
 
   for (const [selectedLayerIndex, selectedLayerValue] of state.selectedLayers.entries()) {
-    let layer = getLayer(selectedLayerValue, campaign)
+    const layer = getLayer(selectedLayerValue, campaign)
+    if (!layer) continue
 
-    // If no start and end, take it through viewer.clock.
-    const viewerClock = viewer.clock;
-    let startDateJulian = viewerClock.startTime;
-    let startJSDate = JulianDate.toDate(startDateJulian);
-    let endDateJulian = viewerClock.stopTime;
-    let endJSDate = JulianDate.toDate(endDateJulian);
+    const viewerStart = layer.start
+      ? addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER)
+      : viewerClock.start.format()
+    const viewerEnd = layer.end
+      ? addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER)
+      : viewerClock.end.format()
+    const candidateStart = moment.utc(viewerStart)
+    const candidateEnd = moment.utc(viewerEnd)
 
-    if (!layerDate || layerDate !== layer.date) {
-      let layerDate = layer.date
-      const viewerStart = layer.start ? addTimeToISODate(layer.start, -CLOCK_START_TIME_BUFFER) : moment(startJSDate).format()
-      const viewerEnd = layer.end ? addTimeToISODate(layer.end, CLOCK_END_TIME_BUFFER) : moment(endJSDate).format()
-      startDate = moment.utc(viewerStart)
-      endDate = moment.utc(viewerEnd)
+    if (!startDate || candidateStart.isBefore(startDate)) {
+      startDate = candidateStart
+    }
+    if (!endDate || candidateEnd.isAfter(endDate)) {
+      endDate = candidateEnd
     }
 
-    let color = "red"
-    let start = layer.start ? moment.utc(layer.start) : moment.utc(startJSDate)
-    let end = layer.end ? moment.utc(layer.end) : moment.utc(endJSDate)
+    const color = getLayerLegendColor(layer, campaign)
+    const timelineStyle = getLayerTimelineStyle(layer, campaign)
+    let start = layer.start ? moment.utc(layer.start) : viewerClock.start.clone()
+    let end = layer.end ? moment.utc(layer.end) : viewerClock.end.clone()
 
-    // Round to the nearest snap distance
     const roundedStartMinutes = Math.floor(start.minute() / snap) * snap
     const roundedEndMinutes = Math.floor(end.minute() / snap) * snap
     start.minute(roundedStartMinutes).second(0)
     end.minute(roundedEndMinutes).second(0)
 
-    if (layer.type === "track") {
-      color = campaign.legends["track"].color
-    } else {
-      color = campaign.legends[layer.shortName].color
-    }
+    const rowIndex = list.length
+    groups.push({
+      id: rowIndex,
+      title: layer.displayName,
+    })
 
     list.push({
       key: `timelineItem${selectedLayerIndex}`,
       title: layer.displayName,
-      color: color,
+      color,
+      timelineStyle,
       row: rowIndex,
-      start: start,
-      end: end,
+      start,
+      end,
     })
+  }
+
+  if (!startDate || !endDate) {
+    startDate = viewerClock.start.clone()
+    endDate = viewerClock.end.clone()
+  }
+
+  if (!groups.length) {
+    groups.push({ id: 0, title: "No layers selected" })
   }
 
   const rowLayers = []
   for (let i = 0; i < list.length; i += 1) {
-    let curDate = startDate.clone()
     rowLayers.push({
-      start: curDate.clone(),
-      end: curDate.clone().add(0, "days"),
-      style: { backgroundColor: "red", opacity: "0.3" },
+      start: startDate.clone(),
+      end: startDate.clone().add(0, "days"),
+      style: { ...(list[i].timelineStyle || { backgroundColor: list[i].color }), opacity: "0.15" },
       rowNumber: i,
     })
   }
 
-  let handleItemClick = (e, key) => {}
-  let handleItemDoubleClick = (e, key) => {}
-  let handleItemContextClick = (e, key) => {}
-  let handleRowDoubleClick = (e, rowNumber, clickedTime, snappedClickedTime) => {}
-  let handleRowContextClick = (e, rowNumber, clickedTime, snappedClickedTime) => {}
-  let handleInteraction = (type, changes, items) => {}
-  let handleRowClick = (e, rowNumber, clickedTime, snappedClickedTime) => {}
-
   return (
-    <Timeline
-      shallowUpdateCheck
-      items={list}
-      groups={groups}
-      startDate={startDate}
-      endDate={endDate}
-      rowLayers={rowLayers}
-      selectedItems={selectedItems}
-      timelineMode={timelineMode}
-      snapMinutes={snap}
-      onItemClick={handleItemClick}
-      onItemDoubleClick={handleItemDoubleClick}
-      onItemContextClick={handleItemContextClick}
-      onInteraction={handleInteraction}
-      onRowClick={handleRowClick}
-      onRowContextClick={handleRowContextClick}
-      onRowDoubleClick={handleRowDoubleClick}
-    />
+    <div className="fcx-timeline-panel">
+      <Timeline
+        shallowUpdateCheck
+        items={list}
+        groups={groups}
+        startDate={startDate}
+        endDate={endDate}
+        rowLayers={rowLayers}
+        selectedItems={selectedItems}
+        timelineMode={timelineMode}
+        snapMinutes={snap}
+        onItemClick={() => {}}
+        onItemDoubleClick={() => {}}
+        onItemContextClick={() => {}}
+        onInteraction={() => {}}
+        onRowClick={() => {}}
+        onRowContextClick={() => {}}
+        onRowDoubleClick={() => {}}
+      />
+    </div>
   )
 }
 

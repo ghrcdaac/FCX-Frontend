@@ -219,6 +219,17 @@
       "id": "impacts",
       "priority": 1,
       "status": "Active"
+    },
+    {
+      "name": "Lake Effect Electrification (LEE)",
+      "description": "The LEE campaign took place between November 1st, 2022 and February 3rd, 2023 with operations based out of Oswego, NY. The team conducted 11 IOPs mostly in November, late January, and early February. NSSL and GTRI provided a set of Lighting Mapper Arrays over the Tug Hill. Georgia Tech LMA was operational from late Sept 2022 to the end of March 2023. Then NSSL and Texas Tech all provided EFM and Imager soundings during IOPs. Finally, soundings were also launched from SUNY Oswego campus, and the FARM DOW7 was also providing radar scanning during IOPs.",
+      "dates": [],
+      "landingPageURL": "http://catalog.eol.ucar.edu/lee",
+      "image": "lee.png",
+      "path": "/lee",
+      "id": "lee",
+      "priority": 5,
+      "status": "Active"
     }
   ]
 }
