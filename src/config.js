@@ -111,16 +111,21 @@ function buildLeeMobileRadarSurfaceCzmlUrls(iopFolder) {
 }
 
 function leeInstrumentBaseUrl(folder) {
-  if (process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL) {
-    return `${process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL}/${folder}`
+  const rawBaseUrl =
+    process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL ||
+    (newFieldCampaignsBaseUrl &&
+      `${newFieldCampaignsBaseUrl.replace(/\/+$/, "")}/Lee/instrument-processed-data`) ||
+    (dataBaseUrl &&
+      `${dataBaseUrl.replace(/\/+$/, "")}/fieldcampaign/Lee/instrument-processed-data`)
+
+  if (!rawBaseUrl) {
+    throw new Error("Instrument base URL is not configured")
   }
-  if (newFieldCampaignsBaseUrl) {
-    return `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data/${folder}`
-  }
-  if (dataBaseUrl) {
-    return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data/${folder}`
-  }
-  return ""
+
+  const cleanBase = rawBaseUrl.replace(/\/+$/, "")
+  const cleanFolder = String(folder ?? "").replace(/^\/+/, "")
+
+  return cleanFolder ? `${cleanBase}/${cleanFolder}` : cleanBase
 }
 
 const leeDow7BaseUrl =
@@ -133,16 +138,18 @@ const leeNov19Folder = "Nov19"
 const leeGlmPointsFile = "lee_points.json"
 
 function leeProcessedDataBaseUrl() {
-  if (process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL) {
-    return process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL.replace(/\/$/, "")
+  const rawBaseUrl =
+    process.env.REACT_APP_LEE_INSTRUMENT_BASE_URL ||
+    (newFieldCampaignsBaseUrl &&
+      `${newFieldCampaignsBaseUrl.replace(/\/+$/, "")}/Lee/instrument-processed-data`) ||
+    (dataBaseUrl &&
+      `${dataBaseUrl.replace(/\/+$/, "")}/fieldcampaign/Lee/instrument-processed-data`)
+
+  if (!rawBaseUrl) {
+    throw new Error("Processed-data base URL is not configured")
   }
-  if (newFieldCampaignsBaseUrl) {
-    return `${newFieldCampaignsBaseUrl}/Lee/instrument-processed-data`
-  }
-  if (dataBaseUrl) {
-    return `${dataBaseUrl.replace(/\/$/, "")}/fieldcampaign/Lee/instrument-processed-data`
-  }
-  return ""
+
+  return rawBaseUrl.replace(/\/+$/, "")
 }
 
 /** Shared IOP folder at processed-data root, e.g. Nov18/lee_points.json */
