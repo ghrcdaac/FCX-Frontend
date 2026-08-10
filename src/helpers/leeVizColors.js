@@ -1,11 +1,11 @@
 // Shared LEE visualization colors — keep timeline/filter bars aligned with the globe.
 
 export const GLM_INTENSITY_LEGEND = [
-  { color: "#4dd2ff", label: "Very Low" },
-  { color: "#ff5c5c", label: "Low" },
-  { color: "#ff9f43", label: "Medium" },
-  { color: "#ffe44d", label: "High" },
-  { color: "#ffffff", label: "Very High" },
+  { color: "#4dd2ff", label: "Very Low", range: "0.00 – 0.20" },
+  { color: "#ff5c5c", label: "Low", range: "0.20 – 0.40" },
+  { color: "#ff9f43", label: "Medium", range: "0.40 – 0.65" },
+  { color: "#ffe44d", label: "High", range: "0.65 – 0.85" },
+  { color: "#ffffff", label: "Very High", range: "0.85 – 1.00", border: true },
 ]
 
 export const GLM_INTENSITY_GRADIENT = `linear-gradient(to right, ${GLM_INTENSITY_LEGEND.map(
@@ -51,15 +51,21 @@ export const NEXRAD_DBZ_GRADIENT =
 export const EFM_ALTITUDE_GRADIENT =
   "linear-gradient(to right, rgb(40,100,255), rgb(40,240,255), rgb(255,240,40), rgb(255,50,40))"
 
-export const LMA_ALTITUDE_LEGEND = [
-  { color: "#FFFFFF", label: "Low altitude", border: true },
-  { color: "#FFFF00", label: "Mid-low altitude" },
-  { color: "#FF8000", label: "Mid-high altitude" },
-  { color: "#FF0000", label: "High altitude" },
+/** LMA point color is baked from source power (dBm) via power_to_rgb in the tileset pipeline. */
+export const LMA_POWER_LEGEND = [
+  { color: "#FFFFFF", label: "Very high", range: "≥ 10", border: true },
+  { color: "#FFFF00", label: "High", range: "0 – 10" },
+  { color: "#FF8000", label: "Medium", range: "−10 – 0" },
+  { color: "#FF0000", label: "Low", range: "−20 – −10" },
 ]
 
+/** @deprecated use LMA_POWER_LEGEND — color is power (dBm), not altitude */
+export const LMA_ALTITUDE_LEGEND = LMA_POWER_LEGEND
+
 export const LMA_ALTITUDE_GRADIENT =
-  "linear-gradient(to right, #FFFFFF 0%, #FFFF00 33%, #FF8000 66%, #FF0000 100%)"
+  "linear-gradient(to right, #FF0000 0%, #FF8000 33%, #FFFF00 66%, #FFFFFF 100%)"
+
+export const LMA_POWER_GRADIENT = LMA_ALTITUDE_GRADIENT
 
 export const OSWEGO_SOUNDING_START_COLOR = "#00897b"
 export const OSWEGO_SOUNDING_END_COLOR = "#f9a825"
@@ -99,7 +105,8 @@ export const LEE_VIZ_LEGENDS = {
   },
   leecombinedlma: {
     color: "deepskyblue",
-    timelineGradient: LMA_ALTITUDE_GRADIENT,
+    timelineGradient: LMA_POWER_GRADIENT,
+    markerLegend: LMA_POWER_LEGEND,
   },
   leeoswegosoundings: {
     color: OSWEGO_SOUNDING_START_COLOR,

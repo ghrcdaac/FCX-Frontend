@@ -488,19 +488,20 @@ export function syncGlmAtViewerTime(viewer, glmRefs, layer) {
 export function applyGlmViewerClock(viewer, layer, glmRefs, options = {}) {
   if (!viewer || viewer.isDestroyed?.()) return
 
+  const epochIso = layer?.epochIso || GLM_IOP2_EPOCH
+  glmRefs.epochJulian = JulianDate.fromIso8601(epochIso)
+
   if (options.skipViewerClock) {
+    glmRefs.lastRelSec = Number.NEGATIVE_INFINITY
     syncGlmAtViewerTime(viewer, glmRefs, layer)
     return
   }
 
   const startIso = layer?.start || GLM_IOP2_START
   const endIso = layer?.end || GLM_IOP2_END
-  const epochIso = layer?.epochIso || GLM_IOP2_EPOCH
 
   const startTime = JulianDate.fromIso8601(startIso)
   const endTime = JulianDate.fromIso8601(endIso)
-
-  glmRefs.epochJulian = JulianDate.fromIso8601(epochIso)
 
   viewer.automaticallyTrackDataSourceClocks = false
   viewer.clock.startTime = startTime.clone()
