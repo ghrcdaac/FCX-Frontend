@@ -3,8 +3,7 @@ import Typography from "@material-ui/core/Typography"
 import emitter from "../helpers/event"
 
 import { GLM_INTENSITY_LEGEND } from "../helpers/leeVizColors"
-
-const INTENSITY_LEGEND = GLM_INTENSITY_LEGEND
+import PointShapeLegend from "./PointShapeLegend"
 
 export default function GlmLayerPanel() {
   const [pointCount, setPointCount] = useState(0)
@@ -34,21 +33,40 @@ export default function GlmLayerPanel() {
         <Typography variant="caption" display="block" style={{ fontWeight: 700, marginBottom: 6 }}>
           Intensity
         </Typography>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          {INTENSITY_LEGEND.map((item) => (
-            <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <PointShapeLegend entries={GLM_INTENSITY_LEGEND} shape="circle" />
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            columnGap: 6,
+            rowGap: 4,
+            lineHeight: 1.35,
+          }}
+        >
+          {GLM_INTENSITY_LEGEND.map((item, index) => (
+            <span
+              key={item.label}
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}
+            >
               <span
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 10,
+                  height: 10,
                   borderRadius: "50%",
                   background: item.color,
-                  border: item.color === "#ffffff" ? "1px solid #ccc" : "none",
+                  border: item.border || item.color === "#ffffff" ? "1px solid #ccc" : "none",
                   flexShrink: 0,
                 }}
               />
-              <span>{item.label}</span>
-            </div>
+              <span>
+                {item.label}
+                {item.range ? (
+                  <span style={{ opacity: 0.75 }}> ({item.range})</span>
+                ) : null}
+                {index < GLM_INTENSITY_LEGEND.length - 1 ? "," : ""}
+              </span>
+            </span>
           ))}
         </div>
       </div>
