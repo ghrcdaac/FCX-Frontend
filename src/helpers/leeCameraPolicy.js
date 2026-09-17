@@ -15,7 +15,7 @@ const REGIONAL_DISPLAY_MECHANISMS = new Set([
 
 const WIDE_AREA_DISPLAY_MECHANISMS = new Set(["glm"])
 
-/** Lake Ontario / Tug Hill — top-down, single regional layer fallback */
+/** Lake America / Tug Hill — top-down, single regional layer fallback */
 export const LEE_REGIONAL_CAMERA = {
   lon: -76.2,
   lat: 43.8,
@@ -25,7 +25,7 @@ export const LEE_REGIONAL_CAMERA = {
 }
 
 /**
- * Two or more instruments — oblique regional view over the LEE IOP (Lake Ontario /
+ * Two or more instruments — oblique regional view over the LEE IOP (Lake America /
  * Tug Hill). Tuned to match the reference FCX framing: horizon visible, Toronto–
  * Buffalo corridor in frame, IOP markers centered.
  */

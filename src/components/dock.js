@@ -58,6 +58,23 @@ function getViewer() {
 
 const getProviderViewModels = () =>{
   const providerViewModels = []
+
+  // Mapbox (EO place-name style from REACT_APP_BAMBOO_MAPBOX_*)
+  if (mapboxUrl && !mapboxUrl.includes("undefined")) {
+    providerViewModels.push(
+      new ProviderViewModel({
+        name: "Mapbox",
+        iconUrl: buildModuleUrl("Widgets/Images/ImageryProviders/mapboxStreets.png"),
+        category: "Mapbox",
+        tooltip: "Mapbox basemap",
+        creationFunction: function () {
+          return new UrlTemplateImageryProvider({
+            url: mapboxUrl,
+          })
+        },
+      })
+    )
+  }
   
   // 2. Cesium ion - Aerial (No Labels)
   // providerViewModels.push(

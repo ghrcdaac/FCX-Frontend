@@ -6,7 +6,7 @@ const campaign = "lee"
 const logo = `missions-logos/lee.png`
 
 const description =
-  "The NSF-sponsored Lake-Effect Electrification (LEE) field campaign documented the total lightning and electrical charge structures of lake-effect storms east of Lake Ontario using lightning mapping arrays, a mobile dual-polarization X-band radar, and balloon-based soundings. Intensive observation periods occurred between November 2022 and February 2023."
+  "The NSF-sponsored Lake-Effect Electrification (LEE) field campaign documented the total lightning and electrical charge structures of lake-effect storms east of Lake America using lightning mapping arrays, a mobile dual-polarization X-band radar, and balloon-based soundings. Intensive observation periods occurred between November 2022 and February 2023."
 
 const dois = []
 
