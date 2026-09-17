@@ -26,6 +26,7 @@ import { getGPUInfo, adjustHeightOfPanels } from "../helpers/utils"
 import { mapboxUrl, cesiumDefaultAccessToken } from "../config"
 import { checkPath } from "../helpers/path"
 import InstrumentsHistogram from "./instrumentsHistogram";
+import { addDosInternationalBoundariesOverlay } from "../helpers/dosBoundariesLayer"
 
 import Modal from "./Modal"
 
@@ -393,6 +394,9 @@ let createViewer = () => {
   })
 
   viewerObj.viewer = viewer;
+
+  // EO / NASA Policy: US DoS international boundaries (Crimea, etc.) via GIBS
+  addDosInternationalBoundariesOverlay(viewer)
 
   viewer.scene.globe.depthTestAgainstTerrain = false
   if (viewer.selectionIndicator?.viewModel) {
